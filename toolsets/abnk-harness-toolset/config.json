@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "0.1.0",
+  "description": "Amazing Bank (ABNK) 项目环境配置（abnk-harness-toolset）。阶段一（当前）：PostgreSQL 18.3 docker 调试环境（宿主 :5432，库 fineract_tenants + fineract_default）+ Fineract ServerApplication（Gradle devRun，Spring Boot + 内嵌 Tomcat，:8443 强制 HTTPS 自签证书，JDWP 调试口 :5005）。Fineract 为 amazingbank/fineract 的 develop 分支（Apache Fineract fork，Gradle 9.7.1 wrapper，Gradle 多模块 7100+ Java 文件），**强制 JDK 25 toolchain**（build.gradle:418）。鉴权 = Basic Auth（默认 mifos:password）+ 多租户头 Fineract-Platform-TenantId: default。DB 迁移 = Liquibase，随应用启动自动执行（spring.liquibase.enabled 默认 true）。本文件是未来 Amazing Bank 整个 IT 系统（新增服务/中间件/前端）的单一事实源——每接入一个新系统就在 environments.local.processes 追加一条。",
+  "project": {
+    "name": "abnk",
+    "logsDir": "logs",
+    "pidFile": "logs/debug-process.pid"
+  },
+  "environments": {
+    "local": {
+      "description": "本地开发调试环境（Amazing Bank 阶段一 = Fineract 单体）。依赖顺序：先起 postgres 容器 → 建两个库（首次）→ 起 fineract（devRun 首次会完整编译，耗时 15–30 min）。Fineract 启动即自动跑 Liquibase 迁移建表，无需手动 migrate。",
+      "isDefault": true,
+      "processes": [
+        {
+          "name": "postgres",
+          "description": "PostgreSQL 18.3 docker 容器（abnk-pg）——Amazing Bank 全系统唯一数据库宿主（阶段一）。刻意用 root/postgres 作为账号密码，与 fineract 的 application.properties 默认值（FINERACT_HIKARI_USERNAME 默认 root / FINERACT_HIKARI_PASSWORD 默认 postgres）以及 gradle 的 createPGDB 任务默认凭据（fineract-provider/build.gradle:206-207 pgUser='root' pgPassword='postgres'）三方一致，从而**零环境变量覆盖**即可跑通。承载两个库：fineract_tenants（租户存储库——tenant store）+ fineract_default（默认业务租户库）。",
+          "dir": "abnk-system/deploy",
+          "configFiles": [
+            "abnk-system/deploy/docker-compose.yml",
+            "abnk-system/deploy/.env"
+          ],
+          "startCommand": "docker compose up -d abnk-pg",
+          "startCommandDebug": "docker compose up -d abnk-pg",
+          "port": 5432,
+          "healthCheck": {
+            "method": "CLI",
+            "command": "docker exec abnk-pg pg_isready -U root -q",
+            "expectedStatus": 0
+          },
+          "readyPattern": "accepting connections",
+          "logFile": "logs/postgres.log",
+          "hmr": false,
+          "killCommand": "docker compose stop abnk-pg",
+          "rebuildCommand": "docker compose down && docker volume rm abnk-pg-data",
+          "language": "sql",
+          "env": {
+            "POSTGRES_USER": "root",
+            "POSTGRES_PASSWORD": "postgres"
+          },
+          "notes": "⚠️ 三条硬约束：(1) **数据卷必须挂在 /var/lib/postgresql（父目录），不能挂 /var/lib/postgresql/data**——PostgreSQL 18+ 改用 pg_ctlcluster 兼容布局，数据落在版本化子目录 /var/lib/postgresql/18/data，挂错会直接启动失败报『in 18+, these Docker images are configured to store database data in a format which is compatible with pg_ctlcluster』。(2) **compose 文件必须显式声明 name: abnk-system**——否则项目名默认取目录名 deploy，会与 AOS 等其他项目的 deploy/ 目录撞名，导致 docker compose down / --remove-orphans 误停人家的容器（aos-flyway / aos-phpmyadmin / aos-mysql）。(3) 卷名用 volumes.abnk-pg-data.name 固定为 abnk-pg-data，否则 compose 会加 abnk-system_ 前缀。日常用 docker compose stop/start，⚠️ rebuildCommand 是破坏性操作（删数据卷），执行前必须问用户。宿主 CLI：docker exec -it abnk-pg psql -U root -d fineract_default。容器未运行时先 open -a Docker 启动 Docker Desktop 并等 docker info 通。仓库自带的 config/docker/compose/postgresql.yml 用随机密码且需 FINERACT_HIKARI_* 覆盖，**本地调试不用它**。"
+        },
+        {
+          "name": "fineract",
+          "description": "Fineract 后端（org.apache.fineract.ServerApplication，fineract-provider 模块，Spring Boot + 内嵌 Tomcat，无需外部 Tomcat）——Amazing Bank 的核心账务引擎。8443 端口默认强制 HTTPS（自签 keystore.jks，密码 openmf），请求须 -k。请求必须带租户头 Fineract-Platform-TenantId: default。",
+          "dir": "fineract",
+          "startCommand": "./gradlew devRun",
+          "startCommandDebug": "./gradlew devRun --debug-jvm",
+          "port": 8443,
+          "debugPort": 5005,
+          "healthCheck": {
+            "method": "GET",
+            "path": "/fineract-provider/actuator/health",
+            "expectedStatus": 200,
+            "expectedBody": "\"status\":\"UP\""
+          },
+          "readyPattern": "APACHE FINERACT IS READY",
+          "logFile": "logs/fineract.log",
+          "hmr": false,
+          "killCommand": "lsof -ti:8443 -sTCP:LISTEN | xargs kill",
+          "rebuildCommand": "./gradlew :fineract-provider:classes",
+          "language": "java",
+          "env": {
+            "JAVA_HOME": "<JDK-25 路径，如 ~/.sdkman/candidates/java/25.0.5+8-tem>"
+          },
+          "notes": "⚠️ devRun 会 fork 出一个独立 JVM 跑 Spring Boot——nohup ./gradlew devRun 记录到的 PID 是 Gradle 客户端，**杀它不杀应用**；停机一律按端口 kill（killCommand）。启动用 devRun 而非 bootRun：devRun 会禁用 checkstyle/spotless/spotbugs/javadoc/modernizer/testClasses（fineract-provider/build.gradle:449），把分钟级构建压到代码改动级别。--debug-jvm 在 :5005 开 JDWP（suspend 默认 n），供 VS Code 远程 attach。首次启动会完整编译（15–30 min，7100+ 文件 + OpenAPI/Avro 代码生成），且 Liquibase 会建全部表——耐心等 APACHE FINERACT IS READY，不要中途 Ctrl-C（会破坏 Liquibase changelog 账本导致下次启动失败）。停机日志 APACHE FINERACT IS SHUTTING DOWN GRACEFULLY；Gradle 报 Build cancelled while executing task 属正常退出，不是崩溃。"
+        }
+      ],
+      "auth": {
+        "authRequired": true,
+        "authMode": "basic（默认 mifos:password，base64 后 = bWlmb3M6cGFzc3dvcmQ=）+ 多租户头 Fineract-Platform-TenantId",
+        "basicAuth": {
+          "username": "mifos",
+          "password": "password",
+          "header": "Authorization: Basic bWlmb3M6cGFzc3dvcmQ=",
+          "tenantHeader": "Fineract-Platform-TenantId: default",
+          "usage": "curl -k -H 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ=' -H 'Fineract-Platform-TenantId: default' https://localhost:8443/fineract-provider/api/v1/clients",
+          "notes": "application.properties 中 fineract.security.basicauth.enabled 默认 true、oauth2/2fa 默认 false——本地调试开箱即 Basic Auth。Basic Auth 与 OAuth2 互斥（fineract.security.oauth2.enabled 一旦为 true 则 Basic 失效）。"
+        },
+        "notes": "租户头缺失会 4xx——这是 Fineract 多租户的硬约束，所有 API 调用必须带。actuator 端点（/actuator/health）无需鉴权。"
+      },
+      "apiEndpoints": {
+        "health": "curl -k https://localhost:8443/fineract-provider/actuator/health（期望 {\"status\":\"UP\",\"groups\":[\"liveness\",\"readiness\"]}）",
+        "clients": "curl -k https://localhost:8443/fineract-provider/api/v1/clients -H 'Fineract-Platform-TenantId: default' -H 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='（空库返回 {\"totalFilteredRecords\":0,\"pageItems\":[]}）",
+        "loans": "curl -k https://localhost:8443/fineract-provider/api/v1/loans -H 'Fineract-Platform-TenantId: default' -H 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='",
+        "savings": "curl -k https://localhost:8443/fineract-provider/api/v1/savings -H 'Fineract-Platform-TenantId: default' -H 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='",
+        "offices": "curl -k https://localhost:8443/fineract-provider/api/v1/offices -H 'Fineract-Platform-TenantId: default' -H 'Authorization: Basic bWlmb3M6cGFzc3dvcmQ='",
+        "apiDocs": "https://localhost:8443/fineract-provider/api-docs（Swagger/OpenAPI JSON；springdoc.api-docs.path 默认 /api-docs）",
+        "swaggerUi": "https://localhost:8443/fineract-provider/swagger-ui.html（Swagger UI，springdoc.swagger-ui.enabled 默认 true，url=/fineract.json——由 resolve 任务生成；可用 IDE 内置浏览器打开，需信任自签证书）",
+        "psqlCli": "docker exec -it abnk-pg psql -U root -d fineract_default（fineract_tenants 为租户存储库）",
+        "psqlNonInteractive": "docker exec abnk-pg psql -U root -d fineract_default -c \"<SQL>\""
+      },
+      "database": {
+        "type": "postgresql",
+        "host": "localhost",
+        "port": 5432,
+        "user": "root",
+        "password": "postgres",
+        "databases": [
+          {
+            "name": "fineract_tenants",
+            "role": "租户存储库（tenant store）——存租户清单与各自连接串；Fineract 的 spring.datasource.hikari.jdbcUrl 指向它"
+          },
+          {
+            "name": "fineract_default",
+            "role": "默认业务租户库（identifier=default）——全部业务表（m_client/m_loan/m_savings/会计科目等）由 Liquibase 在此建"
+          }
+        ],
+        "createCommand": "cd fineract && ./gradlew createPGDB -PdbName=fineract_tenants && ./gradlew createPGDB -PdbName=fineract_default",
+        "migration": "Liquibase，随 Fineract 启动自动执行（spring.liquibase.enabled 默认 true，changeLog = classpath:/db/changelog/db.changelog-master.xml）。首次启动建全部表，无需手工 migrate。",
+        "migrationVerify": "docker exec abnk-pg psql -U root -d fineract_default -tAc \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'\"（首次启动后应 > 300；databasechangelog 为 Liquibase 账本表）",
+        "notes": "这两个库是分库（不是分 schema）——fineract_tenants 存租户元数据，各租户业务库物理隔离。createPGDB 任务不支持 configuration-cache（构建脚本已显式标记），属预期行为。"
+      }
+    }
+  },
+  "browser": {
+    "tool": "curl",
+    "required": false,
+    "notes": "阶段一 Fineract 为纯 API 服务（无自带 Web UI），**不需要 preview_url / playwright-cli**——验证一律走 curl。自带 API 文档 https://localhost:8443/fineract-provider/api-docs 可在 IDE 内置浏览器打开（需信任自签证书）。未来接入 Amazing Bank 前端（Mifos X Web App / 自建前端）后，在此登记前端进程与 preview_url。"
+  },
+  "dependencies": {
+    "jdk": "**Required = 25**（build.gradle:418 toolchain 硬要求；本机已装 17.0.9-zulu / 21.0.11-ms，缺 25）。gradle.properties 还需 --add-exports/--add-opens 系列 JVM 参数（已内置在仓库 gradle.properties，无需手工加）。",
+    "gradle": "9.7.1（仓库自带 wrapper，勿用系统 gradle）：./gradlew",
+    "docker": "Required —— PostgreSQL 18.3 容器（本机 Docker Desktop 29.7.2 + Compose v5.4.0 可用）",
+    "git": "Required —— fineract = git@github.com:amazingbank/fineract.git（develop 分支）"
+  },
+  "extensions": {
+    "notes": "本配置按『每接入一个新系统追加一条 process』的方式扩展。Amazing Bank 后续接入的系统（活动目录中转/支付网关/报表/前端/Kafka/Keycloak 等）一律登记到 environments.local.processes，并记录其端口、日志、健康端点、启动命令。abnk-debugger 会自动按 processes 数组驱动整个栈的起停与日志收集，无需修改 action 文档。",
+    "planned": [
+      "前端（Mifos X Web App / 自建 Amazing Bank 控制台）——需登记端口与 preview_url",
+      "Keycloak / OAuth2（Fineract 的 fineract.security.oauth2.enabled 打开后需要）",
+      "Kafka / ActiveMQ（Fineract 的 remote job message handler，config/docker/compose/kafka-client.env 已预留）",
+      "Amazing Bank 自有业务服务（基于 Fineract API 的上层封装）"
+    ]
+  }
+}
