@@ -44,10 +44,12 @@ amazingbank-ws/
 | 目录 | 性质 | 用途 | 是否必需 |
 |---|---|---|---|
 | `.asdm` | git 仓库（github.com:amazingbank/amazingbank-asdm） | 工具集、规划文档 | 必需 |
-| `abnk-system` | 非 git（暂） | **基础设施编排**（当前仅 PostgreSQL compose） | 必需 |
+| `abnk-system` | git 仓库（github.com:amazingbank/abnk-system） | **基础设施编排**（当前仅 PostgreSQL compose，含 Kafka/Keycloak 接入模板） | 必需 |
 | `fineract` | git 仓库（github.com:amazingbank/fineract，develop） | **ABNK 核心账务引擎**（当前阶段唯一代码仓库） | 必需 |
 | `.codebuddy` | 非 git | CodeBuddy `/abnk-debugger` 快捷命令 | 推荐 |
 | `logs` | 运行时生成 | 栈进程日志与 PID | 自动生成 |
+
+> **`abnk-system` 必须克隆到 `amazingbank-ws/abnk-system/`**。其 `deploy/.env` 里 `ABNK_LOGS_DIR=../../logs` 是相对 compose 文件位置解析的（PostgreSQL 日志要落到工作区统一的 `logs/postgres.log`，与 `logs/fineract.log` 并列，`abnk-debugger` 依赖该布局）。放在别的路径就把该变量改成绝对路径。
 
 ---
 
