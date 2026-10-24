@@ -12,7 +12,7 @@
     "guid": "b7a2c9d1-4e3f-4a58-9c6b-1d2e3f4a5b6c",
     "id": "abnk-harness-toolset",
     "name": "ABNK Harness Toolset",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "scenario": "自动化调试"
 }

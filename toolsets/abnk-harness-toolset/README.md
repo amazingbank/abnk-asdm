@@ -2,7 +2,7 @@
 
 toolset-id: abnk-harness-toolset
 toolset-name: ABNK Harness Toolset
-version: 0.1.0
+version: 0.1.1
 updated-date: 2026-10-24
 toolset-description: Automated toolset for Amazing Bank (ABNK). Stage-1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Gradle devRun，:8443 SSL，JDWP :5005）。Provides the debugger action; grows into the full Amazing Bank IT stack orchestrator via config.json.
 

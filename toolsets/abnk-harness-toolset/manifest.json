@@ -3,7 +3,7 @@
   "registry_id": "abnk-harness-toolset",
   "name": "ABNK Harness Toolset",
   "description": "Automated toolset for Amazing Bank (ABNK) IT system. Phase 1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Spring Boot + 内嵌 Tomcat，:8443 SSL，JDWP :5005）。Provides the debugger action; designed to grow into the full Amazing Bank IT stack orchestrator.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "configType": "toolset",
   "entryPoint": "README.md",
   "commands": {

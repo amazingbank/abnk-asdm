@@ -210,6 +210,38 @@ lsof -i:5005 -sTCP:LISTEN     # 确认 JDWP 口在监听
 - **提交前** → `devRun` 会跳过质量门禁，提交前另跑 `./gradlew spotlessApply checkstyleMain`
 - **扩展栈** → 新系统登记到 `.asdm/toolsets/abnk-harness-toolset/config.json`
 
+### ⚠️ 已踩过的坑：devRun 长驻 + IDE Gradle 扩展 = 构建产物损坏（2026-10-24）
+
+**现象**：运行中的 Fineract 突然对 `/v1/jobs`、`/api-docs` 等端点报 500 `ClassNotFoundException`（如 `IdTypeResolver`——源码明明存在且 `implements Serializable`），重启应用也不愈。
+
+**根因**：VS Code 的 Gradle 扩展（`vscjava.vscode-gradle`）常驻 `GradleServer` 进程。其后台构建任务被中断时，会写出**截断的 `fineract-core-1.16.0-SNAPSHOT.jar`**（`zip END header not found`）。由于 `org.gradle.caching=true`，损坏产物会进构建缓存，之后每次构建都被还原回来，删 `build/` 也没用。
+
+**诱因链**：损坏 jar 被运行中的应用按需加载 → 新触达的类加载失败 → Jersey 容器 500。已启动时加载过的类不受影响，所以问题总是"突然"出现在某个未用过的端点上。
+
+**处置**（完整重建，实测 3.6 min）：
+
+```bash
+cd fineract
+./gradlew --stop                                # 停守护进程清内存态
+./gradlew clean
+rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的构建缓存（安全，只影响下次构建速度）
+# 然后按步骤三正常 devRun
+```
+
+**预防**：`devRun` 长驻期间，避免让 IDE 的 Gradle 扩展在后台跑构建（关闭该扩展的 auto-refresh / 退出 VS Code 前停掉 devRun）。
+
+### API 探测速查（已实测）
+
+| 用途 | 端点 | 备注 |
+|---|---|---|
+| OpenAPI spec | `GET /fineract-provider/fineract.json` | **用这个**（603 路径/968 操作）；`/api-docs` 动态端点 500 别用 |
+| 调度作业清单 | `GET /api/v1/jobs` | 41 个作业，含 shortName/cron/active |
+| **触发日终 COB** | `POST /api/v1/jobs/LOAN_COB/inline` + `{"loanIds":[]}` | ⚠️ 只认 `LOAN_COB`/`WC_LOAN_COB`；用调度名 `LA_ECOB` 或内部名 `LOAN_CLOSE_OF_BUSINESS` 都会 500 |
+| 业务日期 | `GET/POST /api/v1/businessdate` | 需先 `PUT /api/v1/configurations/44 {"enabled":true}` 启用，且必须带 `locale` |
+| 批量请求 | `POST /api/v1/batches` | — |
+
+**当前环境状态**：业务日期已启用并设为 2026-10-24（COB 日期 2026-10-23）。会计模块（GL 科目/会计规则/金融活动映射）**开箱为空**——API 齐备但需自建科目表，这正是 L1 本地化（按《企业会计准则》重建 COA）的核心工作量。
+
 ---
 
 *维护说明：本文档随工作区结构演进同步更新，修改请提交至 `amazingbank-asdm` 仓库（即 `.asdm`）。*
