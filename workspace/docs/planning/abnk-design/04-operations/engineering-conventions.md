@@ -62,6 +62,15 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的缓存（安全
 - **处置**（数据完整恢复）：`docker builder prune -f` + `docker image prune -f` 释放 ~1GB 即够 → `docker compose restart abnk-pg` → 280 表与 Liquibase 账本完好。
 - **预防**：`docker system df` 看 RECLAIMABLE 列纳入日常巡检；卷清理需确认归属后进行（未使用卷里含 aos-bench/deploy_mysql_data 等**他人项目数据**，不可盲 prune）。
 
+### 1.9 SSH 22 端口被网络掐断 → GitHub 走 443（2026-10-25 实际发生）
+
+- **现象**：`git push` 报 `Connection closed by UNKNOWN port 65535`（22 端口被中间设备断开，时通时断——同一网络早间可用）。
+- **处置**：GitHub 官方备用通道 `ssh.github.com:443`。仓库级切换（不动全局 `~/.ssh/config`）：
+  ```bash
+  git remote set-url origin ssh://git@ssh.github.com:443/amazingbank/<repo>.git
+  ```
+- **验证**：`ssh -p 443 -T git@ssh.github.com` 应返回认证成功。当前 `abnk-system` 与 `.asdm` 两个仓库已切 443 通道。
+
 ## 2. 提交纪律
 
 | 时机 | 动作 |
