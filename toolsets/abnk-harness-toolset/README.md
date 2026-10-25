@@ -4,7 +4,7 @@ toolset-id: abnk-harness-toolset
 toolset-name: ABNK Harness Toolset
 version: 0.1.1
 updated-date: 2026-10-24
-toolset-description: Automated toolset for Amazing Bank (ABNK). Stage-1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Gradle devRun，:8443 SSL，JDWP :5005）。Provides the debugger action; grows into the full Amazing Bank IT stack orchestrator via config.json.
+toolset-description: Automated toolset for Amazing Bank (ABNK). Stage-1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Gradle devRun，:8443 SSL，JDWP :5005）。Provides the debugger and doc-review actions; grows into the full Amazing Bank IT stack orchestrator via config.json.
 
 ## Overview
 
@@ -40,6 +40,7 @@ Use ABNK Harness Toolset when:
 - You need to trace data flow across layers（REST → Service → Domain → SQL）by injecting temporary debug logs
 - You want the AI to autonomously debug, fix, and verify without manual intervention
 - The issue spans the API ↔ database boundary（Hikari / Liquibase）
+- You need to review a Sprint/Phase design doc under `.asdm/workspace/docs/Sprints/` before execution——五维审查（可行性/完整性/合理性/一致性/准确性）+ 代码证据核验 + 步步有验收 + 前置条件审计（`/abnk-doc-review`）
 
 ## Toolset Structure
 
@@ -51,6 +52,7 @@ Use ABNK Harness Toolset when:
   - INSTALL.md                            # Installation guide
   - actions/
     - abnk-debugger.md                    # Main debugging action (self-directed loop)
+    - abnk-doc-review.md                  # Sprint/Phase design doc review (five-dimension, evidence-driven; targets .asdm/workspace/docs/Sprints/)
   - specs/
     - process-management-spec.md           # nohup/pid/log + container management + config.json discovery
     - log-reading-spec.md                  # Log filtering, Java stack trace reading
@@ -64,6 +66,7 @@ Use ABNK Harness Toolset when:
 # Install the toolset (follow INSTALL.md)
 # Then invoke:
 /abnk-debugger <describe the issue>
+/abnk-doc-review <path to a Sprint/Phase doc under .asdm/workspace/docs/Sprints/>
 ```
 
 ## config.json

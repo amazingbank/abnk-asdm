@@ -2,11 +2,12 @@
   "guid": "b7a2c9d1-4e3f-4a58-9c6b-1d2e3f4a5b6c",
   "registry_id": "abnk-harness-toolset",
   "name": "ABNK Harness Toolset",
-  "description": "Automated toolset for Amazing Bank (ABNK) IT system. Phase 1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Spring Boot + 内嵌 Tomcat，:8443 SSL，JDWP :5005）。Provides the debugger action; designed to grow into the full Amazing Bank IT stack orchestrator.",
+  "description": "Automated toolset for Amazing Bank (ABNK) IT system. Phase 1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Spring Boot + 内嵌 Tomcat，:8443 SSL，JDWP :5005）。Provides the debugger and doc-review actions; designed to grow into the full Amazing Bank IT stack orchestrator.",
   "version": "0.1.1",
   "configType": "toolset",
   "entryPoint": "README.md",
   "commands": {
-    "abnk-debugger": "Start automated debugging session for the Amazing Bank IT stack with process management, log analysis and self-directed fix scheduling"
+    "abnk-debugger": "Start automated debugging session for the Amazing Bank IT stack with process management, log analysis and self-directed fix scheduling",
+    "abnk-doc-review": "Five-dimension review of Sprint/Phase design docs (.asdm/workspace/docs/Sprints/) with code-evidence verification against the Fineract codebase"
   }
 }

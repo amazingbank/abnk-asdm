@@ -4,9 +4,10 @@
 
 ## Overview
 
-This document provides instructions for installing and setting up the ABNK Harness Toolset for the Amazing Bank (ABNK) IT system. It provides one action:
+This document provides instructions for installing and setting up the ABNK Harness Toolset for the Amazing Bank (ABNK) IT system. It provides two actions:
 
 1. **abnk-debugger** — Automated debugging with process management, log analysis, and self-directed fix scheduling（阶段一：PostgreSQL `:5432` + Fineract `:8443`）
+2. **abnk-doc-review** — Evidence-driven five-dimension review (feasibility/completeness/reasonableness/consistency/accuracy) of Sprint/Phase design docs under `.asdm/workspace/docs/Sprints/`（结构与 aLink `Sprints/` 一致：`<版本>/partNN/<版本>-PartNN-*.md`），with code-evidence verification against the Fineract codebase and executable acceptance-step auditing（步步有验收）
 
 ## AI Guided Installation
 
@@ -46,6 +47,16 @@ argument-hint: "[describe the issue to debug]"
 
 Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-debugger.md to debug: $ARGUMENTS
 EOF
+
+# ABNK Doc Review command
+cat > .claude/commands/abnk-doc-review.md << 'EOF'
+---
+description: "Five-dimension review of a Sprint/Phase design doc under .asdm/workspace/docs/Sprints/ with code-evidence verification"
+argument-hint: "[path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/...Phase1-*.md]"
+---
+
+Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md to review: $ARGUMENTS
+EOF
 ```
 
 #### For GitHub Copilot (`.github/prompts/`):
@@ -62,6 +73,17 @@ argument-hint: 'Describe the issue to debug'
 
 Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-debugger.md to debug: $ARGUMENTS
 EOF
+
+# ABNK Doc Review prompt
+cat > .github/prompts/abnk-doc-review.prompt.md << 'EOF'
+---
+agent: 'agent'
+description: 'Five-dimension review of a Sprint/Phase design doc under .asdm/workspace/docs/Sprints/ with code-evidence verification'
+argument-hint: 'Path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/...Phase1-*.md'
+---
+
+Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md to review: $ARGUMENTS
+EOF
 ```
 
 #### For Tencent CodeBuddy (`.codebuddy/commands/`):
@@ -71,6 +93,11 @@ mkdir -p .codebuddy/commands/
 
 cat > .codebuddy/commands/abnk-debugger.md << 'EOF'
 Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-debugger.md to debug: $ARGUMENTS
+EOF
+
+# ABNK Doc Review command（同样为 thin reference）
+cat > .codebuddy/commands/abnk-doc-review.md << 'EOF'
+Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md to review: $ARGUMENTS
 EOF
 ```
 
@@ -207,7 +234,7 @@ curl -sk https://localhost:8443/fineract-provider/api/v1/clients \
 
 After installation, verify that:
 
-1. Shortcut command for `abnk-debugger` is created in the provider directory（`.codebuddy/commands/` 等）—— contains only frontmatter + thin `Follow` reference
+1. Shortcut commands for `abnk-debugger` and `abnk-doc-review` are created in the provider directory（`.codebuddy/commands/` 等）—— contains only frontmatter + thin `Follow` reference
 2. The ABNK Harness Toolset files are located in `.asdm/toolsets/abnk-harness-toolset`
 3. `java -version` 为 **25.x**
 4. `config.json` exists in `.asdm/toolsets/abnk-harness-toolset/` with ABNK project config
@@ -219,6 +246,7 @@ After installation, verify that:
 Once installed, you can use the following commands:
 
 1. **`/abnk-debugger <issue description>`** — Start automated debugging session for the Amazing Bank IT stack
+2. **`/abnk-doc-review <doc path>`** — Five-dimension review of a Sprint/Phase design doc under `.asdm/workspace/docs/Sprints/`（repeat with "再次检查" to iterate on previous rounds' blind spots until clean）
 
 ## Extending the Toolset
 

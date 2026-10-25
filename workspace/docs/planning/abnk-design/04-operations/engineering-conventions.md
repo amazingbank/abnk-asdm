@@ -84,7 +84,7 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的缓存（安全
 |---|---|
 | devRun 期间 | 它禁用了 checkstyle/spotless/spotbugs/javadoc/modernizer/testClasses（`fineract-provider/build.gradle:449`） |
 | **提交前** | `./gradlew spotlessApply checkstyleMain` 必跑；改动核心相邻区另跑 spotbugsMain |
-| custom 模块 | 官方对 `:custom:*` 关闭了 Checkstyle/SpotBugs（`build.gradle:603,827`）→ **自建 CI 门禁补位**（见下） |
+| custom 模块 | 官方对 `custom/abnk` 门禁**生效**（Checkstyle/SpotBugs 豁免仅限 `:custom:acme:`，`build.gradle:603,827`，2026-10-25 核验修正）→ 自建 CI 补**一键编排**（见下） |
 
 ## 3. CI 门禁（自建，因官方对 custom 关闭质量检查）
 

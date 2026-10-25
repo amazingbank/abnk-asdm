@@ -83,7 +83,7 @@ com.acme.fineract.portfolio.note.starter.AcmeNoteAutoConfiguration
 | 风险 | 缓解（详见 ADR-002） |
 |---|---|
 | API 不稳定，升级要改 | 季度 rebase 纪律 + 定制面窄（只做四类外围事） |
-| 质量门禁被官方关闭 | 根构建脚本对 `:custom:*` **禁用了 Checkstyle 和 SpotBugs**（`build.gradle:603,827`）——ABNK 必须自建 CI 门禁 |
+| 质量门禁对 acme 豁免 | 根构建脚本**仅对 `:custom:acme:` 禁用了 Checkstyle 和 SpotBugs**（`build.gradle:603,827`，条件 `project.path.startsWith(':custom:acme:')`）——**`custom/abnk` 不在豁免内**，且所有 custom 模块都被加入 `fineractJavaProjects`（`build.gradle:379`），官方门禁全量生效（利好）。自建 CI 的重点 = 一键编排（编译/单测/质量/冒烟/E2E 串行流水线），而非补位被豁免的检查（2026-10-25 源码核验修正） |
 | 部署路径与 devRun 不一致 | 见下节 |
 
 ## 6. devRun 下的接入方式（与官方部署路径的差异）

@@ -62,7 +62,7 @@ src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoCo
 | R3 | 定制表只走 `db/custom-changelog/` | 官方约定（`database-migration.adoc`） |
 | R4 | 永不跨租户查询/缓存/JOIN | ADR-004 |
 | R5 | 慎用"替换内置服务"（service.adoc 路线）——优先新增不替换 | PoC 中最激进的能力 |
-| R6 | 单测+质量门禁自建（官方对 custom 关了 Checkstyle/SpotBugs，`build.gradle:603,827`） | 官方豁免 ≠ 我们豁免 |
+| R6 | 质量门禁：官方对 `custom/abnk` **生效**（豁免仅限 `:custom:acme:`，`build.gradle:603,827`——2026-10-25 源码核验修正） | 官方豁免 ≠ 放任；自建 CI 补一键编排（编译/单测/质量/冒烟/E2E） |
 
 ## 4. devRun 接入（对 ADR-001 的唯一豁免）
 
