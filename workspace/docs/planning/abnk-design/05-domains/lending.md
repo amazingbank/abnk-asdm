@@ -57,7 +57,18 @@ Phase 3+（第二波）
 
 | 项 | 风险 | 验证时点 |
 |---|---|---|
-| progressive-loan 复杂度（多 schedule 策略） | 配置面大，误配行为静默偏差 | Phase 1 用 template 端点起步 |
-| COB 行为边界 | 分区并行下的顺序性假设 | Phase 1 单笔贷款观察 |
+| progressive-loan 复杂度（多 schedule 策略） | 配置面大，误配行为静默偏差 | ✅ Phase 1 已过（12 期等额本息一次配成） |
+| COB 行为边界 | 分区并行下的顺序性假设 | ✅ Phase 1 单笔贷款观察通过 |
 | Delinquency 分类规则与五级分类的口径差 | 映射不完整 | Phase 2 业务分析（需要信贷专家输入） |
 | working-capital 模块成熟度 | 较新，行为面待探 | Phase 3 开项前专项 PoC |
+
+## 5. Phase 1 实测回填（2026-10-25）
+
+- [x] **对年对月对日 ✅ 原生支持**——12 期还款计划到期日 `2026-11-24 → 2027-10-24` **逐月对日**（放款日 10-24，末期恰在 12 个月后对日）。原判"偏差则用生成器扩展点"大概率不需要
+- [x] **等额本息 ✅ 原生支持**——`amortizationType=Equal installments(1)`，每期 `totalDueForPeriod` 恒定 4395.79，利息递减（416.67→36.33）本金递增，标准年金形态；首期利息 416.67 = 50000×10%/12 精确吻合
+- [x] **COB 触发 ✅**——`POST /v1/jobs/LOAN_COB/inline {"loanIds":[id]}` 200；未逾期贷款的 summary 无变化（预期内——日终对未逾期贷款无可见账务动作）
+- [x] 贷款交易类型实测可见：Disbursement / **Accrual** / Repayment 三连
+- ⚠️ **新观察（Phase 2 会计分析项）**：`Add Accrual Transactions` 作业对 accountingRule=NONE 的贷款也入账了 **2749.54 ≈ 全期利息总额**（4395.79×12 − 50000）的一次性 Accrual 交易——应计口径/时点与中国"按期计提"差异明显，启用会计后的分录行为必须专项分析
+- [ ] LPR（浮息）：未测（需 `isLinkedToFloatingInterestRates` + 利率基准数据）
+- [ ] 五级分类：未测（需制造逾期数据后触发 Loan Delinquency Classification）
+- [ ] 还款计划查询方式（progressive 架构变化）：默认 `GET /loans/{id}` **不含** repaymentSchedule，须 `GET /loans/{id}?associations=all`

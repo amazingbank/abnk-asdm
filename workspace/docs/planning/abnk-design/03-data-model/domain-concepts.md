@@ -59,4 +59,20 @@ Business Date / COB Date ── COB 作业（Loan COB / WC Loan COB）── Bus
 | 日终 | COB（Close of Business） |
 | 命令/流水 | Command / Transaction |
 
-*Phase 1 执行后回填：各概念的必填字段、状态机、命令动词全集。*
+## 5. Phase 1 实测回填（2026-10-25）
+
+**命令动词（command query 参数）实测全集**：`activate`（客户/储蓄账户）、`approve`（储蓄/贷款）、`disburse`（贷款）、`repayment`（贷款交易）、`deposit` / `withdrawal`（储蓄交易）、`close`（客户，有未清账户被拒）、`executeJob`（作业触发，202）、`inline`（LOAN_COB）。
+
+**交易类型实测（transactionType.value）**：储蓄——Deposit / Withdrawal / **Interest posting**（利息入账，带 runningBalance）；贷款——Disbursement / **Accrual**（应计）/ Repayment。
+
+**状态对象形态**：`{id: 300, code: "<type>.active", value: "Active", ...布尔族}`——判定一律用 `value` 或 `code`，勿用裸字符串比对（大小写实测为 `Active`）。
+
+**字段级发现（写集成代码必读）**：
+- 客户 `mobileNo` 全库唯一（幂等脚本必须变号码）；`legalFormId`：1=Person / 2=Entity
+- 储蓄/贷款产品 `shortName` ≤ 4 字符
+- 储蓄交易强制 `paymentTypeId`（`GET /v1/paymenttypes` 取，内置 Money Transfer id=1）
+- 贷款还款字段是 `transactionAmount`（不是 `amount`）
+- 产品创建要 `locale`（"en"）但**不要** `dateFormat`（400 unsupported）；带日期的 command 端点两者都要
+- 贷款产品必填：`numberOfRepayments / repaymentEvery / daysInMonthType / daysInYearType`（30/360）
+- progressive 架构：`GET /loans/{id}` 默认**不含** repaymentSchedule，须 `?associations=all`
+- 枚举入参一律是**整型 id**（模板 `*Options` 提供 id↔code 映射），唯一例外 `transactionProcessingStrategyCode` 用字符串

@@ -41,9 +41,9 @@ custom 模块    ← 证照校验、强约束字段、计息引擎补差（仅�
 - 币种、科目表按租户独立初始化（每租户库独立）
 - 证照校验按租户启用（`custom/abnk/localization` 的配置开关）
 
-## 5. Phase 1 验证清单（本文档的落地判据）
+## 5. Phase 1 验证清单（2026-10-25 回填）
 
-- [ ] 环境变量覆盖时区为 `Asia/Shanghai` 后重启，`GET /v1/businessdate` 与交易日期表现正确
-- [ ] 产品用 CNY 创建成功，金额精度（分）表现正确
-- [ ] Holiday/Calendar API 建立中国节假日表
-- [ ] 证照字段存储与展示（校验逻辑 Phase 2 custom 模块补）
+- [x] **时区 → `Asia/Shanghai` ✅**——实测路径：直接改 `fineract_tenants.tenants.timezone_id`（原 `Asia/Kolkata`），**无需重启即时生效**（业务日期与客户日期回读正常）。比"环境变量+重启"（只影响新建租户）更直接；ADR-004 多租户下按租户逐个设置
+- [x] **CNY 产品创建 ✅**——储蓄/贷款产品 `currencyCode=CNY` 一次成功，金额精度 2 位正确（余额 8000.0 / 利息 0.33 / 每期 4395.79）
+- [ ] Holiday/Calendar API 建立中国节假日表——未做（Phase 2 初，产品排期需要时）
+- [ ] 证照字段存储与展示——未做（校验逻辑 Phase 2 `custom/abnk/localization/identity`）

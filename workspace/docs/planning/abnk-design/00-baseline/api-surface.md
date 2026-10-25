@@ -80,6 +80,15 @@ POST /api/v1/businessdate
 
 **含义：日终链路默认不跑，Phase 1 验证必须手工触发（inline）或激活作业。**
 
+**调度作业可 API 触发（Phase 1 实测，2026-10-25）**：
+
+```bash
+POST /api/v1/jobs/{jobId}?command=executeJob    # operationId: executeJob
+→ HTTP 202（异步执行，约 20s 内完成）
+```
+
+已实测成功触发 4 个作业：Post Interest For Savings（id=6，**利息入账可见**）、Add Accrual Transactions（11）、Update Loan Arrears Ageing（2）、Loan Delinquency Classification（35）。**这回答了"不等待 cron 如何验证计息/日终"——冒烟与集成测试的核心手段。**
+
 ## 6. 会计模块 —— API 齐备但数据全空（L1 核心工作量的实证）
 
 ```

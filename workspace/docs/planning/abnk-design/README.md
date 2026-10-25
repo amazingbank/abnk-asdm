@@ -57,7 +57,7 @@ abnk-design/
 │
 ├── 06-evolution/
 │   ├── roadmap.md                     #   ✅ Phase 0–5 + 出口判据 + 风险燃尽表
-│   ├── phase-1-validation.md          #   🚧 ★ 当前活跃：12 步端到端施工图
+│   ├── phase-1-validation.md          #   ✅ ★ 12 步已跑通（2026-10-25），判据 5/5 收尾中
 │   └── aos-integration.md             #   ✅ 双本体愿景 + Phase 2 建基线理由
 │
 └── adr/                               # 架构决策记录（全部 Accepted）
@@ -83,7 +83,7 @@ abnk-design/
 
 ## 当前阶段
 
-**Phase 1（原生能力验证）进行中**——施工图 `06-evolution/phase-1-validation.md`，前置全部就绪。文档层的待办已收敛为**随 Phase 1 实测回填**：savings/lending 的"待验证清单"、`domain-concepts.md` 词汇表实测细节、`localization.md` 的 Phase 1 验证清单。
+**Phase 1（原生能力验证）主体完成（2026-10-25）**——12 步端到端脚本一次跑通，报告在 `abnk-system/artifacts/phase1/`。**待验证项已回填**（savings/lending/localization/domain-concepts），两个原判被推翻：积数计息与对年对月对日均**原生支持**，无需 custom。剩余收尾：E2E runner 运行方式验证（判据 5）。工程产物已按 monorepo 约定收进 `abnk-system`。
 
 ## 维护规则
 

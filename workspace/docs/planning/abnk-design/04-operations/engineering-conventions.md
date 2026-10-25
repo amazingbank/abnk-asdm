@@ -55,6 +55,13 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的缓存（安全
 - 改代码必重启（kill 8443 + devRun）。调试器 session 会断开，断点需重挂。
 - 日志增强/插桩类改动**一次注入完所有候选点**再重启，别反复。
 
+### 1.8 Docker 虚拟磁盘写满 → PG 崩溃循环（2026-10-25 实际发生）
+
+- **现象**：容器 `running (unhealthy)`，`pg_isready` 拒绝连接；`logs/postgres.log` 反复出现 `PANIC: could not write to file "pg_logical/replorigin_checkpoint.tmp": No space left on device` + `all server processes terminated; reinitializing`（恢复→checkpoint→PANIC 死循环）。
+- **根因**：Docker Desktop 虚拟盘满（本机当时：镜像 16.9GB + 卷 37.8GB + 构建缓存）。PG 的 WAL 回放本身完好，只是 checkpoint 写不出去。
+- **处置**（数据完整恢复）：`docker builder prune -f` + `docker image prune -f` 释放 ~1GB 即够 → `docker compose restart abnk-pg` → 280 表与 Liquibase 账本完好。
+- **预防**：`docker system df` 看 RECLAIMABLE 列纳入日常巡检；卷清理需确认归属后进行（未使用卷里含 aos-bench/deploy_mysql_data 等**他人项目数据**，不可盲 prune）。
+
 ## 2. 提交纪律
 
 | 时机 | 动作 |
