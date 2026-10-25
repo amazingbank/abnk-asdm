@@ -13,7 +13,7 @@
 | 2 | 每步业务断言通过（余额/状态/分录） | 脚本内置断言 | ✅ **通过**（含余额=8000、状态机、13 期计划、负向关户断言） |
 | 3 | COB 触发后产生可观测变化（应计/逾期分类） | API 查询对比 | ✅ **部分**——储蓄利息入账可见（0.33）；贷款未逾期无 summary 变化（预期内）；逾期分类未验证（需逾期数据） |
 | 4 | 脚本入库为可重复执行的回归资产 | 存放于 `abnk-system/scripts/phase1/`，CI 可跑 | ✅ **入库**（monorepo，见 ADR：所有交付物进 abnk-system） |
-| 5 | 200 个官方 E2E feature 的运行方式已验证 | E2E runner 实跑一次 | ⬜ **未做**（Phase 1 收尾项） |
+| 5 | 200 个官方 E2E feature 的运行方式已验证 | E2E runner 实跑一次 | ✅ **通过**（2026-10-25：1 scenario/10 steps 全 passed，38s；allure 报告生成；证据 `abnk-system/artifacts/phase1/e2e-first-run.json`） |
 
 ## 2. 前置状态（2026-10-25 更新）
 
@@ -70,11 +70,25 @@
 | 租户头缺失 4xx | 封装层统一注入 |
 | 贷款产品配置复杂 | progressive-loan 的产品参数多——先用 `GET /v1/loanproducts/template` 拿模板再改 |
 
-## 5. 官方 E2E 复用（判据 5）
+## 5. 官方 E2E 复用（判据 5）——已验证（2026-10-25）
 
-- 200 个 feature 在 `fineract-e2e-tests-runner`；COB 的官方写法参照 `fineract-e2e-tests-core/.../InlineCOBStepDef.java:60`
-- 首次只验证"能跑起来 + 出报告"，**不追求全绿**（部分 feature 依赖邮件/SMS 等外部桩）
-- 通过后把它定位为 ABNK 的上游回归门禁；我们的 12 步脚本定位为业务冒烟（更快、更贴近 ABNK 链路）
+**运行方式（实测通过）**：
+
+```bash
+cd fineract
+PATH="$HOME/.sdkman/candidates/java/25.0.5+8-tem/bin:$PATH" \
+JAVA_HOME="$HOME/.sdkman/candidates/java/25.0.5+8-tem" \
+./gradlew :fineract-e2e-tests-runner:cucumber \
+  [-Pcucumber.features=src/test/resources/features/<X>.feature] \
+  [-Pcucumber.tags=@WorkingCapital] [-Pcucumber.name=...]
+# 报告: fineract-e2e-tests-runner/build/reports/allure-report/allureReport/index.html
+```
+
+- **零配置连接本机实例**：默认 `BASE_URL=https://localhost:8443` + `mifos/password` + tenant `default`（`fineract-test-application.properties`）
+- ⚠️ **硬坑**：cucumber fork 的 JVM 走 **PATH 上的 java**（默认 21.0.11）而非 toolchain/JAVA_HOME → `UnsupportedClassVersionError`（CLDR class 版本 69 vs 65）。**必须 PATH 前置 JDK 25**
+- ⚠️ 网络依赖：首次要下载 allure-commandline（走 socks 代理）；代理未启动时依赖解析失败
+- 首跑结果：`SavingsProduct.feature` 1 scenario / 10 steps 全 passed（38s）
+- 定位：官方 E2E = 上游回归门禁；12 步冒烟 = ABNK 业务链路快检（两者互补）
 
 ## 6. 范围外（显式排除）
 

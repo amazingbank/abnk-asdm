@@ -57,7 +57,7 @@ abnk-design/
 │
 ├── 06-evolution/
 │   ├── roadmap.md                     #   ✅ Phase 0–5 + 出口判据 + 风险燃尽表
-│   ├── phase-1-validation.md          #   ✅ ★ 12 步已跑通（2026-10-25），判据 5/5 收尾中
+│   ├── phase-1-validation.md          #   ✅ ★ 判据 5/5 全达成（12 步全通 + E2E 已验证）
 │   └── aos-integration.md             #   ✅ 双本体愿景 + Phase 2 建基线理由
 │
 └── adr/                               # 架构决策记录（全部 Accepted）
@@ -83,7 +83,7 @@ abnk-design/
 
 ## 当前阶段
 
-**Phase 1（原生能力验证）主体完成（2026-10-25）**——12 步端到端脚本一次跑通，报告在 `abnk-system/artifacts/phase1/`。**待验证项已回填**（savings/lending/localization/domain-concepts），两个原判被推翻：积数计息与对年对月对日均**原生支持**，无需 custom。剩余收尾：E2E runner 运行方式验证（判据 5）。工程产物已按 monorepo 约定收进 `abnk-system`。
+**Phase 1（原生能力验证）完成（2026-10-25）**——12 步端到端一次跑通（报告 `abnk-system/artifacts/phase1/`）；官方 E2E 运行方式已验证（1 scenario/10 steps 全 passed + allure 报告，判据 5/5 全达成）。**待验证项已回填**，两个原判被推翻：积数计息与对年对月对日均**原生支持**，无需 custom。下一步：Phase 2（custom/abnk 骨架 + 自建 CI 门禁 + COA 会计科目表——后者是关键路径，需要会计专业输入）。
 
 ## 维护规则
 

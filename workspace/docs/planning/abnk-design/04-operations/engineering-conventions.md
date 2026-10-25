@@ -71,6 +71,13 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的缓存（安全
   ```
 - **验证**：`ssh -p 443 -T git@ssh.github.com` 应返回认证成功。当前 `abnk-system` 与 `.asdm` 两个仓库已切 443 通道。
 
+### 1.10 E2E cucumber fork 走 PATH 上的 java → 必须 PATH 前置 JDK 25（2026-10-25 实际发生）
+
+- **现象**：`:fineract-e2e-tests-runner:cucumber` 报 `CucumberException: Locale provider adapter "CLDR" cannot be instantiated`，根因 `UnsupportedClassVersionError: CLDRLocaleDataMetaInfo（class 版本 69=JDK25）… runtime 只认到 65（=JDK21）`。
+- **根因**：cucumber-runner 插件 fork 的 JVM 取 **PATH 上的 `java`**（本机默认 21.0.11），不遵循 toolchain/JAVA_HOME。
+- **处置**：运行时 `PATH=$JDK25/bin:$PATH JAVA_HOME=$JDK25 ./gradlew :fineract-e2e-tests-runner:cucumber ...`（详见 `phase-1-validation.md` §5）。
+- 另注：E2E 首次运行需联网下载 allure-commandline（走 `~/.gradle/gradle.properties` 的 socks 代理；代理未启动时报 `Can't connect to SOCKS proxy`）。
+
 ## 2. 提交纪律
 
 | 时机 | 动作 |
