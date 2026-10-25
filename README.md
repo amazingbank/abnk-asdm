@@ -240,7 +240,7 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的构建缓存（
 | 业务日期 | `GET/POST /api/v1/businessdate` | 需先 `PUT /api/v1/configurations/44 {"enabled":true}` 启用，且必须带 `locale` |
 | 批量请求 | `POST /api/v1/batches` | — |
 
-**当前环境状态**：业务日期已启用并设为 2026-10-24（COB 日期 2026-10-23）。会计模块（GL 科目/会计规则/金融活动映射）**开箱为空**——API 齐备但需自建科目表，这正是 L1 本地化（按《企业会计准则》重建 COA）的核心工作量。
+**当前环境状态**：业务日期已启用（随日终推进，读当前值用 `GET /api/v1/businessdate`，勿依赖本文快照）。会计模块（GL 科目/会计规则/金融活动映射）**开箱为空**——API 齐备但需自建科目表，这正是 L1 本地化（按《企业会计准则》重建 COA）的核心工作量。
 
 ---
 

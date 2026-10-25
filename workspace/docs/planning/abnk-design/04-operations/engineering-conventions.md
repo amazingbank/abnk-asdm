@@ -103,6 +103,7 @@ rm -rf ~/.gradle/caches/build-cache-1           # 清被污染的缓存（安全
 | OpenAPI | `curl -k https://localhost:8443/fineract-provider/fineract.json`（**不是** /api-docs） |
 | psql | `docker exec -it abnk-pg psql -U root -d fineract_default` |
 | 触发日终 | `POST /api/v1/jobs/LOAN_COB/inline`（三套命名坑见 `00-baseline/api-surface.md` §3） |
+| 跑 E2E | `cd fineract && PATH=~/.sdkman/candidates/java/25.0.5+8-tem/bin:$PATH ./gradlew :fineract-e2e-tests-runner:cucumber`（PATH 前置是硬坑 §1.10；过滤用 `-Pcucumber.features/tags/name`，详见 `phase-1-validation.md` §5） |
 
 ## 5. 排障决策树
 

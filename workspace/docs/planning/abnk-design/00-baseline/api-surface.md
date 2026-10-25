@@ -59,7 +59,7 @@ POST /api/v1/businessdate
 ```
 
 - 设 `BUSINESS_DATE` 会联动推进 `COB_DATE`（`enable-automatic-cob-date-adjustment` 默认 true）。
-- 当前环境已设置：BUSINESS_DATE=2026-10-24，COB_DATE=2026-10-23。
+- 业务日期随冒烟/日终持续演进（2026-10-25 时为 BUSINESS_DATE=2026-10-25 / COB_DATE=2026-10-24）。**读当前值一律 `GET /api/v1/businessdate`**，勿依赖文档快照。
 
 ## 5. 调度作业（41 个，`GET /v1/jobs`）
 

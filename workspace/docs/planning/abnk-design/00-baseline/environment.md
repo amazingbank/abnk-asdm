@@ -75,7 +75,10 @@
 | JDK 25 安装 | sdk install 必失败 | curl -L 直取 + 本地安装 |
 | PG 卷挂载 | 容器启动失败 | 挂父目录 `/var/lib/postgresql` |
 | compose 撞名 | 误停他人容器 | 显式 `name: abnk-system` |
+| Docker 虚拟盘满 | PG PANIC `No space left on device` 崩溃循环 | `docker builder prune` + 重启 abnk-pg；巡检看 `docker system df` |
+| SSH 22 被掐 | `git push` Connection closed by UNKNOWN | remote 切 `ssh.github.com:443` |
+| E2E CLDR 版本错 | cucumber fork 取 PATH 上的 java(21) | 运行时 PATH 前置 JDK 25 |
 
 ---
 
-*事实核对方法：全部条目在 2026-10-24 会话中经实际执行验证；引用的行号来自当日的 develop 分支快照，上游演进后可能漂移。*
+*事实核对方法：全部条目在 2026-10-24/25 会话中经实际执行验证；引用的行号来自当日的 develop 分支快照，上游演进后可能漂移。*
