@@ -1,6 +1,6 @@
 # Amazing Bank 设计文档（abnk-design）
 
-> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（36 篇，含 2026-10-26 新增 ADR-007/008）。
+> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（37 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts）。
 > **铁律：事实与设计分离**——`00-baseline/` 只放实测核实的内容（带出处）；设计文档引用事实、不重复事实；已核实 / 推断 / 猜测永不混排。
 
 ## 阅读顺序
@@ -36,7 +36,8 @@ abnk-design/
 │   ├── customization-strategy.md      #   ✅ ★ custom/abnk 宪法（目录/模板/6红线/门禁）
 │   ├── api-gateway.md                 #   ✅ 渠道网关（含 /v1/internal 黑名单）
 │   ├── event-bus.md                   #   ✅ Kafka 事件总线（含与 job-topic 的区分）
-│   └── release-strategy.md            #   ✅ 季度 rebase 流程 + 检查单 + 冲突预案
+│   ├── release-strategy.md            #   ✅ 季度 rebase 流程 + 检查单 + 冲突预案
+│   └── website-i18n-fonts.md          #   ✅ 官网多语言（中英）+ 字体方案（参照 asdm-ai-2026）
 │
 ├── 03-data-model/
 │   ├── domain-concepts.md             #   ✅ 概念地图 + 行为语义 + 词汇表
