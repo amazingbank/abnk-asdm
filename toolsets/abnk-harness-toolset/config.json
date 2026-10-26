@@ -15,10 +15,10 @@
         {
           "name": "postgres",
           "description": "PostgreSQL 18.3 docker 容器（abnk-pg）——Amazing Bank 全系统唯一数据库宿主（阶段一）。刻意用 root/postgres 作为账号密码，与 fineract 的 application.properties 默认值（FINERACT_HIKARI_USERNAME 默认 root / FINERACT_HIKARI_PASSWORD 默认 postgres）以及 gradle 的 createPGDB 任务默认凭据（fineract-provider/build.gradle:206-207 pgUser='root' pgPassword='postgres'）三方一致，从而**零环境变量覆盖**即可跑通。承载两个库：fineract_tenants（租户存储库——tenant store）+ fineract_default（默认业务租户库）。",
-          "dir": "abnk-system/deploy",
+          "dir": "abnk-system/deploy/compose",
           "configFiles": [
-            "abnk-system/deploy/docker-compose.yml",
-            "abnk-system/deploy/.env"
+            "abnk-system/deploy/compose/docker-compose.yml",
+            "abnk-system/deploy/compose/.env"
           ],
           "startCommand": "docker compose up -d abnk-pg",
           "startCommandDebug": "docker compose up -d abnk-pg",
