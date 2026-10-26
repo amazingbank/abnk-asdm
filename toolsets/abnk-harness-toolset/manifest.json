@@ -8,6 +8,7 @@
   "entryPoint": "README.md",
   "commands": {
     "abnk-debugger": "Start automated debugging session for the Amazing Bank IT stack with process management, log analysis and self-directed fix scheduling",
-    "abnk-doc-review": "Five-dimension review of Sprint/Phase design docs (.asdm/workspace/docs/Sprints/) with code-evidence verification against the Fineract codebase"
+    "abnk-doc-review": "Five-dimension review of Sprint/Phase design docs (.asdm/workspace/docs/Sprints/) with code-evidence verification against the Fineract codebase",
+    "abnk-prod-deploy": "Deploy the Amazing Bank website (abnk-system/channels/website) to the production server via docker compose with HTTPS (amazingbank.ai). Enforces sensitive-info audit gate (Step 0) — production secrets live only in .github-private. Two-phase flow: Release Note review checkpoint, then server-side build + compose switch"
   }
 }
