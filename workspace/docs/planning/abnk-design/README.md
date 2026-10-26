@@ -1,6 +1,6 @@
 # Amazing Bank 设计文档（abnk-design）
 
-> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（34 篇）。
+> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（36 篇，含 2026-10-26 新增 ADR-007/008）。
 > **铁律：事实与设计分离**——`00-baseline/` 只放实测核实的内容（带出处）；设计文档引用事实、不重复事实；已核实 / 推断 / 猜测永不混排。
 
 ## 阅读顺序
@@ -67,7 +67,9 @@ abnk-design/
     ├── 003-postgresql-baseline.md     #   ✅ PG 单宿主 + 三方对齐
     ├── 004-multi-tenancy.md           #   ✅ 多租户分阶段
     ├── 005-frontend-strategy.md       #   ✅ 前端自建三套
-    └── 006-product-lines.md           #   ✅ 储蓄+消费贷先行
+    ├── 006-product-lines.md           #   ✅ 储蓄+消费贷先行
+    ├── 007-xinchuang-compatibility.md #   ✅ 信创：主线开源 + 兼容层（认证矩阵）
+    └── 008-channel-tech-stack.md      #   ✅ 渠道层技术栈（SCG/React/混合移动）
 ```
 
 ## 已生效的决策（摘要）
@@ -80,10 +82,12 @@ abnk-design/
 | 004 | 多租户要做（分阶段） | 代码不得硬编码单租户假设 |
 | 005 | 前端自建三套 | 前端永不直连 8443，一律走网关 |
 | 006 | 储蓄+消费贷先行 | 05-domains 优先级按波次排 |
+| 007 | 信创主线开源+兼容层 | changelog 慎用 PG 专有扩展；IAM 只用 OIDC；缓存用 Valkey；multi-arch 必做 |
+| 008 | 渠道层 SCG + React + 混合移动 | 前端 API 类型从网关 OpenAPI 生成；移动壳不载业务；官网零业务 API |
 
 ## 当前阶段
 
-**Phase 1（原生能力验证）完成（2026-10-25）**——12 步端到端一次跑通（报告 `abnk-system/artifacts/phase1/`）；官方 E2E 运行方式已验证（1 scenario/10 steps 全 passed + allure 报告，判据 5/5 全达成）。**待验证项已回填**，两个原判被推翻：积数计息与对年对月对日均**原生支持**，无需 custom。下一步：Phase 2（custom/abnk 骨架 + 自建 CI 门禁 + COA 会计科目表——后者是关键路径，需要会计专业输入）。
+**Phase 2（定制框架 + L1 本地化）进行中**——2026-10-26 完成技术架构定案：ADR-007（信创兼容）、ADR-008（渠道层技术栈：SCG 网关 + React 前端 + 混合移动端）；`abnk-system` monorepo 骨架按新目录结构重构完成（`frontend/` → `channels/`，官网入库 `channels/website/`）。待办关键路径不变：COA 会计科目表（需会计专业输入）、custom/abnk 骨架、自建 CI 门禁。
 
 ## 维护规则
 

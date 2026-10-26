@@ -13,6 +13,8 @@
 | [004](004-multi-tenancy.md) | 采用 Fineract 多租户架构（分阶段落地） | ✅ Accepted | 2026-10-25 |
 | [005](005-frontend-strategy.md) | 前端自建三套（柜面/网银手机/管理后台） | ✅ Accepted | 2026-10-25 |
 | [006](006-product-lines.md) | 产品线：储蓄+消费贷先行，经营贷后续 | ✅ Accepted | 2026-10-25 |
+| [007](007-xinchuang-compatibility.md) | 信创兼容策略：主线开源 + 兼容层（四原则 + 认证矩阵） | ✅ Accepted | 2026-10-26 |
+| [008](008-channel-tech-stack.md) | 渠道层技术栈：SCG 网关 + React 前端 + 移动混合 App | ✅ Accepted | 2026-10-26 |
 
 ## 模板
 

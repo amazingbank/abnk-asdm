@@ -31,6 +31,8 @@
 
 ## 4. 技术选型（Phase 3 开项时评审，当前只列候选）
 
+> **2026-10-26 更新**：已提前定案 **Spring Cloud Gateway**（OIDC 集成、租户注入走 Java 过滤器、与 JVM 栈同构），理由与约束见 ADR-008。Phase 3 开项时按本文判据复核落地细节。
+
 候选：Spring Cloud Gateway / APISIX / Kong。选型判据：OIDC 成熟度、多租户注入的插件成本、与观测栈（Tempo 追踪）集成。
 
 ## 5. 与三套前端的映射
