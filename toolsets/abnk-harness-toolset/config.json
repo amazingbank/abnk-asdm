@@ -127,6 +127,13 @@
     "docker": "Required —— PostgreSQL 18.3 容器（本机 Docker Desktop 29.7.2 + Compose v5.4.0 可用）",
     "git": "Required —— fineract = git@github.com:amazingbank/fineract.git（develop 分支）"
   },
+  "gitAuth": {
+    "description": "Azure DevOps（ADS）Personal Access Token——用于 git LFS 提交（lfs.smudge/lfs.push 走 HTTPS 鉴权时以 PAT 作为密码）。记录于 2026-10-29。",
+    "type": "azure-devops-pat",
+    "pat": "SEE secrets.local.json",
+    "usage": "git lfs / HTTPS basic auth——用户名任意（惯例用 PAT 名或空），密码填此 PAT；如 git push https://<user>:<PAT>@dev.azure.com/... 或写入 credential helper",
+    "notes": "⚠️ .asdm 是 git 仓库（abnk-asdm）——PAT 明文严禁入库。真实值存放在同目录 secrets.local.json（已被 .gitignore 排除，不入库）；PAT 过期或轮换后更新该文件。2026-10-29 该 PAT 曾误提交至本地，已通过 amend 改写移除（未推送到远端）。"
+  },
   "extensions": {
     "notes": "本配置按『每接入一个新系统追加一条 process』的方式扩展。Amazing Bank 后续接入的系统（活动目录中转/支付网关/报表/前端/Kafka/Keycloak 等）一律登记到 environments.local.processes，并记录其端口、日志、健康端点、启动命令。abnk-debugger 会自动按 processes 数组驱动整个栈的起停与日志收集，无需修改 action 文档。",
     "planned": [

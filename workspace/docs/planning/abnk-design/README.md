@@ -1,6 +1,6 @@
 # Amazing Bank 设计文档（abnk-design）
 
-> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（37 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts）。
+> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（38 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts 与 domain-ontology）。
 > **铁律：事实与设计分离**——`00-baseline/` 只放实测核实的内容（带出处）；设计文档引用事实、不重复事实；已核实 / 推断 / 猜测永不混排。
 
 ## 阅读顺序
@@ -59,7 +59,8 @@ abnk-design/
 ├── 06-evolution/
 │   ├── roadmap.md                     #   ✅ Phase 0–5 + 出口判据 + 风险燃尽表
 │   ├── phase-1-validation.md          #   ✅ ★ 判据 5/5 全达成（12 步全通 + E2E 已验证）
-│   └── aos-integration.md             #   ✅ 双本体愿景 + Phase 2 建基线理由
+│   ├── aos-integration.md             #   ✅ 双本体愿景 + Phase 2 建基线理由
+│   └── domain-ontology.md            #   ✅ 银行领域本体建法（三方对齐 + 分阶段）
 │
 └── adr/                               # 架构决策记录（全部 Accepted）
     ├── README.md                      #   ✅ 索引 + 模板
