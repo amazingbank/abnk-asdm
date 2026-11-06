@@ -15,6 +15,7 @@
 | [006](006-product-lines.md) | 产品线：储蓄+消费贷先行，经营贷后续 | ✅ Accepted | 2026-10-25 |
 | [007](007-xinchuang-compatibility.md) | 信创兼容策略：主线开源 + 兼容层（四原则 + 认证矩阵） | ✅ Accepted | 2026-10-26 |
 | [008](008-channel-tech-stack.md) | 渠道层技术栈：SCG 网关 + React 前端 + 移动混合 App | ✅ Accepted | 2026-10-26 |
+| [009](009-flutter-mobile.md) | 手机银行移动端采用 Flutter（取代 ADR-008 移动方案） | 🟡 Proposed | 2026-11-03 |
 
 ## 模板
 

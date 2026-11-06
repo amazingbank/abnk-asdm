@@ -1,12 +1,12 @@
 # Amazing Bank 设计文档（abnk-design）
 
-> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（38 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts 与 domain-ontology）。
+> 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（40 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts 与 domain-ontology、2026-11-03 新增 mobile-banking-mvp 与 ADR-009（Flutter 移动端））。
 > **铁律：事实与设计分离**——`00-baseline/` 只放实测核实的内容（带出处）；设计文档引用事实、不重复事实；已核实 / 推断 / 猜测永不混排。
 
 ## 阅读顺序
 
 ```
-新人/评审：00-baseline/ 四篇 → adr/ 六篇 → 06-evolution/roadmap.md
+新人/评审：00-baseline/ 四篇 → adr/ 七篇 → 06-evolution/roadmap.md
 施工：06-evolution/phase-1-validation.md（当前活跃文档）
 定制开发：02-architecture/customization-strategy.md（宪法）→ 03-data-model/ → 05-domains/
 排障：04-operations/engineering-conventions.md（排障决策树）
@@ -35,6 +35,7 @@ abnk-design/
 │   ├── overview.md                    #   ✅ L0–L5 分层 + 依赖方向硬规则
 │   ├── customization-strategy.md      #   ✅ ★ custom/abnk 宪法（目录/模板/6红线/门禁）
 │   ├── api-gateway.md                 #   ✅ 渠道网关（含 /v1/internal 黑名单）
+│   ├── mobile-banking-mvp.md          #   🟡 手机银行(Flutter)+对客 API+Backoffice MVP 设计
 │   ├── event-bus.md                   #   ✅ Kafka 事件总线（含与 job-topic 的区分）
 │   ├── release-strategy.md            #   ✅ 季度 rebase 流程 + 检查单 + 冲突预案
 │   └── website-i18n-fonts.md          #   ✅ 官网多语言（中英）+ 字体方案（参照 asdm-ai-2026）
