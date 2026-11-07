@@ -53,7 +53,7 @@ Apache Fineract（L0 核心，603 端点）
 | M3 | 身份认证 | 自绘安全键盘（金额/密码输入） | P0 | Flutter 自绘组件，防录屏/防系统输入法 |
 | M4 | 账户 | 账户总览（活期/定期余额与可用余额） | P0 | `GET /v1/clients/{id}/accounts` + savingsaccounts 明细 |
 | M5 | 账户 | 单账户详情（利率/期限/到期日/结息方式） | P0 | `GET /v1/savingsaccounts/{id}` |
-| M6 | 账户 | 交易明细（存取/利息入账，含 runningBalance） | P0 | `GET /v1/savingsaccounts/{id}/transactions` |
+| M6 | 账户 | 交易明细（存取/利息入账，含 runningBalance） | P0 | `GET /v1/savingsaccounts/{id}/transactions/search`（本 HEAD 无朴素列表 GET——实测口径见 Part02 P0.2 VP0.2.4） |
 | M7 | 储蓄 | 本人账户间转账（活期→活期） | P0 | `deposit` + `withdrawal` 组合（或网关聚合） |
 | M8 | 储蓄 | 定期开户（3M/6M/1Y/2Y/3Y，对年对月对日到期） | P0 | `POST /v1/savingsaccounts`（定存产品） |
 | M9 | 储蓄 | 提前支取（定期→活期） | P0 | `withdrawal`（提前支取规则由产品配置） |
@@ -99,7 +99,7 @@ Apache Fineract（L0 核心，603 端点）
 | 证照状态 | `GET /me/identity` | custom identity + client datatable | 只返回状态与有效期，不返回证件原件 |
 | 账户总览 | `GET /me/accounts` | `GET /v1/clients/{id}/accounts`（+ savingsaccounts 聚合） | 只返回本人账户；脱敏账号尾号 |
 | 账户详情 | `GET /accounts/{id}` | `GET /v1/savingsaccounts/{id}` | 收敛字段 |
-| 交易明细 | `GET /accounts/{id}/transactions` | `GET /v1/savingsaccounts/{id}/transactions` | runningBalance 保留 |
+| 交易明细 | `GET /accounts/{id}/transactions` | `GET /v1/savingsaccounts/{id}/transactions/search` | runningBalance 保留 |
 | 账户间转账 | `POST /accounts/{id}/transfer` | `deposit` + `withdrawal`（网关聚合，幂等） | 服务端校验同客户 |
 | 定期开户 | `POST /savings` | `POST /v1/savingsaccounts`（定存产品） | 产品由网关按渠道白名单收敛 |
 | 提前支取 | `POST /accounts/{id}/withdraw` | `POST .../transactions?command=withdrawal` | 走提前支取规则 |
