@@ -64,6 +64,60 @@
             "JAVA_HOME": "<JDK-25 路径，如 ~/.sdkman/candidates/java/25.0.5+8-tem>"
           },
           "notes": "⚠️ devRun 会 fork 出一个独立 JVM 跑 Spring Boot——nohup ./gradlew devRun 记录到的 PID 是 Gradle 客户端，**杀它不杀应用**；停机一律按端口 kill（killCommand）。启动用 devRun 而非 bootRun：devRun 会禁用 checkstyle/spotless/spotbugs/javadoc/modernizer/testClasses（fineract-provider/build.gradle:449），把分钟级构建压到代码改动级别。--debug-jvm 在 :5005 开 JDWP（suspend 默认 n），供 VS Code 远程 attach。首次启动会完整编译（15–30 min，7100+ 文件 + OpenAPI/Avro 代码生成），且 Liquibase 会建全部表——耐心等 APACHE FINERACT IS READY，不要中途 Ctrl-C（会破坏 Liquibase changelog 账本导致下次启动失败）。停机日志 APACHE FINERACT IS SHUTTING DOWN GRACEFULLY；Gradle 报 Build cancelled while executing task 属正常退出，不是崩溃。⚠️ **构建产物损坏坑（2026-10-24 实际踩过）**：VS Code 的 Gradle 扩展（vscjava.vscode-gradle）常驻 GradleServer 进程，其后台构建被中断时会写出**截断的 fineract-core jar**（zip END header not found），且 org.gradle.caching=true 会让损坏产物进构建缓存反复还原——症状是运行中实例突然对 /v1/jobs、/api-docs 等报 500 ClassNotFoundException（如 IdTypeResolver，源码明明存在且 implements Serializable），重启也不愈。处置：./gradlew --stop && ./gradlew clean && rm -rf ~/.gradle/caches/build-cache-1 && 重新 devRun（完整重建实测 3.6 min）。预防：devRun 长驻期间避免让 IDE 的 Gradle 扩展在后台跑构建任务。"
+        },
+        {
+          "name": "abnk-fineract",
+          "description": "Fineract 生产形态（WAR + Tomcat 容器 abnk-fineract，Phase P0.1 建栈）——本地生产形态验证载体，与 devRun 开发形态并行。Tomcat 平面 HTTP :8081（容器内 8080），无 SSL（公网 TLS 终止在网关层是后续 Phase 的事）。卷只读挂载 fineract/fineract-war/build/libs/fineract-provider.war；启动即 Liquibase 迁移。请求仍须租户头 + Basic Auth。",
+          "dir": "abnk-system/deploy/compose",
+          "configFiles": [
+            "abnk-system/deploy/compose/docker-compose.prodform.yml",
+            "abnk-system/deploy/compose/env/fineract-prodform.env",
+            "abnk-system/deploy/compose/initdb/01-init-abnk.sh"
+          ],
+          "startCommand": "docker compose -f docker-compose.prodform.yml up -d",
+          "startCommandDebug": "docker compose -f docker-compose.prodform.yml up -d",
+          "port": 8081,
+          "healthCheck": {
+            "method": "GET",
+            "path": "/fineract-provider/actuator/health",
+            "expectedStatus": 200,
+            "expectedBody": "\"status\":\"UP\""
+          },
+          "readyPattern": "APACHE FINERACT IS READY",
+          "logFile": "logs/prodform-fineract.log",
+          "hmr": false,
+          "killCommand": "docker compose -f docker-compose.prodform.yml stop abnk-fineract",
+          "rebuildCommand": "cd fineract && JAVA_HOME=$HOME/.sdkman/candidates/java/25.0.5+8-tem ./gradlew :fineract-war:war",
+          "language": "java",
+          "notes": "⚠️ (1) 停机用 docker compose stop（容器形态，勿按宿主端口 kill——Tomcat 在容器内）。(2) 停栈/删卷（compose down / down -v / docker volume rm abnk-pg-prod-data）为破坏性操作，执行前必须问用户。(3) 部署新 WAR：重跑 fineract-war:war 后 docker compose -f docker-compose.prodform.yml restart abnk-fineract（WAR 只读挂载，Tomcat 解压目录会重建）。(4) 日志以 docker logs abnk-fineract 为准。(5) 业务 API 前缀 http://localhost:8081/fineract-provider/api/v1（HTTP 无需 -k）。"
+        },
+        {
+          "name": "abnk-pg-prod",
+          "description": "PostgreSQL 18.3 容器（abnk-pg-prod）——本地生产形态栈数据库宿主（Phase P0.1 建栈），宿主 :5433，与开发栈 abnk-pg :5432 并行互不干扰。承载 fineract_tenants + fineract_default（由 initdb/01-init-abnk.sh 预建——Fineract 迁移代码不建库）。凭据沿用 root/postgres 开发口径。",
+          "dir": "abnk-system/deploy/compose",
+          "configFiles": [
+            "abnk-system/deploy/compose/docker-compose.prodform.yml",
+            "abnk-system/deploy/compose/initdb/01-init-abnk.sh"
+          ],
+          "startCommand": "docker compose -f docker-compose.prodform.yml up -d abnk-pg-prod",
+          "startCommandDebug": "docker compose -f docker-compose.prodform.yml up -d abnk-pg-prod",
+          "port": 5433,
+          "healthCheck": {
+            "method": "CLI",
+            "command": "docker exec abnk-pg-prod pg_isready -U root -q",
+            "expectedStatus": 0
+          },
+          "readyPattern": "accepting connections",
+          "logFile": "logs/prodform-postgres.log",
+          "hmr": false,
+          "killCommand": "docker compose -f docker-compose.prodform.yml stop abnk-pg-prod",
+          "rebuildCommand": "docker compose -f docker-compose.prodform.yml down && docker volume rm abnk-pg-prod-data",
+          "language": "sql",
+          "env": {
+            "POSTGRES_USER": "root",
+            "POSTGRES_PASSWORD": "postgres"
+          },
+          "notes": "⚠️ (1) compose 项目名固定 abnk-prodform（compose 文件内 name 声明），与开发栈 abnk-system 严格区分——不得在错误目录执行 down。(2) 卷名固定 abnk-pg-prod-data。(3) rebuildCommand 是破坏性操作（删数据卷），执行前必须问用户。(4) PG18 卷挂 /var/lib/postgresql 父目录。(5) 宿主 CLI：docker exec -it abnk-pg-prod psql -U root -d fineract_default。"
         }
       ],
       "auth": {
