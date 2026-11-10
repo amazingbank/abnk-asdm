@@ -111,7 +111,8 @@ docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-platform.yam
 
 | 项 | 说明 | 影响 |
 |----|------|------|
-| ghcr 包可见性 public + 关联源仓库 | ✅ **可见性 public 已完成**（用户网页操作，2026-11-10 实测：五包匿名 manifest 全 200 + 本机无凭据 `docker pull` 认证通过）。**关联源仓库仍挂账**：org 包 REST API 不支持（PATCH/PUT 实测 404）——需在各包 `Package settings → Manage repository access` 手动添加 `abnk-system`（五包各一次） | 不阻塞部署；关联仅为 repo 页面 Packages 侧栏展示与权限管理便利 |
+| ghcr 包可见性 public + 关联源仓库 | ✅ **两项均已完成**（用户网页操作，2026-11-10）：五包匿名 manifest 全 200 + 本机无凭据 `docker pull` 认证通过；关联回读——gateway/website/mweb/bo → `abnk-system`、fineract → `fineract` | 已闭环 |
+| multi-arch（amd64 + arm64） | ✅ **已补齐**（2026-11-10）：builder 层钉 `$BUILDPLATFORM`（`19bb0f6`）+ buildx 双平台构建推送 **latest** tag（版本 tag 遵禁覆盖纪律不动）——五镜像 manifest list 双架构，本机 arm64 匿名拉取自动选择 ✅ | 维护纪律：后续发版同命令更新 latest；服务器重启后 binfmt 需重装 |
 | 官网中断窗口 | ② compose 定义变更（website 端口收编）必然触发 recreate | 秒级中断；回滚预案已备 |
 | NSG 8080 规则 | D7 直暴形态随本栈切换退役 | 公网入口统一收口 abnk-nginx 80/443；8080 规则可后续收紧（Azure Portal 操作，非本次范围） |
 | 网关用户表实例态 | `gateway_users.json` 已恢复 server 实例（`fb3b944`，口令与服务器在产种子一致）；镜像 bake 后不可变 | alice/bob/admin 演示口令 = 服务器种子态（`.github-private` 归档） |
