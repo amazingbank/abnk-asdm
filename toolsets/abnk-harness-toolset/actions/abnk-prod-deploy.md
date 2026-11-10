@@ -30,8 +30,8 @@ This action deploys the Amazing Bank 官网渠道前端（`abnk-system/channels/
 
 | 级别 | 内容 | 存放位置 |
 |------|------|---------|
-| 🔴 生产敏感 | 服务器 IP / SSH / 生产凭据 / TLS 私钥 / 生产路径 | `.github-private/`（ssl 归档 `ssl/`，环境配置 `abnk-prod/config.json`） |
-| 🟢 开发公开 | 本地调试凭据（postgres/postgres、mifos:password 等）、代码、compose 编排、Dockerfile | public 仓库（`abnk-system` / `.asdm`） |
+| 🔴 生产敏感 | 服务器 IP / SSH / 生产凭据 / TLS 私钥 / 生产路径 / **制品库推送 PAT**（D8） | `.github-private/`（ssl 归档 `ssl/`，环境配置 `abnk-prod/config.json`，PAT 归档 `abnk-prod/`） |
+| 🟢 开发公开 | 本地调试凭据（postgres/postgres、mifos:password 等）、代码、compose 编排、Dockerfile、**制品镜像本体**（公开包——D8 开源定位） | public 仓库（`abnk-system` / `.asdm`）与 ghcr.io/amazingbank |
 
 **每次部署 Step 0 强制执行敏感信息审计**：`.github-private/abnk-prod/scripts/audit-sensitive-info.sh`（扫描 public 仓库的私钥块/生产 IP/凭据模式/密钥文件形态 + private repo 完整性核查）。审计失败 = 部署中止。
 
@@ -60,12 +60,13 @@ cat .github-private/abnk-prod/config.json | jq '.environments.production'
 ### Iron Rules
 
 1. **敏感信息铁律** — 生产环境信息只在 `.github-private`（见安全模型节）。Step 0 审计是每次部署的强制门禁；审计失败 = 中止。发现泄漏的处置：从 public 仓库清除 → 移入 `.github-private` → commit → 必要时轮换凭据/证书。
-2. **所有代码改动在本地，所有制品在服务端构建** — 本地 Mac 只做 edit/commit/push；服务器 `git pull` + `docker build` + compose 切换。禁止本地构建镜像推送（Mac ARM64 vs 服务器 x86_64）。
+2. **所有代码改动在本地，所有制品在服务端构建并推送 ghcr** — 本地 Mac 只做 edit/commit/push（**本地构建的镜像不推送不发布——仅调试用**）；服务器 `git pull` + `docker build`（x86_64 原生）+ `docker push ghcr.io/amazingbank/*` + compose 切换。禁止本地构建镜像推送（Mac ARM64 vs 服务器 x86_64）。
 3. **up/down 必须带 `--env-file`** — compose 宿主挂载全经 `${ABNK_DEPLOY_ROOT:?}`（缺失即硬失败，不静默回落）；一切运行时写入物归部署根 `~/deploy`，代码域随仓库。
 4. **镜像 tag = website package.json version** — `channels/website/package.json` 的 `version` 字段（`0.y.z`）。仅 patch 位随发版自动递增；minor/major 须用户明确指定。禁止复用已存在的版本号。
 5. **用户确认是铁门** — Phase A 生成 Release Note 后必须停止，等用户明确回复"确认发版"才能进入 Phase B。
 6. **TLS 证书生命周期** — 证书与私钥归部署根数据域 `$SSL_DIR`（compose 只读挂载 `/etc/nginx/ssl`）；私钥源件归档 `$SSL_ARCHIVE`（强管控），服务器丢失 = 自归档 scp 恢复。续期 = 覆盖两 PEM + `docker compose restart abnk-website`（无需 rebuild/重发版）。部署前置：证书存在 + 有效期 > 30 天 + 与私钥 modulus 匹配。
 7. **服务器 clone 用专用 deploy key** — 服务器 `~/.ssh/id_rsa_github`（已配置 `~/.ssh/config`，`ssh.github.com:443`），只读用途即 GitHub 常规 SSH key；服务器上禁止任何文件编辑（纯 git pull + build + compose）。
+8. **制品库 = GitHub Packages 公共包**（D8，2026-11-10）— ABNK 定位开源可演示银行系统（展示 ASDM 全 SDLC AI 能力），五服务镜像统一发布 `ghcr.io/amazingbank/abnk-*` **公共包**（存储/流量免费不设配额；匿名 pull 免登录）。推送 PAT（`write:packages`）只存 `.github-private` 与服务器 docker config；**禁止覆盖已推送 tag**（ghcr 允许覆盖同 tag——不可变性靠纪律）；首推后设包可见性为 public 并关联源仓库；推送凭据泄漏扫描入 Step 0 审计门（第 5 节）。
 
 ### Two-Phase Flow
 
@@ -98,7 +99,7 @@ cat .github-private/abnk-prod/config.json | jq '.environments.production'
 
 ```bash
 bash .github-private/abnk-prod/scripts/audit-sensitive-info.sh
-# Expected: exit 0（5 节全 ✅）
+# Expected: exit 0（6 节全 ✅——第 5 节为 GitHub PAT/Token 扫描，D8 引入）
 ```
 
 审计失败处置：按脚本输出的泄漏项定位 → 从 public 仓库清除（git rm / 修改文件）→ 该信息如属生产必需则移入 `.github-private` → 重新审计通过后才能继续。**已 push 到远端的泄漏 = 立即告知用户评估凭据/证书轮换**（git 历史清除需用户裁决）。
@@ -269,9 +270,9 @@ curl -s https://amazingbank.ai/ | grep -oE '<title>[^<]*</title>'
 ## Rollback
 
 ```bash
-# 回滚到上一版本（镜像仍在服务器本地缓存；首次部署无上一版可回）
+# 回滚到上一版本（D8 后：历史 tag 随时可自 ghcr 拉取——服务器本地缓存或 registry 双通道）
 <PROD_SSH> "cd <PROD_REPO_SERVER> && \
-  ABNK_WEBSITE_IMAGE=abnk-website:<previous-version> \
+  ABNK_WEBSITE_IMAGE=ghcr.io/amazingbank/abnk-website:<previous-version> \
     docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-prod.yaml up -d --force-recreate"
 ```
 
