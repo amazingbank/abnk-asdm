@@ -220,24 +220,28 @@ dig +short amazingbank.ai A && dig +short www.amazingbank.ai A
 # 必须等于 Phase A Step 1 推送的 commit——漂移即中止
 ```
 
-### Step 6: Docker Build（服务端）
+### Step 6: Docker Build + Push（服务端，D8 口径）
 
 ```bash
 <PROD_SSH> "cd <PROD_REPO_SERVER> && docker build -f channels/website/Dockerfile \
-  -t abnk-website:<version> channels/website 2>&1 | tail -10"
+  -t ghcr.io/amazingbank/abnk-website:<version> channels/website 2>&1 | tail -10 \
+  && docker push ghcr.io/amazingbank/abnk-website:<version>"
 ```
 
 多阶段自含构建（npm ci + vite build 在 builder 内完成），服务器无需预装 Node。
+**D8**：tag 用 ghcr FQN 并在构建后 push（Iron Rule 8）；首次推送后到 GitHub Packages
+设置页设可见性 public + 关联源仓库。全栈五镜像同式（build + push 各一）。
 
 ### Step 7: Compose 切换
 
 ```bash
 <PROD_SSH> "cd <PROD_REPO_SERVER> && \
-  ABNK_WEBSITE_IMAGE=abnk-website:<version> \
+  ABNK_WEBSITE_IMAGE=ghcr.io/amazingbank/abnk-website:<version> \
     docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-prod.yaml down && \
-  ABNK_WEBSITE_IMAGE=abnk-website:<version> \
+  ABNK_WEBSITE_IMAGE=ghcr.io/amazingbank/abnk-website:<version> \
     docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-prod.yaml up -d"
 # 依赖：证书在位（Step 3 已查）——缺失即 nginx 起不来
+# compose pull_policy 缺省 missing：本地已有同 FQN 镜像（Step 6 刚构建）不重复拉取
 ```
 
 ### Step 8: 部署验证

@@ -89,7 +89,7 @@
           "killCommand": "docker compose -f docker-compose.prodform.yml stop abnk-fineract",
           "rebuildCommand": "cd fineract && JAVA_HOME=$HOME/.sdkman/candidates/java/25.0.5+8-tem ./gradlew :fineract-war:war",
           "language": "java",
-          "notes": "⚠️ (1) 停机用 docker compose stop（容器形态，勿按宿主端口 kill——Tomcat 在容器内）。(2) 停栈/删卷（compose down / down -v / docker volume rm abnk-pg-prod-data）为破坏性操作，执行前必须问用户。(3) 部署新 WAR：重跑 fineract-war:war 后 docker compose -f docker-compose.prodform.yml restart abnk-fineract（WAR 只读挂载，Tomcat 解压目录会重建）。(4) 日志以 docker logs abnk-fineract 为准。(5) 业务 API 前缀 http://localhost:8081/fineract-provider/api/v1（HTTP 无需 -k）。"
+          "notes": "⚠️ (1) 停机用 docker compose stop（容器形态，勿按宿主端口 kill——Tomcat 在容器内）。(2) 停栈/删卷（compose down / down -v / docker volume rm abnk-pg-prod-data）为破坏性操作，执行前必须问用户。(3) 部署新 WAR：重跑 fineract-war:war 后 docker compose -f docker-compose.prodform.yml restart abnk-fineract（WAR 只读挂载，Tomcat 解压目录会重建）。(4) 日志以 docker logs abnk-fineract 为准。(5) 业务 API 前缀 http://localhost:8081/fineract-provider/api/v1（HTTP 无需 -k）。(6) **退役注记（2026-11-10 P3.4）**：本地联调载体已切换为全栈演练栈（见 abnk-fullstack-drill 条目）——两者容器同名（abnk-fineract）不可并行，重启用本条目前先停演练栈；prodform 数据卷 abnk-pg-prod-data 保留（P0.3–P3.3 种子态）。"
         },
         {
           "name": "abnk-pg-prod",
@@ -144,6 +144,22 @@
           "notes": "⚠️ (1) bootRun 会 fork 独立 JVM——nohup 记录的 PID 是 Gradle 客户端，停机一律按端口 kill（killCommand）。(2) 构建必须显式 JAVA_HOME=JDK25（宿主默认 java 为 21，漏写触发 toolchain 自动下载）。(3) 网关侧 curl 无需 Fineract 双头（网关注入）；联调直查 Fineract 时仍带双头。(4) 网关 dev 形态依赖生产形态栈（abnk-fineract :8081）先运行。(5) 停止后重启：起进程前先 lsof -ti:8080 清端口。(6) 演示口令/JWT 密钥等敏感项延后 P2.2 引入（.github-private 口径）。"
         },
         {
+          "name": "abnk-fullstack-drill",
+          "description": "ABNK 全栈本地演练栈（P3.4 口径——生产拓扑七容器单入口：abnk-nginx + website + gateway + fineract + pg-platform + bo + mweb；对客联调/剧本基址 https://localhost）",
+          "dir": "/Users/leixu/source/asdm/amazingbank-ws/abnk-system/deploy/prod",
+          "configFiles": ["compose-abnk-prod.yaml", "docker-compose.drill-override.yml", "env/abnk-fullstack.drill.env", "../../data/gateway_users.json"],
+          "startCommand": "docker compose -f compose-abnk-prod.yaml -f docker-compose.drill-override.yml --env-file env/abnk-fullstack.drill.env up -d",
+          "healthCheck": {
+            "method": "CLI",
+            "command": "curl -sk https://localhost/actuator/health",
+            "expectedStatus": 0
+          },
+          "port": 443,
+          "logFile": "",
+          "readyPattern": "",
+          "notes": "⚠️ (1) 与 prodform 栈容器同名（abnk-fineract）——互斥不可并行，启动前确认 prodform 已退役。(2) 端口占用：宿主 80/443（唯一）+ fineract 回环 127.0.0.1:8081；与 dev 栈（5432/8080/6280/6203）可并行。(3) Fineract 新库首迁 15–30 min（healthcheck start_period 20m 覆盖；M 系实测约 3 min）。(4) 种子施加后 data/gateway_users.json 重生成——需重建网关镜像（docker build -f channels/gateway/Dockerfile -t abnk-gateway:0.1.0 .）并 up -d abnk-gateway recreate（P3.4 证据归档口径）。(5) 停栈用 compose stop；down / down -v 为破坏性操作必须问用户。"
+        },
+        {
           "name": "abnk-mobile-web",
           "description": "ABNK 手机银行 Flutter web 调试载体（Phase P1.3 建，ADR-009 三目标之一）——flutter run -d web-server，mock 数据（fixtures/*.json，P0.3 种子快照口径），无后端依赖。调试端口取 62xx 段 :6280（ADR-009 口径）。iOS 模拟器（iPhone 16 Pro）与 Android 模拟器（abnk_api36）载体用 flutter drive + integration_test 走查，不经本进程。",
           "dir": "abnk-system/channels/mobile-banking",
@@ -164,7 +180,7 @@
           "env": {
             "PATH": "$HOME/development/flutter/bin:$PATH"
           },
-          "notes": "⚠️ (1) 纯 mock：登录口令 alice/password（demoUsers，原型专用明文），与网关 PBKDF2 凭据无关。(2) 首次启动 flutter run 全量编译 web 产物约 1–2 min，等 readyPattern。(3) 产物构建 flutter build web（VP1.3.7 已验 ✓ Built build/web）。(4) 三载体走查截图归档在 abnk-system/artifacts/phaseP1/screenshots/（web-*/ios-*/android-*）。(5) pubspec 资产（fixtures/字体）变更需重启 flutter run，热重载（r）只覆盖 Dart 代码。"
+          "notes": "⚠️ (1) 本条目 = mock 模式（无 --dart-define，登录口令 alice/password 原型明文）。**P3.1 接线后另有 remote 模式**：`--dart-define=ABNK_API_BASE=http://localhost:8080/abnk/api/v1` 连真实网关（凭据走 PBKDF2 种子，口令在 .github-private）；装配点 lib/data/repository_factory.dart。(2) 首次启动 flutter run 全量编译 web 产物约 1–2 min，等 readyPattern。(3) 产物构建 flutter build web（VP1.3.7 已验 ✓ Built build/web；容器化口径见 channels/mobile-banking/Dockerfile）。(4) 三载体走查截图归档在 abnk-system/artifacts/phaseP1/screenshots/（web-*/ios-*/android-*）。(5) pubspec 资产（fixtures/字体）变更需重启 flutter run，热重载（r）只覆盖 Dart 代码。"
         },
         {
           "name": "abnk-backoffice",
@@ -185,7 +201,7 @@
           "rebuildCommand": "npm install && npm run typecheck && npm run lint",
           "language": "typescript",
           "env": {},
-          "notes": "⚠️ (1) 纯 mock：登录口令 admin/password（operators.json，原型专用明文），生产走 PBKDF2 凭据（data/gateway_users.json admin）。(2) strictPort：6203 被占直接报错不漂移。(3) repository 装配点 src/api/index.ts——P3.2 接线换生成 client 只改该文件。(4) 走查记录 artifacts/phaseP1/taskP1.4-bo-walkthrough.md + 截图 bo-01~bo-05。"
+          "notes": "⚠️ (1) 本条目 = mock 模式（无 VITE_ABNK_API_BASE，登录口令 admin/password 原型明文）。**P3.2 接线后另有 remote 模式**：`VITE_ABNK_API_BASE=/ npm run dev`（同源经 vite proxy /bo → 网关 :8080，凭据走 PBKDF2 种子）；装配点 src/api/dataSource.ts。(2) strictPort：6203 被占直接报错不漂移。(3) 走查记录 artifacts/phaseP1/taskP1.4-bo-walkthrough.md + 截图 bo-01~bo-05。"
         }
       ],
       "auth": {
@@ -244,7 +260,7 @@
     "notes": "阶段一 Fineract 为纯 API 服务（无自带 Web UI），**不需要 preview_url / playwright-cli**——验证一律走 curl。自带 API 文档 https://localhost:8443/fineract-provider/api-docs 可在 IDE 内置浏览器打开（需信任自签证书）。未来接入 Amazing Bank 前端（Mifos X Web App / 自建前端）后，在此登记前端进程与 preview_url。"
   },
   "dependencies": {
-    "jdk": "**Required = 25**（build.gradle:418 toolchain 硬要求；本机已装 17.0.9-zulu / 21.0.11-ms，缺 25）。gradle.properties 还需 --add-exports/--add-opens 系列 JVM 参数（已内置在仓库 gradle.properties，无需手工加）。",
+    "jdk": "**Required = 25**（build.gradle:418 toolchain 硬要求；本机 25.0.5+8-tem 已装（sdkman，勿设 default 避免污染 17/21 项目）——网关与 fineract 启动命令均前置 JAVA_HOME）。gradle.properties 还需 --add-exports/--add-opens 系列 JVM 参数（已内置在仓库 gradle.properties，无需手工加）。",
     "gradle": "9.7.1（仓库自带 wrapper，勿用系统 gradle）：./gradlew",
     "docker": "Required —— PostgreSQL 18.3 容器（本机 Docker Desktop 29.7.2 + Compose v5.4.0 可用）",
     "git": "Required —— fineract = git@github.com:amazingbank/fineract.git（develop 分支）"
