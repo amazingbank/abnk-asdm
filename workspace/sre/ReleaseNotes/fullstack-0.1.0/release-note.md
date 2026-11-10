@@ -111,7 +111,7 @@ docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-platform.yam
 
 | 项 | 说明 | 影响 |
 |----|------|------|
-| ghcr 包可见性 public + 关联源仓库 | REST API 对 org 包不支持 PATCH visibility（实测 GET 200 / PATCH 404）——需 org admin 在 `github.com/orgs/amazingbank/packages` 各包设置页手动设置（五包：abnk-fineract/gateway/website/bo/mweb） | 不阻塞部署（服务器本地镜像齐备，`pull_policy missing` 命中本地）；仅影响匿名 pull/外部回滚通道 |
+| ghcr 包可见性 public + 关联源仓库 | ✅ **可见性 public 已完成**（用户网页操作，2026-11-10 实测：五包匿名 manifest 全 200 + 本机无凭据 `docker pull` 认证通过）。**关联源仓库仍挂账**：org 包 REST API 不支持（PATCH/PUT 实测 404）——需在各包 `Package settings → Manage repository access` 手动添加 `abnk-system`（五包各一次） | 不阻塞部署；关联仅为 repo 页面 Packages 侧栏展示与权限管理便利 |
 | 官网中断窗口 | ② compose 定义变更（website 端口收编）必然触发 recreate | 秒级中断；回滚预案已备 |
 | NSG 8080 规则 | D7 直暴形态随本栈切换退役 | 公网入口统一收口 abnk-nginx 80/443；8080 规则可后续收紧（Azure Portal 操作，非本次范围） |
 | 网关用户表实例态 | `gateway_users.json` 已恢复 server 实例（`fb3b944`，口令与服务器在产种子一致）；镜像 bake 后不可变 | alice/bob/admin 演示口令 = 服务器种子态（`.github-private` 归档） |
