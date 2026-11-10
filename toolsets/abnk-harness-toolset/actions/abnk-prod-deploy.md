@@ -7,7 +7,7 @@
   "guid": "a8c3d4e5-f6a7-8901-2345-67890abcdef1",
   "name": "abnk-prod-deploy",
   "displayName": "ABNK Prod Deploy",
-  "description": "- Audit sensitive info (Step 0 iron gate), check environment readiness, generate Release Note for review, then build Docker image (abnk-website——channels/website 官网前端) on the production server and deploy the abnk-prod compose stack (abnk-website nginx TLS 终止 :80/:443——https://amazingbank.ai)",
+  "description": "- Audit sensitive info (Step 0 iron gate), check environment readiness, generate Release Note for review, then build Docker image (abnk-website——独立私有仓 abnk-website 官网前端，2026-11-10 迁出 abnk-system) on the production server and deploy the abnk-prod compose stack (abnk-website 静态托管；TLS 终止在 abnk-nginx 入口——https://amazingbank.ai)",
   "toolset": {
     "guid": "b7a2c9d1-4e3f-4a58-9c6b-1d2e3f4a5b6c",
     "id": "abnk-harness-toolset",
@@ -20,7 +20,7 @@
 
 ## Overview
 
-This action deploys the Amazing Bank 官网渠道前端（`abnk-system/channels/website`——Vite React SPA）to the production server（`abnk-vm001`）via Docker compose stack `abnk-prod`（`deploy/prod/compose-abnk-prod.yaml`）——单容器 `abnk-website`（多阶段镜像：nginx 静态托管 + TLS 终止），用户入口 `https://amazingbank.ai`（80 → 301 → https）。
+This action deploys the Amazing Bank 官网渠道前端（**独立私有仓 `abnk-website`**——Vite React SPA；2026-11-10 自 `abnk-system/channels/website` subtree split 迁出，承载 amazingbank.ai 入口/对外展示/方法论链接/社区管理，**不随 ABNK 开源**；ghcr 包同为 private——D8 修订「四公共 + 一私有」）to the production server（`abnk-vm001`）via Docker compose stack `abnk-prod`（`abnk-system/deploy/prod/compose-abnk-prod.yaml`）——容器 `abnk-website`（静态托管；TLS 由 `abnk-nginx` 入口终止），用户入口 `https://amazingbank.ai`（80 → 301 → https）。
 
 ### 敏感信息安全模型（本 action 的首要铁律）
 
@@ -62,7 +62,7 @@ cat .github-private/abnk-prod/config.json | jq '.environments.production'
 1. **敏感信息铁律** — 生产环境信息只在 `.github-private`（见安全模型节）。Step 0 审计是每次部署的强制门禁；审计失败 = 中止。发现泄漏的处置：从 public 仓库清除 → 移入 `.github-private` → commit → 必要时轮换凭据/证书。
 2. **所有代码改动在本地，所有制品在服务端构建并推送 ghcr** — 本地 Mac 只做 edit/commit/push（**本地构建的镜像不推送不发布——仅调试用**）；服务器 `git pull` + `docker build`（x86_64 原生）+ `docker push ghcr.io/amazingbank/*` + compose 切换。禁止本地构建镜像推送（Mac ARM64 vs 服务器 x86_64）。
 3. **up/down 必须带 `--env-file`** — compose 宿主挂载全经 `${ABNK_DEPLOY_ROOT:?}`（缺失即硬失败，不静默回落）；一切运行时写入物归部署根 `~/deploy`，代码域随仓库。
-4. **镜像 tag = website package.json version** — `channels/website/package.json` 的 `version` 字段（`0.y.z`）。仅 patch 位随发版自动递增；minor/major 须用户明确指定。禁止复用已存在的版本号。
+4. **镜像 tag = website package.json version** — `abnk-website` 仓（独立私有仓）`package.json` 的 `version` 字段（`0.y.z`）。仅 patch 位随发版自动递增；minor/major 须用户明确指定。禁止复用已存在的版本号。
 5. **用户确认是铁门** — Phase A 生成 Release Note 后必须停止，等用户明确回复"确认发版"才能进入 Phase B。
 6. **TLS 证书生命周期** — 证书与私钥归部署根数据域 `$SSL_DIR`（compose 只读挂载 `/etc/nginx/ssl`）；私钥源件归档 `$SSL_ARCHIVE`（强管控），服务器丢失 = 自归档 scp 恢复。续期 = 覆盖两 PEM + `docker compose restart abnk-website`（无需 rebuild/重发版）。部署前置：证书存在 + 有效期 > 30 天 + 与私钥 modulus 匹配。
 7. **服务器 clone 用专用 deploy key** — 服务器 `~/.ssh/id_rsa_github`（已配置 `~/.ssh/config`，`ssh.github.com:443`），只读用途即 GitHub 常规 SSH key；服务器上禁止任何文件编辑（纯 git pull + build + compose）。
@@ -115,7 +115,7 @@ git log --oneline origin/<PROD_BRANCH>..HEAD   # 应为空（全部已推送）
 ### Step 2: 确定版本
 
 ```bash
-cd <PROD_REPO_LOCAL>/channels/website
+cd ~/source/asdm/amazingbank-ws/abnk-website   # 独立私有仓（websiteRepo 解析自 private config）
 grep '"version"' package.json         # 当前版本，如 0.1.0
 
 # 服务器已部署版本（首次部署跳过）
@@ -171,7 +171,7 @@ dig +short amazingbank.ai A && dig +short www.amazingbank.ai A
 ```markdown
 # ABNK Website — Release Notes
 
-**版本**：`<version>`（镜像 tag，= channels/website/package.json version）
+**版本**：`<version>`（镜像 tag，= abnk-website 仓 package.json version）
 **日期**：<YYYY-MM-DD>
 **状态**：🟡 预部署（Phase A 完成，等待用户确认）
 **分支**：`<PROD_BRANCH>`
@@ -223,8 +223,8 @@ dig +short amazingbank.ai A && dig +short www.amazingbank.ai A
 ### Step 6: Docker Build + Push（服务端，D8 口径）
 
 ```bash
-<PROD_SSH> "cd <PROD_REPO_SERVER> && docker build -f channels/website/Dockerfile \
-  -t ghcr.io/amazingbank/abnk-website:<version> channels/website 2>&1 | tail -10 \
+<PROD_SSH> "cd ~/source/abnk-website && docker build \
+  -t ghcr.io/amazingbank/abnk-website:<version> . 2>&1 | tail -10 \
   && docker push ghcr.io/amazingbank/abnk-website:<version>"
 ```
 
