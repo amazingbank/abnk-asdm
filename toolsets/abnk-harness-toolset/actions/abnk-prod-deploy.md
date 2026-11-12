@@ -302,6 +302,9 @@ curl -s -o /dev/null -w '%{http_code}\n' https://bo.amazingbank.ai/    # Expecte
 
 ## Rollback（单服务镜像切换——与 Step 7 同式）
 
+> ⚠️ **滚动 up 后必须 `docker restart abnk-nginx`**（2026-11-12 bo 0.1.1 + mweb 1.0.1 发版实测新增纪律）：nginx worker 启动时解析并缓存 upstream 容器名 → IP 映射，被反代容器（bo/mweb/website/gateway）recreate 时 Docker 重新分配 IP，nginx 若不重启则按旧 IP 转发——bo/mweb 双 recreate 实测触发 `bo.*`/`app.*` 内容互换错位（容器产物/配置/DNS 三者均正确，仅 nginx 缓存陈旧）。修复与预防 = 每次滚动 up 后重启入口 nginx（秒级）。根治方案（`resolver 127.0.0.11` + 变量式 proxy_pass）挂账后续优化。
+> ⚠️ **After any rolling up, `docker restart abnk-nginx` is mandatory** (new discipline from the bo 0.1.1 + mweb 1.0.1 release, 2026-11-12): nginx workers resolve and cache the upstream container-name → IP mapping at startup; when a proxied container (bo/mweb/website/gateway) is recreated Docker reassigns IPs, and an un-restarted nginx keeps forwarding to stale IPs — the bo/mweb double recreate swapped the content served by `bo.*`/`app.*` (container artifacts, nginx config and DNS were all correct; only the nginx cache was stale). Fix and prevention = restart the entry nginx after every rolling up (seconds). A permanent fix (resolver 127.0.0.11 + variable-form proxy_pass) is backloged.
+
 ```bash
 # 回滚到上一版本（D8 后：历史 tag 随时可自 ghcr 拉取——服务器本地缓存或 registry 双通道；
 # abnk-website 私有包经服务器已登录凭据拉取）

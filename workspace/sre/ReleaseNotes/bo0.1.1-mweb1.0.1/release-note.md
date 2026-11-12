@@ -2,7 +2,7 @@
 
 **版本**：`abnk-bo:0.1.1` + `abnk-mweb:1.0.1`（ghcr 公共包）
 **日期**：2026-11-12
-**状态**：🟡 预部署（Phase A 完成，等待用户确认）
+**状态**：✅ 已完成（2026-11-12）
 **分支**：`main`
 **发版类型**：双服务滚动（bo + mweb 单服务 recreate；其余五容器零感知，无 down）
 
@@ -83,15 +83,28 @@ sed -i.bak 's|^ABNK_BO_IMAGE=.*|ABNK_BO_IMAGE=ghcr.io/amazingbank/abnk-bo:0.1.0|
 ## 执行进度跟踪
 
 - [x] ✅ Step 0：敏感信息审计（6 节全过）
-- [x] ✅ Step 1：双仓干净已推送（abnk-system HEAD: `aa020f7`）
+- [x] ✅ Step 1：双仓干净已推送（发版时 HEAD：`aa020f7` → Phase 7 修订后 `c872beb`，用户确认门通过后以 `c872beb` 为部署基线）
 - [x] ✅ Step 2：版本确定（bo `0.1.1` / mweb `1.0.1`）
 - [x] ✅ Step 3：服务器就绪（SSH/Docker/磁盘/端口/证书/七容器/在产 tag）
-- [x] ✅ Step 4：Release Note 生成 → ⏸ **IRON GATE：等待用户「确认发版」**
-- [ ] ⬜ Step 5：服务器 git pull + HEAD 核对（= aa020f7）
-- [ ] ⬜ Step 6：docker build + push（bo 0.1.1 / mweb 1.0.1，数据集 en-us）
-- [ ] ⬜ Step 7：.env 三行更新 + 双服务滚动 up
-- [ ] ⬜ Step 8：部署验证（七容器 + 三子域 + 数据语言抽查）
-- [ ] ⬜ Step 9：Release Note 回填 + commit
+- [x] ✅ Step 4：Release Note 生成 → 用户「确认发版」（含 Phase 7 D3 修订后重新审查）
+- [x] ✅ Step 5：服务器 git pull + HEAD 核对（= `c872beb`，漂移零）
+- [x] ✅ Step 6：docker build + push（bo 54.5s / mweb 7m；digests：bo `sha256:08ac81d2…` / mweb `sha256:72174802…`）
+- [x] ✅ Step 7：.env 三行更新 + 双服务滚动 up（bo/mweb recreate，其余五容器零感知）
+- [x] ✅ Step 8：部署验证（见下方实测结果；含一项发版中修复）
+- [x] ✅ Step 9：Release Note 回填 + commit
+
+## Step 8 实测结果（2026-11-12）
+
+- 七容器全部 `Up (healthy)`；`abnk-bo` 运行镜像 = `ghcr.io/amazingbank/abnk-bo:0.1.1`、`abnk-mweb` = `ghcr.io/amazingbank/abnk-mweb:1.0.1`（docker inspect 核对）
+- 公网四端：`bo.` → 200 + `<title>ABNK Backoffice · 运营后台</title>`；`app.` → 200 + Flutter 手机银行；`api.` → `{"status":"UP"}`；`amazingbank.ai` → 200 官网 title
+- 数据语言抽查：bo bundle（`/assets/index-B7qeLqge.js`）含 `ABNK Current Savings`（英文数据在场，D3 修订双集进包）；mweb `/assets/fixtures/en-us/accounts.json` → 200 + 3 处 `ABNK Current Savings`（en-us 数据集资产在场）
+
+### 发版中发现并修复（既有问题首次暴露）
+
+- **症状**：滚动 up 后公网 `bo.*` 显示 Flutter 手机银行、`app.*` 显示 Backoffice（内容互换），而容器内产物、nginx 配置、DNS 三者均正确
+- **根因**：nginx worker 启动时解析并缓存 upstream 容器名 → IP 映射；`abnk-bo`/`abnk-mweb` recreate 时 Docker 重新分配 IP（互换），nginx 仍按旧 IP 转发 → 分流错位。属 P3.4 拓扑上线以来的既有隐患（当时验证只查 HTTP 200 未查内容归属），本次 bo/mweb 双 recreate 首次触发
+- **修复**：`docker restart abnk-nginx`（秒级）——重启后四端内容归属全部正确
+- **后续发版纪律（新增）**：任何被入口 nginx 反代的容器发生 recreate（镜像 tag 变化 up）后，必须 `docker restart abnk-nginx` 刷新 upstream 解析；根治方案（nginx `resolver 127.0.0.11` + 变量式 proxy_pass）列入后续优化挂账
 
 ## 风险与备注
 
