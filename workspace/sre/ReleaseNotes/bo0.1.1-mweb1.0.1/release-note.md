@@ -13,11 +13,12 @@
 | `abnk-system`（发版对象——bo/mweb 两渠道） | `aa020f7` | 11 commits（Part03 Phase 1–4 + P3.6 apk 修复等） |
 | `abnk-asdm`（进度文档） | `8dba059` | — |
 
-## 变更内容（Part03 双语 i18n 与中英切换，Phase 1–4）
+## 变更内容（Part03 双语 i18n 与中英切换，Phase 1–4 + Phase 7 D3 修订）
 
-- **backoffice**（Phase 1–2）：零依赖 i18n 体系（8 命名空间词条 + localStorage 事实源 + antd/dayjs 联动）、错误码化（ApiError + 双语 errors 词条）、mock 数据集双语两套 + 部署期切换（Vite 构建注入）
-- **mobile-banking**（Phase 3–4）：gen-l10n 体系（ARB 双语，中文为源英文语义重写）、语言切换（AppState + shared_preferences 持久化）、fixtures 双语两套 + 编译期数据集选择（`--dart-define ABNK_DATA_LOCALE`）
-- **本次发版拍板——应用数据默认英文**（D3 部署期决策）：两 Dockerfile ARG 缺省与部署 env 均为 `en-us`；运行时 UI 语言切换不切数据集（UI 语言仍各自跟随用户选择/系统语言）
+- **backoffice**（Phase 1–2）：零依赖 i18n 体系（8 命名空间词条 + localStorage 事实源 + antd/dayjs 联动）、错误码化（ApiError + 双语 errors 词条）、mock 数据集双语两套
+- **mobile-banking**（Phase 3–4）：gen-l10n 体系（ARB 双语，中文为源英文语义重写）、语言切换（AppState + shared_preferences 持久化）、fixtures 双语两套
+- **D3 修订（Phase 7，2026-11-12 确认门处用户拍板）——数据集运行时随 UI 语言切换**：双语两套数据全量进包；初始数据语言 = `ABNK_DATA_LOCALE` 注入（缺省 `en-us`，「应用数据默认英文」口径）；用户手动切换 UI 语言时数据集跟随（zh→zh-cn / en→en-us），mock 内存态（转账/证照编辑/定期开户）随之重置。backoffice：`reseedDataSet` + `dataEpoch`（Outlet remount）；mobile：`FixtureBundle.activate` + `Resettable.reset` + `AppState.dataEpoch`（home 子树 ValueKey remount）
+- **判据体系变更**：Phase 2 `V2.2.3`（bo bundle 单集 tree-shaking）废止——双集进包为运行时选择前提（`V7.1.2` 实测双数据串均在）；Phase 4 `V4.2.5` ③ define 传播两向测试保留有效（初始值注入仍走编译期）
 - **版本递增**（Iron Rule 4 patch 纪律）：bo `0.1.0→0.1.1`（package.json）、mweb `1.0.0+1→1.0.1+2`（pubspec，build number 不入 tag）
 
 ## 环境就绪检查（Phase A 实测 2026-11-12）
@@ -40,7 +41,8 @@
 # 1) git pull + HEAD 核对（必须 = aa020f7）
 cd ~/source/abnk-system && git checkout main && git pull origin main && git log --oneline -1
 
-# 2) 服务端构建两镜像（x86_64 原生；数据集英文显式注入——D3 部署期决策）
+# 2) 服务端构建两镜像（x86_64 原生；ABNK_DATA_LOCALE=en-us = 初始数据语言注入，
+#    D3 修订后运行时可随 UI 切换——双语两套全量进包）
 docker build -f channels/backoffice/Dockerfile \
   -t ghcr.io/amazingbank/abnk-bo:0.1.1 \
   --build-arg ABNK_DATA_LOCALE=en-us channels/backoffice
