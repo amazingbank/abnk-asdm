@@ -1,0 +1,19 @@
+- generic [active] [ref=f1e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - group:
+              - generic:
+                - generic [ref=f1e7]: AMAZING BANK
+                - generic [ref=f1e8]: Amazing Bank
+                - generic [ref=f1e9]: 手机银行
+                - textbox "用户名" [ref=f1e11]
+                - generic [ref=f1e12]:
+                  - textbox "密码" [ref=f1e13]
+                  - button [ref=f1e14]
+                - button "登 录" [ref=f1e15]
+                - generic "指纹登录（视觉占位）":
+                  - button [ref=f1e16]
+                - generic [ref=f1e17]: 指纹登录与安全键盘为视觉占位（POC 范围外）

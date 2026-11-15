@@ -1,0 +1,124 @@
+# 任务 5.3 · V5.3.4 引用目标存在性全验报告
+
+- 提取范围：workspace 创作 md（排除 artifacts/modelB）+ .asdm README/toolsets + abnk-system README/scripts/tests/gitignore
+- 提取形态：md `](...)` 相对链接 + backtick/裸 `artifacts/` 路径引用（新旧形态一律提取）
+- 检查总数：105（OK 85 / GLOB-OK 2 / PLACEHOLDER 4 / 失联 0）
+
+## 失联引用清单
+
+（无——失联引用 0 条）
+
+## 占位符形态清单（模板非实体，不参与存在性判定）
+
+- `../../part01/artifacts/report-<ts>.json` @ .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md
+- `../artifacts/phaseP3/gap-report-<ts>.json` @ .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md
+- `../artifacts/phaseP2/gateway-report-<ts>.json` @ .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md
+- `../../artifacts/phase1/report-<ts>.json` @ .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md
+
+## 全量明细
+
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase1-Results.md :: ../artifacts/report-1025094135.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase1-Results.md :: ../artifacts/e2e-first-run.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../../part02/artifacts/phaseP0/taskP0.5-wiring-evidence.txt
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/coa-channel-report.json  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/gate-first-run.log  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/gate-first-run.log  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/holidays-2026-evidence.json  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/behavior-probe.json  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/coa-full-import.json  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/accrual-analysis.md  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[PLAN-TEXT   ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase2-Custom-L1.md :: ../artifacts/phase2/rebase-first-run.md  ==> 计划文本（part01 Phase2 已移交任务的历史/未来归档位，非现存证据）
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Plan.md :: ./v0.0.1-Part01-Phase0-Results.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Plan.md :: ./v0.0.1-Part01-Phase1-Results.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Plan.md :: ./v0.0.1-Part01-Phase2-Custom-L1.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/taskP0.1-war-stack-evidence.txt
+[PLACEHOLDER ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../../part01/artifacts/report-<ts>.json  ==> 占位符（<version>/<ts>）模板形态
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/capability-probe.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/capability-probe.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/seed-poc-evidence.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/seed-poc-evidence.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/taskP0.4-server-deploy.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/taskP0.4-server-deploy.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md :: ../artifacts/phaseP0/taskP0.5-wiring-evidence.txt
+[PLACEHOLDER ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/gap-report-<ts>.json  ==> 占位符（<version>/<ts>）模板形态
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/gap-report-20261110-073749.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP2/gateway-report-20261110-073757.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/taskP3.4-fullstack-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/gap-report-20261110-093911.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/taskP3.5-prod-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP3-Integration-Deploy.md :: ../artifacts/phaseP3/taskP3.6-mobile-package.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ./v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ./v0.0.1-Part02-PhaseP1-UX-Prototype.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ./v0.0.1-Part02-PhaseP2-Gateway-Backend.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ./v0.0.1-Part02-PhaseP3-Integration-Deploy.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP0/capability-probe.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.1-forward-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.2-auth-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.3-customer-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.4-transfer-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.5-bo-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP2/taskP2.6-contract-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.1-mobile-e2e.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.2-bo-e2e.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.3-gap-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.4-fullstack-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.5-prod-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-Plan.md :: ../artifacts/phaseP3/taskP3.6-mobile-package.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.1-forward-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.3-customer-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.4-transfer-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.5-bo-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.6-contract-evidence.txt
+[PLACEHOLDER ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/gateway-report-<ts>.json  ==> 占位符（<version>/<ts>）模板形态
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/gateway-report-20261108-170841.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/gateway-report-20261108-170857.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP2-Gateway-Backend.md :: ../artifacts/phaseP2/taskP2.7-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP1-UX-Prototype.md :: ../artifacts/phaseP0/seed-poc-evidence.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP1-UX-Prototype.md :: ../artifacts/phaseP1/taskP1.3-web-walkthrough.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP1-UX-Prototype.md :: ../artifacts/phaseP1/taskP1.3-evidence.txt
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP1-UX-Prototype.md :: ../artifacts/phaseP1/screenshots/p1.5-three-terminal.png
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/zh-CN/v0.0.1-Part02-PhaseP1-UX-Prototype.md :: ../artifacts/phaseP1/taskP1.5-review-gate.md
+[GLOB-OK     ] .asdm/workspace/docs/Sprints/v0.0.1/part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md :: ../../artifacts/phaseP2/taskP2.*-evidence.txt  ==> glob 匹配 7 文件
+[GLOB-OK     ] .asdm/workspace/docs/Sprints/v0.0.1/part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md :: ../../artifacts/phaseP2/gateway-report-*.json  ==> glob 匹配 3 文件
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md :: ../../artifacts/phaseP2/gateway-report-20261108-170841.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md :: ../../artifacts/phaseP2/gateway-report-20261108-170857.json
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Phase5-Generalization-Roadmap.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ./v0.0.1-Part04-Phase1-Data-Pipeline.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ./v0.0.1-Part04-Phase2-Portal-Content.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ./v0.0.1-Part04-Phase3-Portal-Site.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ./v0.0.1-Part04-Phase4-Portal-Release.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Plan.md :: ./v0.0.1-Part04-Phase5-Generalization-Roadmap.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Phase2-Portal-Content.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Phase1-Data-Pipeline.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part04/zh-CN/v0.0.1-Part04-Phase4-Portal-Release.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[DESIGN-TEXT ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../...  ==> Phase5 判据设计文本的省略号示例形态
+[DESIGN-TEXT ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ...  ==> Phase5 判据设计文本的省略号示例形态
+[DESIGN-TEXT ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../...  ==> Phase5 判据设计文本的省略号示例形态
+[DESIGN-TEXT ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../../../planning/...  ==> Phase5 判据设计文本的省略号示例形态
+[DESIGN-TEXT ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../../../../planning/abnk-design/zh-CN/...  ==> Phase5 判据设计文本的省略号示例形态
+[PLACEHOLDER ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Phase5-Asdm-Workspace.md :: ../../artifacts/phase1/report-<ts>.json  ==> 占位符（<version>/<ts>）模板形态
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase1-Backoffice-I18n.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase2-Backoffice-Errors-Data.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase3-Mobile-L10n.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase4-Mobile-Fixtures.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase5-Asdm-Workspace.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase6-Comments-Convention.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ./v0.0.1-Part03-Phase7-Runtime-Data-Locale.md
+[OK          ] .asdm/workspace/docs/Sprints/v0.0.1/part03/zh-CN/v0.0.1-Part03-Plan.md :: ../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 001-no-rewrite.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 002-custom-modules.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 003-postgresql-baseline.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 004-multi-tenancy.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 005-frontend-strategy.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 006-product-lines.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 007-xinchuang-compatibility.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 008-channel-tech-stack.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 009-flutter-mobile.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/adr/zh-CN/README.md :: 010-repository-openness.md
+[OK          ] .asdm/workspace/docs/planning/abnk-design/00-baseline/zh-CN/fineract-codebase.md :: ../count-loc.sh
+[OK          ] .asdm/workspace/docs/planning/abnk-design/00-baseline/zh-CN/fineract-codebase.md :: ../count-loc.sh
+[OK          ] .asdm/README.md :: workspace/docs/planning/abnk-design/adr/zh-CN/010-repository-openness.md
+[DESIGN-TEXT ] .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md :: ./link  ==> doc-review 模板示例文本（Phase 行格式说明）
+[OK          ] abnk-system/docs/README.md :: port-allocation.md

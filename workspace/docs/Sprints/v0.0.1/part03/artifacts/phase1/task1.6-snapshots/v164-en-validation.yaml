@@ -1,0 +1,24 @@
+- generic [ref=f9e146]:
+  - generic [ref=f9e147]:
+    - generic [ref=f9e148]: Amazing Bank
+    - heading "Backoffice Operations Console" [level=3] [ref=f9e149]
+  - generic [ref=f9e150]:
+    - generic [ref=f9e152]:
+      - generic "Username" [ref=f9e154]: "* Username"
+      - generic [ref=f9e155]:
+        - generic [ref=f9e158]:
+          - img "user" [ref=f9e160]
+          - textbox "* Username" [invalid] [ref=f9e163]:
+            - /placeholder: Operations account
+        - generic [ref=f9e189]: Please enter your username
+    - generic [ref=f9e165]:
+      - generic "Password" [ref=f9e167]: "* Password"
+      - generic [ref=f9e168]:
+        - generic [ref=f9e171]:
+          - img "lock" [ref=f9e173]
+          - textbox "* Password" [invalid] [ref=f9e176]:
+            - /placeholder: Password
+          - img "eye-invisible" [ref=f9e178] [cursor=pointer]
+        - generic [ref=f9e192]: Please enter your password
+    - button "Sign in" [active] [ref=f9e187] [cursor=pointer]
+  - text: "Mock demo credentials: admin / password (prototype-only plaintext; production uses PBKDF2 credentials)"

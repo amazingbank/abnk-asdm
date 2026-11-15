@@ -1,0 +1,105 @@
+Task P2.3 对客通道收敛面 + 黑名单 —— 执行证据（2026-11-08）
+====================================================================
+
+[环境基线]
+- 网关：channels/gateway（:8080，bootRun，JDK 25.0.5+8-tem，Boot 3.5.6 + SCG 2025.0.0）
+- 转发目标：本地生产形态栈 abnk-fineract（:8081）+ abnk-pg-prod（:5433）——health UP
+- 用户表：data/gateway_users.local.json（本任务新生成——本地栈实例：alice clientId=28 / bob clientId=29 /
+  admin 无 clientId；PBKDF2-HMAC-SHA256 复算一致自验通过。成因归档：data/gateway_users.json 当前为
+  P0.4 服务器实例（alice clientId=1），与本地栈种子（clientId=28/29，seed-poc-evidence.json）错位；
+  本地联调经 ABNK_USERS_FILE 注入本地实例副本，服务器实例文件保持不动（P3 部署时切换）
+- 种子：P0.3 本地种子（客户 A=28 过期证照/源账户 11 余额 10000/目标账户 12；客户 B=29 有效证照/储蓄 13/定期 14）
+- 业务日期：2027-03-29（种子推进后，单向不回拨）
+
+[VP2.3.1 编译门槛 + 单测] PASS（2026-11-08）
+- 命令：cd $GW && JAVA_HOME=$JDK25 ./gradlew test --tests '*customer*'（含 -DsocksProxyHost= 空
+  覆盖——沿用 P2.2 归档的全局 SOCKS 代理坑位口径）
+- 输出：BUILD SUCCESSFUL；customer 单测 26/26 全绿（failures=0 errors=0，XML 明细
+  build/test-results/test/TEST-*.xml）：
+  * MaskingTest 7（displayName 姓+名首字 / mobile 前3后2 / accountNo 前4后4 / documentKey 前4后3 及短输入全掩码）
+  * IdentityControllerTest 6（deriveStatus 边界：EXPIRED/当天/ +30d 临期 / +31d 有效 / null 视为有效；
+    alice EXPIRED、bob VALID、EXPIRING_SOON 直接覆盖、无证照 404、internal token 403）
+  * MeControllerTest 4（脱敏字段断言 + 无 Fineract 内部字段泄漏（accountNo/legalForm/timeline/明文手机号/
+    全名均不出现）、未知客户 404、无 token 401、internal token 403）
+  * AccountsControllerTest 3（depositType 分组 + 尾号脱敏 + 定期 availableBalance 回退账面、
+    transactions runningBalance 透传、非本人账户 404 归属短路）
+  * BlacklistFilterTest 6（jobs 403 / internal 403 / configurations 403 / loans/{id}/command 404 /
+    骨架期 offices 收敛 404 / 契约内路径非契约方法 PUT /me 404）
+- 全量回归：./gradlew test → BUILD SUCCESSFUL，36/36 全绿（auth 10 + customer 26——P2.2 组件未破坏）
+- 首跑插曲归档：2 个期望值笔误（documentKey 15 位种子键的星数——8 星非 9 星），修正后全绿
+
+[VP2.3.2 API·me 聚合] PASS（2026-11-08）
+- alice token（本地实例用户表签发，sub=28）→ GET /abnk/api/v1/me → 200：
+  {"clientId":28,"externalId":"ABNK-POC-A-1107104347","firstname":"王","lastname":"POC-A1107104347",
+   "displayName":"王 P.","mobileNo":"135******01","emailAddress":null,"officeName":"Head Office"}
+- 断言：displayName 脱敏形态（姓 + 名首字：「王 P.」≠ 全名「王 POC-A1107104347」）；mobileNo 尾号形态
+- 对照 Fineract 原始 GET /clients/28：网关响应无 accountNo("000000028")/status/timeline/legalForm/
+  明文 mobileNo("13504347001")——Fineract 内部形态零透传（对照差异即收敛证据）
+
+[VP2.3.3 API·identity 状态计算] PASS（2026-11-08）
+- alice（过期种子）→ GET /abnk/api/v1/me/identity → 200：
+  {"documentTypeId":1,"documentTypeName":"Passport","documentKey":"ID-A********347",
+   "status":"EXPIRED","issuanceDate":"2015-01-01","expiryDate":"2020-01-01"}
+- bob（有效种子）→ 200：{"status":"VALID","expiryDate":"2099-12-31","documentKey":"ID-B********347"}
+- 两态断言 PASS；状态计算基准 = Fineract 业务日期（GET /businessdate，实测 2027-03-29）
+- EXPIRING_SOON 分支仅单测覆盖（expiringSoonWindowDirectlyCovered：业务日+10 → EXPIRING_SOON；
+  种子无临期客户——VP 声明口径）
+- 纯读计算、无任何拦截行为（基线口径）——documentKey 为脱敏形态
+
+[VP2.3.4 API·账户与明细] PASS（2026-11-08）
+- alice → GET /abnk/api/v1/me/accounts → 200：savingsAccounts 2 项（id 11/12）、fixedDepositAccounts 0 项；
+  账号尾号脱敏（000000011 → "0000**0011"）；目标账户 12 余额 null（Fineract /clients/{id}/accounts
+  投影对零余额账户缺 accountBalance 键——实测形态，网关防御式透传 null）
+- alice → GET /abnk/api/v1/accounts/11/transactions → 200（裸数组 1 项）：
+  {"id":15,"date":"2027-01-17","transactionType":"Deposit","amount":10000.0,
+   "runningBalance":10000.0,"note":"POC 源账户初始余额"}
+- 两项断言 PASS：列表 ≥2 项 + 尾号脱敏；明细含 runningBalance（P0.2 VP0.2.4 实测口径：
+  search 端点、Spring 标准分页 content、item 6 字段收敛）
+- 归属校验旁证：单测 transactionsOfForeignAccountYields404（账户 999 → 404，不触达下游查询）
+
+[VP2.3.5 API·黑名单负向] PASS（2026-11-08）
+- alice token → 三路径：
+  /abnk/api/v1/jobs                → 403 {"error":"forbidden","message":"path not available on customer channel"}
+  /abnk/api/v1/internal/cache/evict → 403 同上
+  /abnk/api/v1/loans/999/command   → 404 {"error":"not_found","message":"no such endpoint on customer channel"}
+- 三值归档如上；附加收敛断言：/abnk/api/v1/offices（P2.1 骨架期全量转发路径）→ 404
+- 黑名单口径 = planning 层 api-gateway.md §3：/internal/*、/jobs/*、/configurations/*、fineract.json
+  （路径段级判定）；收敛口径 = 冻结契约对客面 method+path 全集白名单（含 P2.4 transfer 模式占位）
+
+[交付物清单]
+- customer/FineractClient.java（Fineract WebClient 数据源：双头注入 + 日期数组/嵌套取值工具）
+- customer/Masking.java（脱敏口径单一实现点：displayName/mobileNo/accountNo/documentKey）
+- customer/CustomerContext.java（token sub → customer 通道 clientId 解析）
+- customer/MeController.java（GET /me + ApiError 统一载荷）
+- customer/IdentityController.java（GET /me/identity：三态纯读计算 + 业务日期基准 + businessDateOfHolder 共享 helper）
+- customer/AccountsController.java（GET /me/accounts 分组脱敏 + GET /accounts/{id}/transactions 归属校验）
+- customer/LoanController.java（GET /loan-products、GET /fixed-deposit-products、POST /loans、GET /loans/{id}）
+- customer/SavingsController.java（POST /savings 定期开户编排：申请→审批→激活→源账户扣款，12 个月口径）
+- customer/CustomerChannelAdvice.java（编排链下游失败 502 统一出口）
+- route/BlacklistFilter.java（对客通道黑名单 403 + 契约外 404，WebFilter）
+- 修改：auth/BearerTokenFilter.java（GlobalFilter → WebFilter——架构调整，见插曲①）
+- 修改：application.yml（customer-channel SCG 路由移除 + abnk.fineract.base/prefix 配置节）
+- 测试：customer/ 五个测试类 26 用例
+- data/gateway_users.local.json（本地栈实例用户表）
+
+[调试插曲归档]
+① 架构调整（必要变更，超出原改动清单）：对客收敛面端点为网关本地 @RestController 聚合，本地请求
+   不经 SCG 路由链——GlobalFilter（只包裹 route 执行）无法覆盖本地 controller，受保护路径将裸奔。
+   修复 = BearerTokenFilter 由 GlobalFilter 改为 WebFilter（对本地 controller 与 SCG 转发统一生效；
+   放行清单/401 载荷/属性键保持 P2.2 口径，auth 单测全量回归 10/10 绿）。同因 BlacklistFilter 直接
+   以 WebFilter 实现（order -90，鉴权先行）。
+② 运行时 NPE（VP2.3.4 首验 500）：AccountsController.toAccount 三元表达式混用 double/Double 触发
+   自动拆箱——Fineract /clients/{id}/accounts 投影对零余额账户（目标账户 12）缺 accountBalance 键。
+   修复 = 显式 Double.valueOf 保持装箱类型；单测补投影缺键形态（mock 已含缺键用例的同类防御）。
+③ 用户表实例错位：见环境基线段（gateway_users.json 为服务器实例，本地联调用 local 副本对齐
+   本地栈种子 clientId）。
+④ 产品利率投影口径（实测声明）：GET /fixeddepositproducts 响应 charts:null、interestRateFromChart:null、
+   nominalAnnualInterestRate=0.0（DB m_deposit_product_interest_rate_chart 有 3.0% 数据——Fineract
+   产品 API 投影不吐 chart，上游行为）；网关 FixedDepositProduct.interestRate 取产品主名义利率，
+   chart 细化利率在账户层呈现（GET /fixeddepositaccounts/{id} nominalAnnualInterestRate=3.0 实测）。
+   minDepositAmount 取 depositAmount（P0.3 种子起存金额字段——产品投影无 minDepositAmount 键）。
+⑤ 首跑单测 2 个期望值笔误（documentKey 星数），修正后全绿。
+
+[敏感复核]
+- 演示口令明文（alice/bob/admin 本地与服务器实例共 6 个值）对本证据文件与 gateway/src/ 的 grep = 0 命中
+- 证据仅含 token 长度（188）与脱敏后字段值，无明文口令、无完整 JWT

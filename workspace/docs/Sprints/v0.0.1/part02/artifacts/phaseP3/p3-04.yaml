@@ -1,0 +1,11 @@
+- generic [ref=f1e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic [ref=f1e48]:
+          - alertdialog:
+            - generic [ref=f1e49]:
+              - generic [active]: 转账成功
+            - generic: 流水号 1026 转出账户新余额：¥9,629.82
+            - button "知道了" [ref=f1e51]
+        - button "Dismiss" [ref=f1e52]

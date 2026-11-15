@@ -1,0 +1,82 @@
+# 任务 P3.4 网关容器化 + prod compose 扩容 —— 执行证据归档（VP3.4.1–VP3.4.5）
+
+- **日期**：2026-11-10
+- **环境**：本地 prod 演练栈（compose 项目 `abnk-prod`，双文件 `compose-abnk-prod.yaml` + `docker-compose.drill-override.yml`，env = `deploy/prod/env/abnk-fullstack.drill.env`，部署根 = `deploy/prod/.drill-root/` 自签证书对 + initdb + WAR）
+- **前置动作**：prodform 栈退役（用户确认；数据卷 `abnk-pg-prod-data` 保留不动）
+
+## VP3.4.1 三镜像本地构建（+ 演练补齐二镜像）
+
+- 构建命令（网关实测修正：上下文 = 仓库根——`gateway_users.json` 需自 `data/` 进上下文，per-Dockerfile dockerignore 裁剪；mweb/bo 同计划口径）：
+  - `docker build -f channels/gateway/Dockerfile -t abnk-gateway:0.1.0 .`
+  - `docker build -f channels/mobile-banking/Dockerfile -t abnk-mweb:1.0.0 channels/mobile-banking`
+  - `docker build -f channels/backoffice/Dockerfile -t abnk-bo:0.1.0 channels/backoffice`
+- 镜像清单（docker images 实测）：
+
+| 镜像 | tag 源 | size | 说明 |
+|---|---|---|---|
+| `abnk-gateway:0.1.0` | channels/gateway/gradle.properties `version=0.1.0` | 419MB | builder=eclipse-temurin:25-jdk + gradlew 9.7.1（bootJar BUILD SUCCESSFUL 1m39s）；runtime=eclipse-temurin:25-jre + curl（healthcheck）；gateway_users.json 打包 `/app/data/` |
+| `abnk-mweb:1.0.0` | pubspec.yaml `version: 1.0.0+1`（build number 不入 tag） | 154MB | builder=ubuntu:24.04 + Flutter 3.47.9 官方归档（sha256 钉死）；`--dart-define=ABNK_API_BASE=https://api.amazingbank.ai`；runtime=nginx:1.27-alpine |
+| `abnk-bo:0.1.0` | package.json `version: 0.1.0` | 61.8MB | node:22-alpine builder（对齐本地 v22.23.1）+ `VITE_ABNK_API_BASE=https://api.amazingbank.ai` |
+| `abnk-website:0.1.2` | package.json version | 60.8MB | 演练补齐（既有 Dockerfile 复用） |
+| `abnk-fineract:7b896ad6` | fineract 仓 8 位短 hash | 660MB | 演练补齐（Dockerfile.fineract + curl 层；WAR = fineract-war/build/libs 2026-11-07 构建） |
+
+- **实测修正与坑位归档**（三处，均已回写 Dockerfile 注释）：
+  1. **Flutter 官方 stable Linux 归档仅 x64**（releases_linux.json 实测 3.47.x 无 arm64）——mweb builder 固定 `--platform=linux/amd64`（本地 Apple Silicon 经 Docker Desktop Rosetta 模拟，服务器 x86_64 原生）；runtime 层不受影响
+  2. **SDK 归档属主坑**：tar 保属主 → git dubious ownership（exit 128）→ `tar --no-same-owner` + `git safe.directory` 双保险
+  3. **依赖分层坑**：`openapi` 为路径依赖（openapi-generated/）需随 pubspec 前置 COPY；BuildKit cache mount 仅单 RUN 可见——`flutter build web` 步骤补挂同一 pub cache（否则 dart2js 报 vector_math 等 No such file or directory）
+- **API 基址口径实测修正**（对计划「相对路径」的修正，两处 Dockerfile 注释归档）：P3.1/P3.2 客户端契约均要求/支持绝对基址（mobile `GeneratedClient._normalizeBaseUrl` 强制绝对 URL 且生成路径已含 `/login` 与 `/abnk/api/v1` 全前缀；BO generatedClient 绝对基址 = 跨 origin 直连）——统一注入网关 origin `https://api.amazingbank.ai`，经入口 nginx api Host 分流直达网关；跨 origin 由网关 CorsConfig 放行（P3.1 web 载体同机制已实测）
+
+## VP3.4.2 本地全栈演练
+
+- prodform 退役（用户确认）：`scripts/prodform/stack.sh down`（abnk-fineract/abnk-pg-prod 移除；卷 `abnk-pg-prod-data` 保留）
+- 演练栈 up：`cd deploy/prod && docker compose -f compose-abnk-prod.yaml -f docker-compose.drill-override.yml --env-file env/abnk-fullstack.drill.env up -d`
+- 七容器状态（docker compose ps 实测，全 healthy）：
+
+| 容器 | 状态 | 备注 |
+|---|---|---|
+| abnk-nginx | Up (healthy) | 唯一绑定宿主 80/443；healthcheck = `wget -k --spider https://localhost/actuator/health`（经 default_server 兜底直达网关） |
+| abnk-website | Up (healthy) | 端口已收编（无宿主 80/443） |
+| abnk-gateway | Up (healthy) | 无宿主端口；curl actuator 探活 |
+| abnk-fineract | Up (healthy) | Liquibase 新库首迁实测约 3 min（databasechangelog 2061 行、业务表 280 张）；宿主仅 drill override 回环 127.0.0.1:8081 |
+| abnk-pg-platform | Up (healthy) | 全新卷 `abnk-pg-platform-data`；initdb 预建 fineract_tenants + fineract_default ✓ |
+| abnk-bo | Up (healthy) | 静态自检 |
+| abnk-mweb | Up (healthy) | 静态自检 |
+
+- 入口探活：`curl -s -k https://localhost/actuator/health` = `{"status":"UP"}` ✓；加验 `http://localhost` → 301 ✓
+- 自签证书：CN=localhost，SAN = DNS:localhost + DNS:amazingbank.ai + DNS:*.amazingbank.ai（825 天）
+
+## VP3.4.3 演练栈种子施加
+
+- 施加：`cd data && ABNK_BASE_URL=http://localhost:8081/fineract-provider/api/v1 python3 seed_poc.py` → **退出码 0**（16 断言全过）
+  - 客户 A(过期证照) clientId=1 源账户=1 目标账户=2（源余额 10000）；客户 B(有效证照) clientId=2 储蓄=3 定期=4；客户 C(逾期贷款) clientId=3 loanId=1（分档 ABNK_POC_OD，业务日期推进 2027-01-19 单向）
+- 种子客户计数：`SELECT count(*) FROM m_client WHERE external_id LIKE 'ABNK-POC-%'` = **3**（≥3 ✓）
+- **新库前置坑复现**（P0.4 归档口径处置）：`enable-business-date` changelog 默认 false → 首跑 403 `business.date.is.not.enabled`；经 `PUT /configurations/44 {"enabled":true}` 启用后重跑通过
+- **用户表对齐步骤**（种子重生成 `data/gateway_users.json` → 镜像内旧表失配）：重建 `abnk-gateway:0.1.0`（层缓存命中，秒级）+ `up -d abnk-gateway` recreate → alice 新口令经 `https://localhost/login` 登录成功（token 187 字符）
+- 演示口令：归档 `.github-private/kbank-poc/gateway-demo-passwords.json` instances.`local-drill` 节（不入 public 仓与 artifacts）
+
+## VP3.4.4 全链路 HTTPS 剧本（双剧本基址 = https://localhost）
+
+| 剧本 | 退出码 | 结果 | 报告 |
+|---|---|---|---|
+| `tests/poc/baseline_gap_test.py` | **0** | 段 4/4、断言 23/23——③ 段「EXPIRED 客户转账 HTTP 200 成功」缺口在容器拓扑下成立；④ 段 Fineract 独立核对双账户 −10/+10 对称、交易计数 +1 | `artifacts/phaseP3/gap-report-20261110-073749.json` |
+| `tests/gateway/gateway_test.py` | **0** | 步骤 11/11、断言 55/55——登录三用户、me/identity、转账正向+幂等重放+越权 403、bo 面 + 通道隔离 + identifiers PUT→恢复、黑名单三断言全过 | `artifacts/phaseP2/gateway-report-20261110-073757.json` |
+
+- 运行口径：`ABNK_GATEWAY_BASE=https://localhost`（nginx 入口 default_server → 网关；自签证书由 Client 跳过校验）+ `ABNK_CREDENTIALS_INSTANCE=local-drill` + `ABNK_DEMO_CREDENTIALS=<私有仓归档>`
+- 缺口资产复用为拓扑回归成立——P3.3 资产在「入口 nginx + 容器网关 + 容器 Fineract」全链路 HTTPS 下行为一致
+
+## 交付物清单
+
+- `channels/gateway/Dockerfile` + `Dockerfile.dockerignore` + `gradle.properties`（version=0.1.0）+ `build.gradle`（版本属性化 + plain jar 禁用）
+- `channels/mobile-banking/Dockerfile` + `nginx.conf` + `.dockerignore`
+- `channels/backoffice/Dockerfile` + `nginx.conf` + `.dockerignore`
+- `deploy/prod/nginx-gateway.conf`（入口单 conf 双场景）
+- `deploy/prod/compose-abnk-prod.yaml`（七容器扩容 + 全 healthcheck + website 端口收编）
+- `deploy/prod/docker-compose.drill-override.yml`（演练专用回环 8081）
+- `deploy/prod/env/abnk-fullstack.env.example`（占位）+ `abnk-fullstack.drill.env`（本地演练实际值）
+- `deploy/prod/Dockerfile.fineract`（curl 追加层）；`deploy/prod/compose-abnk-platform.yaml`（supersede 声明头）
+- `.gitignore`（演练根排除）
+
+## 声明
+
+- 演练栈保持运行（后续 P3.5 生产部署对照 + POC 演示预演可用；七容器内存占用约 4-5GB）
+- `data/gateway_users.json` 与 `artifacts/phaseP0/seed-poc-evidence.json` 已随演练种子重写为 local-drill 实例态（local-prodform 前态在 git 历史）

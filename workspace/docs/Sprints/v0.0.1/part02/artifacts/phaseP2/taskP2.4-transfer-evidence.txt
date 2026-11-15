@@ -1,0 +1,105 @@
+Task P2.4 转账聚合（幂等 + 补偿）—— 执行证据（2026-11-08）
+====================================================================
+
+[环境基线]
+- 网关：channels/gateway（:8080，bootRun，JDK 25.0.5+8-tem，Boot 3.5.6 + SCG 2025.0.0 + Caffeine
+  （Boot BOM 版本，P2.4 新引入——幂等缓存））
+- 转发目标：本地生产形态栈 abnk-fineract（:8081）+ abnk-pg-prod（:5433）——health UP
+- 用户表：data/gateway_users.local.json（沿用 P2.3 口径，ABNK_USERS_FILE 注入本地实例：
+  alice clientId=28 / bob clientId=29 / admin 无 clientId）
+- 联调数据：alice(28) 源账户 11（余额 10000）/ 目标账户 12（余额 0）；bob(29) 账户 13/14
+- 业务日期：2027-03-29（种子推进后，单向不回拨）
+
+[VP2.4.1 编译门槛 + 单测] PASS（2026-11-08）
+- 命令：cd $GW && JAVA_HOME=$JDK25 ./gradlew test --tests '*transfer*'（-DsocksProxyHost= 空覆盖，
+  沿用 P2.2 归档的全局 SOCKS 代理坑位口径）
+- 输出：BUILD SUCCESSFUL；transfer 单测 9/9 全绿（XML failures=0 errors=0）
+- 用例数归档（五类全覆盖 + 边界补充）：
+  * 正向成功 1：transferHappyPathReturnsResult（withdrawal resourceId=21 + balance 回读 9900）
+  * 幂等 2：replaySameKeyReturnsCachedResultWithoutNewTransactions（同键二连发，响应逐字一致，
+    verify withdrawal/deposit 各恰 1 次不重复落账）
+           + replayAfterCacheLossRecoversFromFineractLedger（缓存空 + -w/-d 已落账 → 重建首次
+             结果，verify 零 post——重启场景）
+  * 冲正分支 2：depositFailureTriggersReversalAndReturns502（第二步 mock 500 → 冲正 deposit 落账
+              恰一次 → 502 + reversalTransactionId=23 + message 含「冲正」）
+              + reversalFailureYieldsTerminal502（冲正也 mock 500 → 终态 502 + message 含
+                「人工对账」——风险表「冲正也失败」分支覆盖）
+  * 越权 1：transferToForeignAccountYields403（目标账户非本人 → 403，verify 零 post 短路）
+  * 余额不足 1：insufficientBalanceYields400WithDownstreamMessage（withdrawal mock 403 →
+              契约 400，message 透传 "Insufficient account balance."，无 deposit/冲正）
+  * 边界 2：sameAccountYields400（toAccountId == 路径 id → 400）
+          + sourceNotOwnedYields403（转出账户非本人 → 403，本人账户约束）
+- 全量回归：./gradlew test → 45/45 全绿（auth 10 + customer 26 + transfer 9）
+- 设计修正归档（DB 实测依据）：m_savings_account_transaction.external_id 存在全局唯一索引
+  uk_m_sat_external_id——① 冲正后同键重放返回失败终态而非重新执行（避免撞唯一约束双落账）；
+  ② 并发双击天然被 DB 约束兜底拒绝
+- 测试技巧归档：WebTestClient bodyValue(String) 需显式 contentType(APPLICATION_JSON)（否则 415）；
+  Mockito mock 未覆盖路径返回 null → switchIfEmpty 参数组装期 NPE——@BeforeEach 全局默认
+  stub（empty Mono）+ 用例内具体覆盖
+
+[VP2.4.2 API·正向转账] PASS（2026-11-08）
+- alice token（sub=28，channel=customer）→ POST /abnk/api/v1/accounts/11/transfer
+  body：{"toAccountId":12,"amount":100,"externalId":"T1","note":"P2.4 正向转账"}
+- 响应：HTTP 200 {"transactionId":18,"newSourceBalance":9900.0}
+- Fineract 侧双交易落账（$FINERACT_PROD/savingsaccounts/{id}/transactions/search，Spring 分页
+  content/total——P0.2 实测口径）：
+  * 转账前：src(11) total=1（Deposit 10000）；dst(12) total=0
+  * 转账后：src(11) total=2 —— 新 Withdrawal id=18 金额 100.0 runningBalance 9900.0
+            dst(12) total=1 —— 新 Deposit      id=19 金额 100.0 runningBalance 100.0
+  * 派生幂等键回读：GET /savingsaccounts/11/transactions/external-id/T1-w → 200；
+                    GET /savingsaccounts/12/transactions/external-id/T1-d → 200（兜底链路数据就位）
+- 环境插曲归档：data/gateway_users.json 当前为 P0.4 服务器实例（alice clientId=1），与本地栈种子
+  （clientId=28）错位——沿用 P2.3 口径经 ABNK_USERS_FILE=../../data/gateway_users.local.json
+  注入本地实例副本；首次注入路径误写 ../data（相对 channels/gateway 应为 ../../data）致
+  usersStore init 失败，修正后 UP
+
+[VP2.4.3 API·幂等重放] PASS（2026-11-08）
+- 同载荷（externalId="T1"）重放 → HTTP 200
+- 响应与首次逐字一致：{"transactionId":18,"newSourceBalance":9900.0}（IDENTICAL——契约
+  TransferResult 必填字段为 transactionId/newSourceBalance，无 transactionRef 字段，一致性以
+  响应全文比对为准）
+- Fineract 侧交易计数不变（幂等前后比对）：src total=2 / dst total=1（重放前后一致，零新落账）
+- 附加验证（运行时补证单测兜底分支）：重启网关清空幂等缓存（Caffeine 进程内）后重放 T1 →
+  HTTP 200 同结果（走 Fineract 落账痕迹恢复：-w/-d 派生键回读重建），计数仍 2/1
+  ——「重启不破坏幂等」设计声明运行时成立
+
+[VP2.4.4 API·越权负向] PASS（2026-11-08）
+- alice token → POST /abnk/api/v1/accounts/13/transfer（转出账户填 bob 的账户）
+  body：{"toAccountId":11,"amount":100,"externalId":"T-403-BOB"}
+- 响应：HTTP 403 {"status":403,"error":"Forbidden","message":"转出账户不属于当前客户"}
+- 附加断言（契约 403 语义双形态）：目标账户填 bob 的 13（src=11）
+  → HTTP 403 {"error":"Forbidden","message":"目标账户不属于当前客户"}
+- 越权短路：Fineract 交易计数不变（src total=2）
+- 实现修正归档：初版转出非本人返回 404（沿用 P2.3 只读端点口径），按本 VP 验收口径改为 403
+  ——转账为写操作，本人账户约束按明确拒绝（403）而非不暴露（404）；单测同步改 403，
+  全量 45/45 复绿
+
+[VP2.4.5 归档] 本文件
+- 幂等前后交易计数对比：src 2→2 / dst 1→1（含重启后兜底重放仍 2/1）
+- 敏感复核：演示口令（alice/bob/admin，local-prodform 与 server 两实例共 6 个真实值）对
+  artifacts/phaseP2/ 与 channels/gateway/src/ grep → 0 命中（口令仅经 .github-private 归档
+  读取，未入任何证据与代码）
+
+[交付物清单]
+- channels/gateway/src/main/java/ai/amazingbank/gateway/transfer/TransferController.java
+  （POST /abnk/api/v1/accounts/{id}/transfer：入参校验（必填/金额正/同账户 400/externalId ≤98
+  预留派生后缀空间）+ customer 通道 403）
+- channels/gateway/src/main/java/ai/amazingbank/gateway/transfer/TransferService.java
+  （withdraw→deposit 编排；幂等 = Caffeine TTL 24h 缓存（键 clientId:externalId）+ Fineract
+  派生键 -w/-d/-r 落账痕迹兜底恢复；补偿 = deposit 失败对 src 反向 deposit（-r），冲正成功
+  502+冲正单号、冲正失败终态告警日志+502 人工对账；余额不足 4xx 透传契约 400）
+- channels/gateway/src/test/java/ai/amazingbank/gateway/transfer/TransferControllerTest.java（9 用例）
+- build.gradle（+com.github.ben-manes.caffeine:caffeine，版本随 Boot BOM）
+- 辅助方法跨包公开：AccountsController.ownsAccount / LoanController.downstreamMessage /
+  IdentityController.businessDateOfHolder（package-private → public，transfer 包复用）
+
+[调试插曲归档]
+1. 编译插曲：@JsonInclude 的 FQN 注解写法触发 javadoc/编译顺序异常（cannot find symbol Include），
+   改标准 import 后通过
+2. 单测首跑 9/9 全挂（415 UNSUPPORTED_MEDIA_TYPE）——bodyValue(String) 未带 JSON Content-Type，
+   批量补 contentType(APPLICATION_JSON)
+3. 二跑 3 挂（500 NPE）——Mockito mock 未 stub 路径返回 null，switchIfEmpty 参数组装期即求值
+   NPE；@BeforeEach 全局默认 stub（get/post → empty Mono）解决
+4. 网关重启注入 ABNK_USERS_FILE 相对路径错一层（../data → ../../data）致 usersStore init
+   失败，修正后 UP
+5. 实现口径修正：转出账户非本人 404 → 403（VP2.4.4 验收口径，写操作明确拒绝）

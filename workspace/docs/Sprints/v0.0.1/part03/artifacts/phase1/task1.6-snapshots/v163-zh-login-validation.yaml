@@ -1,0 +1,24 @@
+- generic [ref=f5e146]:
+  - generic [ref=f5e147]:
+    - generic [ref=f5e148]: Amazing Bank
+    - heading "Backoffice 运营后台" [level=3] [ref=f5e149]
+  - generic [ref=f5e150]:
+    - generic [ref=f5e152]:
+      - generic "用户名" [ref=f5e154]: "* 用户名"
+      - generic [ref=f5e155]:
+        - generic [ref=f5e158]:
+          - img "user" [ref=f5e160]
+          - textbox "* 用户名" [invalid] [ref=f5e163]:
+            - /placeholder: 运营账号
+        - generic [ref=f5e189]: 请输入用户名
+    - generic [ref=f5e165]:
+      - generic "口令" [ref=f5e167]: "* 口令"
+      - generic [ref=f5e168]:
+        - generic [ref=f5e171]:
+          - img "lock" [ref=f5e173]
+          - textbox "* 口令" [invalid] [ref=f5e176]:
+            - /placeholder: 口令
+          - img "eye-invisible" [ref=f5e178] [cursor=pointer]
+        - generic [ref=f5e192]: 请输入口令
+    - button "登 录" [active] [ref=f5e187] [cursor=pointer]
+  - text: mock 演示口令：admin / password（原型专用明文，生产走 PBKDF2 凭据）

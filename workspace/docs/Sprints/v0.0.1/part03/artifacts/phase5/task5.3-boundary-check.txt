@@ -1,0 +1,17 @@
+# 任务 5.3 · V5.3.6 出界甄别报告（asdm-training 独立仓）
+
+执行日：2026-11-16；判据：`grep -rln "asdm/workspace" $WS/asdm-training | wc -l` = 12 文件（31 行）。
+
+## 逐类指向甄别
+
+| 类别 | 文件 | 指向 | 判定 |
+|---|---|---|---|
+| training 自身 workspace（qahc-harness 演示） | workshops 2 outline + lab-01 实验手册 3 行 + demo001-qahc 5 行 | `.asdm/workspace/qahc-harness/...`（asdm-training 仓内概念/样例路径） | 自身 ✅ |
+| training 自身 toolset | `asdm-training/README.md:147` | `.asdm/workspace/awesome-pptx/output/`（自身 toolset 输出） | 自身 ✅ |
+| training 自身 .asdm 结构 | `asdm-training/.asdm/toolsets/` 下 6 文件 | 自身 toolsets 路径契约 | 自身 ✅ |
+| 第三方独立仓 | `docs/product/presales/.../README.md:49` | `asdm-ontology-ws/.asdm/workspace/...`（asdm-ontology-ws 独立仓，非本仓） | 非本仓 ✅ |
+
+## 结论
+
+全部命中指向 asdm-training 自身路径、概念性文字或第三方独立仓（asdm-ontology-ws），
+**零跨仓指向本仓 `$ASDM`（amazingbank-ws/.asdm）**——出界项不存在，无升级为清扫项。

@@ -25,10 +25,13 @@ amazingbank-ws/
 │   │           ├── log-reading-spec.md
 │   │           ├── log-augmentation-spec.md
 │   │           └── fix-scheduling-spec.md
-│   └── workspace/                #   工作区文档
+│   └── workspace/                #   工作区文档（结构树语言无关，locale 在文档叶子层）
 │       └── docs/
-│           └── planning/         #     Amazing Bank 规划文档
-│               └── abnk-design/  #       产品 / 架构 / 数据模型 / 运行治理 / 演进
+│           ├── planning/         #     Amazing Bank 规划文档
+│           │   ├── abnk-design/  #       产品 / 架构 / 数据模型 / 运行治理 / 演进（各分区 zh-CN/ 叶子层）
+│           │   └── modelB/       #       外部资料汇编（永不分层）
+│           ├── Sprints/          #     Sprint 迭代文档（partXX/zh-CN/ + partXX/artifacts/ 证据分桶）
+│           └── README.md         #     叶子层与 en-US 生长规则约定
 ├── abnk-system/                  # 基础设施编排（阶段一 = PostgreSQL）
 │   └── deploy/
 │       ├── docker-compose.yml    #   abnk-pg 服务（项目名固定 abnk-system）
@@ -39,7 +42,7 @@ amazingbank-ws/
 └── logs/                         # 运行时日志（fineract.log + postgres.log + PID），运行时生成
 ```
 
-**目录速查表**（开放性口径依据 [ADR-010](workspace/docs/planning/abnk-design/adr/010-repository-openness.md)）：
+**目录速查表**（开放性口径依据 [ADR-010](workspace/docs/planning/abnk-design/adr/zh-CN/010-repository-openness.md)）：
 
 | 目录 | 性质 | 用途 | 开放性 | 是否必需 |
 |---|---|---|---|---|

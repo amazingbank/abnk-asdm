@@ -1,0 +1,23 @@
+- generic [ref=f1e5] [cursor=pointer]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - heading "ABNK 手机银行" [level=2] [ref=f1e68]
+            - generic:
+              - group:
+                - generic [ref=f1e69]: 欢迎回来
+                - generic [ref=f1e71]: 你好，王 P.
+                - group "活期总余额 ¥10,029.82 活期账户":
+                  - button "转账" [active] [ref=f1e73]
+                  - button "定期" [ref=f1e74]
+                  - button "贷款" [ref=f1e75]
+                  - button "明细" [ref=f1e76]
+                  - button "ABNK-POC活期1107104347（0000**0011） 可用余额 ¥9,729.82 ¥9,729.82" [ref=f1e77]
+                  - button "ABNK-POC活期1107104347（0000**0012） 可用余额 ¥300.00 ¥300.00" [ref=f1e78]
+            - tablist:
+              - tab "首页" [selected] [ref=f1e79]
+              - tab "明细" [ref=f1e80]
+              - tab "贷款" [ref=f1e81]
+              - tab "我的" [ref=f1e82]

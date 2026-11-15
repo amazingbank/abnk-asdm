@@ -1,0 +1,19 @@
+- generic [ref=f1e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Back" [active] [ref=f1e33]
+              - heading "本人转账" [level=2] [ref=f1e34]
+            - generic:
+              - generic:
+                - group:
+                  - button "转出账户 ABNK-POC活期1107104347（0000**0011） · ¥9,729.82" [ref=f1e35]
+                  - button "转入账户 ABNK-POC活期1107104347（0000**0012） · ¥300.00" [ref=f1e37]
+                  - textbox "转账金额（CNY）" [ref=f1e40]
+                  - generic [ref=f1e42]:
+                    - textbox "附言（选填）" [ref=f1e43]
+                    - generic [ref=f1e44]: 40 characters remaining
+                  - button "提交转账" [ref=f1e46]

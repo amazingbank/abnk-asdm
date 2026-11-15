@@ -1,0 +1,105 @@
+# 任务 P2.2 登录与 JWT 证据（简化登录与 JWT，Bearer 形态）
+
+> 归档时间：2026-11-08（UTC+8）
+> 环境：macOS · JDK 25.0.5（~/.sdkman/candidates/java/25.0.5+8-tem）· Gradle 9.7.1 wrapper · Spring Boot 3.5.6 + Spring Cloud 2025.0.0 + spring-boot-starter-security（随放行清单引入）+ spring-security-oauth2-jose（Nimbus JOSE JWT，HS256）
+> 数据源：`abnk-system/data/gateway_users.json`（服务器实例——alice clientId=1 / bob clientId=2 / admin 无 clientId）；演示口令从 `.github-private/kbank-poc/gateway-demo-passwords.json` server 节读取（shell 变量传入，不出现在命令行明文与本文档——先行 hash 复算一致验证）
+> 网关状态：bootRun 运行中（:8080，`Started GatewayApplication` ×1，health UP），`UsersStore` 启动日志确认 `Loaded 3 gateway users`
+
+## 一、VP2.2.1 编译门槛 + auth 单测
+
+```
+$ cd $GW && JAVA_HOME=$JDK25 ./gradlew classes test --tests '*auth*'   # 含代理覆盖参数 -DsocksProxyHost= -DsocksProxyPort=（见插曲）
+> Task :compileJava
+> Task :classes
+> Task :compileTestJava
+> Task :test
+BUILD SUCCESSFUL in 6s
+```
+
+单测明细（`build/test-results/test/*.xml`）：
+
+```
+ai.amazingbank.gateway.auth.JwtServiceTest:      tests=6 failures=0 errors=0 skipped=0
+ai.amazingbank.gateway.auth.LoginControllerTest: tests=4 failures=0 errors=0 skipped=0
+TOTAL: tests=10 failures=0 errors=0 skipped=0
+```
+
+用例分类归档（正/误/过期）：
+- **正向 5**：签发/解析往返（sub+channel）、临期前 1s 仍有效、internal 通道 claim 往返、登录成功 200+三段式 token+sub 解析、admin 无 clientId 时 sub=username & channel=internal
+- **误口令/无效类 4**：错误口令 401（invalid_credentials）、未知用户 401、错密钥签名拒绝（InvalidTokenException）、畸形 token 拒绝（"not-a-jwt" / "aaa.bbb.ccc"）
+- **过期类 1**：时钟偏移注入（解析侧推进 TTL+1s=15min01s）→ TokenExpiredException
+
+## 二、VP2.2.2 API·登录成功（alice）
+
+```
+$ curl -s -X POST $GW_BASE/login -H 'Content-Type: application/json' -d '{"username":"alice","password":"<演示口令>"}'
+```
+
+响应（载荷字段，token 值省略——三段式结构断言见下）：
+
+```
+HTTP=200
+token_segments: 3            # JWT 三段式 header.payload.signature
+channel: customer
+sub: 1                       # alice 的 clientId（当前 gateway_users.json = 服务器实例）
+expiresIn: 900               # TTL 15min
+decoded_sub: 1               # 第二段 base64url 解码断言（python3 base64.urlsafe_b64decode）
+decoded_channel: customer
+decoded_exp_minus_iat: 900
+```
+
+> 第二段解码以 `python3 -c "...base64.urlsafe_b64decode..."` 完成（JWT 为 base64url 编码，BSD `base64 -D` 处理 url-safe 字符需手动替换 `-`/`_`，python3 等效更稳）。
+
+## 三、VP2.2.3 API·鉴权负向断言（无 token）
+
+```
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/abnk/api/v1/offices
+401
+
+$ curl -s $GW_BASE/abnk/api/v1/offices
+{"error":"unauthorized","message":"missing bearer token"}
+```
+
+放行清单复核（白名单路径不受 Bearer 校验拦截）：
+
+```
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/actuator/health
+200                                    # /actuator/health 免鉴权放行
+
+$ curl -s -o /dev/null -w '%{http_code}' -X POST $GW_BASE/login -d '{"username":"x","password":"y"}'
+401                                    # /login 本身可达（走自身 401 invalid_credentials，未被过滤器误拦）
+```
+
+## 四、VP2.2.4 API·错误口令
+
+```
+$ curl -s -X POST $GW_BASE/login -H 'Content-Type: application/json' -d '{"username":"alice","password":"<错误口令>"}'
+401 {"error":"invalid_credentials"}
+```
+
+## 五、附加段·出口判据 2 完整闭环（有效 token → 受保护端点 200）
+
+```
+$ TOKEN=<alice 有效 JWT> curl -s -o /dev/null -w '%{http_code}' $GW_BASE/abnk/api/v1/offices -H "Authorization: Bearer $TOKEN"
+200                                    # BearerTokenFilter 校验通过 → SCG 路由转发 → Fineract 生产形态栈（:8081）
+
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/abnk/api/v1/offices -H "Authorization: Bearer aaa.bbb.ccc"
+401                                    # 签名/格式无效 token 拒绝（InvalidTokenException → 401）
+```
+
+## 六、交付物清单
+
+- `auth/UsersStore.java` —— 启动加载 gateway_users.json（env `ABNK_USERS_FILE` 覆盖，dev 默认 `$GW/../../data`；容器路径契约声明于 P3.4）；PBKDF2WithHmacSHA256 手工校验（P0.3 跨端契约，恒时比较），channel/sub 判定（无 clientId → internal/username）
+- `auth/JwtService.java` —— Nimbus HS256 签发/解析（claims：sub/channel/jti/iat/exp；TTL 15min 可配 `abnk.jwt.ttl`；密钥 env `ABNK_JWT_SECRET`，开发默认值 public 仓占位）；Clock 注入支持时钟偏移测试
+- `auth/LoginController.java` —— `POST /login`（200：token+channel+sub+expiresIn；401 统一载荷 `{"error":"invalid_credentials"}`）
+- `auth/BearerTokenFilter.java` —— GlobalFilter（order -100）：放行清单外强制 Bearer，sub/channel 写入请求属性（`abnk.auth.sub`/`abnk.auth.channel`，P2.3+ 聚合与 P2.5 通道隔离消费）
+- `auth/SecurityConfig.java` —— starter-security 放行清单落地（permitAll + csrf/basic/formLogin 禁用，鉴权权威在 BearerTokenFilter；Keycloak 替换点声明）+ Clock bean
+- `src/test/java/.../auth/JwtServiceTest.java`、`LoginControllerTest.java`（10 用例）+ `src/test/resources/auth/test-users.json`（自造口令 fixture，与真实演示口令无关）
+- `build.gradle`：+ starter-security、+ spring-security-oauth2-jose、+ spring-boot-starter-test、+ `tasks.named('test') { useJUnitPlatform() }`
+- `application.yml`：+ `abnk.users.file` / `abnk.jwt.secret` / `abnk.jwt.ttl` / `abnk.security.public-paths`
+
+## 七、调试插曲（根因与修复记录）
+
+1. **全局 SOCKS 代理失效**（VP2.2.1）：`~/.gradle/gradle.properties` 的 `systemProp.socksProxyHost=127.0.0.1:3322` 未运行（lsof 空监听）→ 依赖解析 Connection refused；实测直连 Maven Central 可达（curl 200），本轮构建经命令行 `-DsocksProxyHost= -DsocksProxyPort=` 覆盖通过（Gradle 命令行系统属性优先于 gradle.properties）。
+2. **JUnit5 用例未被发现**（VP2.2.1）：首次 `test --tests '*auth*'` 报 `No tests found for given includes`——测试类编译产物存在（find 确认 .class），根因 = build.gradle 缺 `useJUnitPlatform()`（Gradle 默认 JUnit4 runner 发现不了 JUnit5 注解用例）；补 `tasks.named('test') { useJUnitPlatform() }` 后 10/10 全绿。
+3. **@Value 与 YAML 列表不兼容**（VP2.2.2 首次启动）：bootRun 失败——`BearerTokenFilter` 的 `@Value("${abnk.security.public-paths}") List<String>` 解析异常（YAML list 展开为 indexed key `public-paths[0]`，占位符按整 key 查询落空 → bean 创建失败）；修复 = 改逗号分隔字符串 `public-paths: ${ABNK_PUBLIC_PATHS:/login,/actuator/health}`（Spring 对 `List<String>` 自动逗号切分），重启后 UP。

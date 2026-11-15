@@ -1,0 +1,80 @@
+# 任务 P1.2 一致性证据 —— 设计系统 tokens 单一事实源落地
+
+> 归档时间：2026-11-07 · Sprint v0.0.1 Part02 Phase P1 任务 P1.2
+> 源文件：channels/website/tailwind.config.js（theme.extend，只读）
+> 事实源：channels/shared/design-tokens.json
+> 双端映射：channels/mobile-banking/lib/core/theme/app_theme.dart + channels/backoffice/src/theme/abnkTheme.ts
+> 比对脚本：channels/shared/scripts/tokens_sync.py（纯标准库，受限解析 + 防空洞门禁）
+
+## 1. VP1.2.1 tokens_sync 零差异（原文输出）
+
+命令：python3 channels/shared/scripts/tokens_sync.py（退出码 0）
+
+```
+SOURCE  : abnk-system/channels/website/tailwind.config.js (theme.extend 受限提取)
+TOKENS  : abnk-system/channels/shared/design-tokens.json
+EXTRACTED: colorFamilies=10, colorEntries=43, fontStacks=3, eyebrow=0.22em, pageMaxWidth=1360px
+GUARD   : colorFamilies>=10 OK (10) / fontStacks>=3 OK (3) / eyebrow present OK (0.22em) / pageMaxWidth present OK (1360px)
+DIFF: 0
+RESULT: PASS — design-tokens.json 与 tailwind 源逐值零差异
+```
+
+防空洞自证成立：提取条目数非零（10 色族 / 43 色值 / 3 字体栈 / eyebrow / pageMaxWidth 均在），DIFF: 0 有效。
+
+脚本首跑修复链（供复跑参考）：
+1. 块体首键与数字档键（50:/700:）未被加引号 → 键正则放宽为 `([{,\s])([A-Za-z0-9_]+)(\s*:)`
+2. extract_section 块体不含外层花括号，块尾尾逗号无 `}` 可锚定 → 尾逗号清理正则增加 `,\s*$` 分支
+
+## 2. VP1.2.2 Flutter 主题锚点色值对照
+
+命令：grep -c '#B08A4F\|#26201A\|#FAF7F2\|#D9A55C' channels/mobile-banking/lib/core/theme/app_theme.dart
+实测：16（≥ 4）✓
+
+| 锚点 | app_theme.dart（Color 构造 + 注释） | design-tokens.json | 一致 |
+|---|---|---|---|
+| copper 首值 | `Color(0xFFB08A4F)` / `// #B08A4F`（copper 与 copper500 双常量） | colors.copper.DEFAULT = #B08A4F | ✓ |
+| char 首值 | `Color(0xFF26201A)` / `// #26201A`（char 与 char800 双常量） | colors.char.DEFAULT = #26201A | ✓ |
+| ivory 首值 | `Color(0xFFFAF7F2)` / `// #FAF7F2`（ivory 与 ivory100 双常量） | colors.ivory.DEFAULT = #FAF7F2 | ✓ |
+| amber 首值 | `Color(0xFFD9A55C)` / `// #D9A55C`（amber 与 amber500 双常量） | colors.amber.DEFAULT = #D9A55C | ✓ |
+
+覆盖范围：43 个色值全部以 `AbnkColors` 常量落地（十族，DEFAULT/数字档齐备）；
+ColorScheme 语义映射（primary=copper / secondary=amber / error=brick500 /
+surface=warmwhite / onSurface=char / outline 族=taupe）；scaffoldBackgroundColor=ivory。
+编译验证由任务 P1.3 VP1.3.1 flutter analyze 承接（本文件先于 flutter create 产出，合并生成不覆盖）。
+
+## 3. VP1.2.3 AntD 主题锚点色值对照
+
+命令：grep -c "B08A4F\|F5EFE6" channels/backoffice/src/theme/abnkTheme.ts
+实测：17（≥ 2）✓
+
+| 锚点 | abnkTheme.ts | design-tokens.json | 一致 |
+|---|---|---|---|
+| colorPrimary | `abnkPalette.copper.DEFAULT` = '#B08A4F'（colorPrimary/colorInfo/inkBarColor/--abnk-color-primary 多处引用） | colors.copper.DEFAULT = #B08A4F | ✓ |
+| 背景色锚点 | `abnkPalette.warmwhite` = '#F5EFE6'（colorBgLayout/colorBgElevated/Layout.headerBg/siderBg/Card/Modal 等） | colors.warmwhite = #F5EFE6 | ✓ |
+
+覆盖范围：abnkPalette 十族 43 色值 as const；AntD v5 ThemeConfig（token 全局层 +
+components 七组件定制层）；abnkCssVariables 26 个 CSS 变量 + applyAbnkCssVariables 注入函数。
+编译验证由任务 P1.4 VP1.4.1 typecheck 承接。
+
+## 4. 字体族清单（三端同源对照）
+
+| 栈 | tailwind 源（fontFamily） | design-tokens.json | Flutter（google_fonts） | AntD/TS（abnkFonts） | 一致 |
+|---|---|---|---|---|---|
+| sans | "Oxanium Variable", "Noto Sans SC Variable", ui-sans-serif, system-ui, sans-serif | 同左（去引号规范化） | GoogleFonts.oxanium + sansFallback 五项回退数组 | "'Oxanium Variable', 'Noto Sans SC Variable', ui-sans-serif, system-ui, sans-serif" | ✓ |
+| serif | "Noto Serif SC Variable", Georgia, serif | 同左 | GoogleFonts.notoSerifSc + serifFallback（display/headline 档） | "'Noto Serif SC Variable', Georgia, serif" | ✓ |
+| mono | "JetBrains Mono Variable", "Noto Sans SC Variable", ui-monospace, monospace | 同左 | GoogleFonts.jetBrainsMono + monoFallback | "'JetBrains Mono Variable', 'Noto Sans SC Variable', ui-monospace, monospace" | ✓ |
+
+字族合计 4 个：Oxanium / Noto Sans SC / Noto Serif SC / JetBrains Mono（含 serif 栈 Georgia 系统回退）。
+
+## 5. 版式度量对照
+
+| 度量 | tailwind 源 | design-tokens.json | Flutter | AntD/TS | 一致 |
+|---|---|---|---|---|---|
+| eyebrow 字距 | letterSpacing.eyebrow = 0.22em | "0.22em" | AbnkMetrics.eyebrowEm = 0.22（按字号换算逻辑像素） | abnkMetrics.eyebrow = '0.22em'（CSS 变量 --abnk-eyebrow-spacing） | ✓ |
+| 页宽 | maxWidth.page = 1360px | "1360px" | AbnkMetrics.pageMaxWidth = 1360 | abnkMetrics.pageMaxWidth = '1360px'（--abnk-page-max-width） | ✓ |
+
+## 6. 边界声明
+
+- 三端同屏视觉走查不在本步骤——手机银行/Backoffice 页面载体由 P1.3/P1.4 交付，统一在 VP1.5.3 评审关口执行（任务边界不前置）。
+- tailwind.config.js 为源，全程只读未动（git status 干净口径见提交）。
+- Flutter web 字体自托管打包（GoogleFonts 禁运行时拉取 + 资产内置）在 P1.3 工程创建时落地；本任务锁定 token 数值与结构。

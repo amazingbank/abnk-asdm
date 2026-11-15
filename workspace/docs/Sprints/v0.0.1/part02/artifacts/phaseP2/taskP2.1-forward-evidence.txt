@@ -1,0 +1,70 @@
+# 任务 P2.1 转发链路证据（SCG 工程骨架与 Fineract 转发）
+
+> 归档时间：2026-11-07（UTC+8）
+> 环境：macOS · JDK 25.0.5（~/.sdkman/candidates/java/25.0.5+8-tem）· Gradle 9.7.1 wrapper（fineract 仓复制）· Spring Boot 3.5.6 + Spring Cloud 2025.0.0 + springdoc-openapi-starter-webflux-ui 2.8.9
+> 转发目标：本地生产形态栈 abnk-fineract（Tomcat 10.1.59，http://localhost:8081/fineract-provider，容器 HTTP 平面）
+
+## 一、VP2.1.2 编译门槛（附加段）
+
+```
+$ cd $GW && JAVA_HOME=$JDK25 ./gradlew classes
+> Task :compileJava
+> Task :processResources
+> Task :classes
+BUILD SUCCESSFUL in 55s
+2 actionable tasks: 2 executed
+```
+
+## 二、VP2.1.3 进程·bootRun 启动
+
+```
+$ nohup env JAVA_HOME=$JDK25 ./gradlew bootRun > $WS/logs/gateway.log 2>&1 &
+
+$ grep -c 'Started GatewayApplication' $WS/logs/gateway.log
+1
+
+$ curl -s $GW_BASE/actuator/health
+{"status":"UP"}
+```
+
+日志关键行（logs/gateway.log）：
+
+```
+2026-11-07T22:53:1x.xxx+08:00  INFO ... : Starting GatewayApplication using Java 25.0.5 with PID 53459 ...
+2026-11-07T22:53:2x.xxx+08:00  INFO ... : Netty started on port 8080 (http)
+2026-11-07T22:53:2x.xxx+08:00  INFO ... : Started GatewayApplication in 2.394 seconds (process running for 2.986)
+```
+
+## 三、VP2.1.4 运行时·转发打通
+
+```
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/abnk/api/v1/offices -H "$TENANT" -H "$AUTH"
+200
+
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/bo/api/v1/offices -H "$TENANT" -H "$AUTH"
+200
+
+$ curl -s -o /dev/null -w '%{http_code}' $GW_BASE/abnk/api/v1/offices   # 无任何头（网关全局注入兜底）
+200
+```
+
+响应体抽查（经网关抵达 Fineract 生产形态栈的真实数据）：
+
+```
+$ curl -s $GW_BASE/abnk/api/v1/offices | head -c 200
+[{"id":1,"name":"Head Office","nameDecorated":"Head Office","externalId":"1","openingDate":[2009,1,1],"hierarchy":"."},{"id":2,"name":"ABNK冒烟支行1107093814","nameDecorated":"....ABNK冒烟支行
+```
+
+## 四、调试插曲（根因与修复记录）
+
+- 症状：首验 VP2.1.4 返回 404，响应体为 Tomcat/10.1.59 HTML 样式（非网关自身 Spring JSON 404）——请求已转发至 Fineract，但路径不被识别。
+- 直连对照：`curl http://localhost:8081/fineract-provider/api/v1/offices`（双头）→ 200，排除 Fineract 侧问题。
+- 取证：一次性 Python 假后端（:8099）抓包，分别用无 path base 与含 path base（`http://127.0.0.1:8099/fineract-provider`）各验证一轮——后者收到的请求行仍为 `GET /api/v1/offices`。
+- 根因：Spring Cloud Gateway（Spring Cloud 2025.0 线）实际转发时**忽略 route URI 的 path 部分**，`/fineract-provider` context path 被丢弃。
+- 修复：路由过滤器改为 `StripPrefix=1` + `PrefixPath=${ABNK_FINERACT_PREFIX:/fineract-provider}`；`ABNK_FINERACT_BASE` 语义调整为 host:port（如 `http://localhost:8081`，服务器形态 `http://abnk-fineract:8080`），context path 独立经 `ABNK_FINERACT_PREFIX` 覆盖。
+- 清理：临时 TRACE 日志（org.springframework.cloud.gateway）与探针假后端已全部移除，清理后重启复验双通道 200（见上）。
+
+## 五、VP2.1.5 登记
+
+- config.json `environments.local.processes` 追加 `abnk-gateway`（port 8080，logFile logs/gateway.log，killCommand 按端口 kill）——JSON 合法性经 python3 json.load 校验，进程清单：
+  `['postgres', 'fineract', 'abnk-fineract', 'abnk-pg-prod', 'abnk-gateway', 'abnk-mobile-web', 'abnk-backoffice']`

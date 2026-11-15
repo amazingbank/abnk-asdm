@@ -1,0 +1,49 @@
+- generic [ref=f4e4]:
+  - banner [ref=f4e5]:
+    - generic [ref=f4e6]:
+      - generic [ref=f4e7]: Amazing Bank
+      - generic [ref=f4e8]: Backoffice 运营后台
+    - generic [ref=f4e9]:
+      - button "Switch to English" [ref=f4e10] [cursor=pointer]:
+        - img "translation" [ref=f4e12]
+      - button "user ABNK 运营管理员" [ref=f4e16] [cursor=pointer]:
+        - img "user" [ref=f4e18]
+        - generic [ref=f4e21]: ABNK 运营管理员
+  - generic [ref=f4e22]:
+    - complementary [ref=f4e23]:
+      - menu [ref=f4e25]:
+        - menuitem "team 客户列表" [ref=f4e26] [cursor=pointer]:
+          - img "team" [ref=f4e27]
+          - generic [ref=f4e30]: 客户列表
+        - menuitem "account-book 贷款运营" [ref=f4e31] [cursor=pointer]:
+          - img "account-book" [ref=f4e32]
+          - generic [ref=f4e35]: 贷款运营
+    - main [ref=f4e36]:
+      - generic [ref=f4e37]:
+        - generic [ref=f4e39]:
+          - heading "客户列表" [level=4] [ref=f4e40]
+          - generic [ref=f4e42]:
+            - generic [ref=f4e43]:
+              - img "search" [ref=f4e45]
+              - searchbox "搜索姓名 / 外部编号 / 手机号" [active] [ref=f4e48]: 不存在的客户XYZ
+              - button [ref=f4e138] [cursor=pointer]:
+                - img "close-circle" [ref=f4e139]
+            - button [ref=f4e51] [cursor=pointer]:
+              - img "search" [ref=f4e53]
+        - table [ref=f4e72]:
+          - rowgroup [ref=f4e81]:
+            - row [ref=f4e82]:
+              - columnheader "客户号" [ref=f4e83]
+              - columnheader "姓名" [ref=f4e84]
+              - columnheader "外部编号" [ref=f4e85]
+              - columnheader "手机号" [ref=f4e86]
+              - columnheader "证照状态" [ref=f4e87]
+              - columnheader "证照到期日" [ref=f4e88]
+              - columnheader "操作" [ref=f4e89]
+          - rowgroup [ref=f4e90]:
+            - row [ref=f4e142]:
+              - cell "暂无数据 暂无数据" [ref=f4e143]:
+                - generic [ref=f4e144]:
+                  - img "暂无数据" [ref=f4e146]
+                  - generic [ref=f4e152]: 暂无数据
+        - generic [ref=f4e66]: 数据口径：P0.3 种子快照（王/李/赵 POC-A/B/C，业务日期 2027-03-29）； 证照状态由到期日对业务日期推导（基线只读展示）——金额格式示例 ¥10,000.00

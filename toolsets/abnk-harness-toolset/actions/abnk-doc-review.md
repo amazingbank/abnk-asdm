@@ -20,7 +20,7 @@
 
 ## Overview
 
-This action performs **evidence-driven five-dimension review** of a Sprint/Phase design document (`.asdm/workspace/docs/Sprints/**/v*-*-PhaseN-*.md`). Every claim in the doc is verified against the actual Fineract code and the real runtime environment (postgres 容器 + fineract 进程); every 执行和验收步骤 item is audited for executability. Problems found are fixed in place, cross-referenced sections are synchronized, and a structured report is produced. The review loops ("再次检查") until no new findings — each round shifts focus to the previous round's blind spots.
+This action performs **evidence-driven five-dimension review** of a Sprint/Phase design document (`.asdm/workspace/docs/Sprints/**/zh-CN/v*-*-PhaseN-*.md`). Every claim in the doc is verified against the actual Fineract code and the real runtime environment (postgres 容器 + fineract 进程); every 执行和验收步骤 item is audited for executability. Problems found are fixed in place, cross-referenced sections are synchronized, and a structured report is produced. The review loops ("再次检查") until no new findings — each round shifts focus to the previous round's blind spots.
 
 **ABNK project context** (verify at review time, never assume):
 - 双进程栈：**postgres**（docker 容器 `abnk-pg`，PostgreSQL 18.3，宿主 `:5432`，承载 `fineract_tenants` + `fineract_default` 两库）/ **fineract**（`org.apache.fineract.ServerApplication`，Spring Boot + 内嵌 Tomcat，`:8443` 强制 HTTPS 自签证书，JDWP `:5005`，Gradle `devRun` 启动）
@@ -58,7 +58,7 @@ This action performs **evidence-driven five-dimension review** of a Sprint/Phase
 
 ## Input
 
-- Path to the Sprint/Phase document to review (e.g., `.asdm/workspace/docs/Sprints/v0.0.1/part01/v0.0.1-Part01-Phase1-XXX.md`)
+- Path to the Sprint/Phase document to review (e.g., `.asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/v0.0.1-Part01-Phase1-XXX.md`)
 - (Optional) "再次检查" — re-run with focus on previous round's blind spots
 
 ## Output

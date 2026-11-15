@@ -1,0 +1,54 @@
+- generic [ref=f10e4]:
+  - banner [ref=f10e5]:
+    - generic [ref=f10e6]:
+      - generic [ref=f10e7]: Amazing Bank
+      - generic [ref=f10e8]: Backoffice Operations Console
+    - generic [ref=f10e9]:
+      - button "切换到中文" [ref=f10e10] [cursor=pointer]:
+        - img "translation" [ref=f10e12]
+      - button "user ABNK 运营管理员" [ref=f10e16] [cursor=pointer]:
+        - img "user" [ref=f10e18]
+        - generic [ref=f10e21]: ABNK 运营管理员
+  - generic [ref=f10e22]:
+    - complementary [ref=f10e23]:
+      - menu [ref=f10e25]:
+        - menuitem "team Clients" [ref=f10e26] [cursor=pointer]:
+          - img "team" [ref=f10e27]
+          - generic [ref=f10e30]: Clients
+        - menuitem "account-book Loan Operations" [ref=f10e31] [cursor=pointer]:
+          - img "account-book" [ref=f10e32]
+          - generic [ref=f10e35]: Loan Operations
+    - main [ref=f10e36]:
+      - generic [ref=f10e37]:
+        - heading "Loan Operations" [level=4] [ref=f10e39]
+        - alert [ref=f10e41]:
+          - img "info-circle" [ref=f10e42]
+          - generic [ref=f10e45]: The POC baseline is read-only — approve and disburse are reserved placeholders, to be enabled once the P2.5 gateway internal channel (/bo/api/*) is wired in
+        - table [ref=f10e62]:
+          - rowgroup [ref=f10e72]:
+            - row [ref=f10e73]:
+              - columnheader "Loan ID" [ref=f10e74]
+              - columnheader "Client" [ref=f10e75]
+              - columnheader "Product" [ref=f10e76]
+              - columnheader "Principal" [ref=f10e77]
+              - columnheader "Interest Rate" [ref=f10e78]
+              - columnheader "Term (months)" [ref=f10e79]
+              - columnheader "Status" [ref=f10e80]
+              - columnheader "Actions" [ref=f10e81]
+          - rowgroup [ref=f10e82]:
+            - row [ref=f10e83]:
+              - cell "6" [ref=f10e84]
+              - cell "赵POC-C1107104347" [ref=f10e85]
+              - cell "ABNK-POC消费贷1107104347" [ref=f10e86]
+              - cell "¥50,000.00" [ref=f10e87]
+              - cell "10.0%" [ref=f10e88]
+              - cell "12" [ref=f10e89]
+              - cell "Active Overdue for 40 days (ABNK_POC_OD)" [ref=f10e90]:
+                - generic [ref=f10e91]:
+                  - generic [ref=f10e92]: Active
+                  - generic [ref=f10e94]: Overdue for 40 days (ABNK_POC_OD)
+              - cell [ref=f10e96]:
+                - generic [ref=f10e97]:
+                  - button "Approve" [disabled] [ref=f10e99]
+                  - button "Disburse" [disabled] [ref=f10e101]
+        - generic [ref=f10e57]: "Data source: P0.3 seed snapshot (client C loan 6 — 40 days overdue as of the business date 2027-03-29, classified ABNK_POC_OD)"

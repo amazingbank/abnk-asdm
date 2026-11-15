@@ -1,0 +1,151 @@
+任务 P2.6 契约一致性校验 + 客户端生成 —— 执行证据（2026-11-08）
+================================================================
+
+[环境基线]
+- 网关 abnk-gateway（:8080，bootRun + ABNK_USERS_FILE=../../data/gateway_users.local.json，
+  本地栈口径 alice clientId=28）：/actuator/health → {"status":"UP"}
+- 生产形态栈 abnk-fineract（:8081）：/fineract-provider/actuator/health → UP
+- 冻结契约：channels/shared/api-contract/openapi.yaml（P1.5 出口，18 路径）
+- 工具链：node v22.23.1 + npx @openapitools/openapi-generator-cli（引擎 7.27.0）；
+  flutter/dart（PATH=~/development/flutter/bin）；JDK 25（网关构建）
+
+----------------------------------------------------------------
+[VP2.6.1 静态·导出就绪] PASS（2026-11-08）
+- 命令：curl -s http://localhost:8080/v3/api-docs | python3 -c "...print(len(d['paths']))"
+- 输出：PATHS: 12
+- 数值构成归档：契约对客面显式端点 11（/login + 10 个 /abnk/api/v1/*）
+  + /bo/login 1（Auth·内部，@RestController 实现故 springdoc 可见）= 12
+- /bo/api/** 转发族 6 路径在导出不可见 ✓（BoRouteFilter 路由转发实现，容差声明口径）
+- 白名单自有点（/actuator/**、/v3/**、/error）均未出现在导出（0 个）
+- 12 路径明细（全量）：
+  /abnk/api/v1/accounts/{id}/transactions [GET]
+  /abnk/api/v1/accounts/{id}/transfer [POST]
+  /abnk/api/v1/fixed-deposit-products [GET]
+  /abnk/api/v1/loan-products [GET]
+  /abnk/api/v1/loans [POST]
+  /abnk/api/v1/loans/{id} [GET]
+  /abnk/api/v1/me [GET]
+  /abnk/api/v1/me/accounts [GET]
+  /abnk/api/v1/me/identity [GET]
+  /abnk/api/v1/savings [POST]
+  /bo/login [POST]
+  /login [POST]
+
+----------------------------------------------------------------
+[VP2.6.2 静态·一致性零漂移] PASS（2026-11-08）
+- 命令：python3 channels/shared/scripts/contract_diff.py
+- 输出（verbatim）：
+    契约路径（白名单过滤后）: 12；导出路径（白名单过滤后）: 12
+    DRIFT: 0
+- 退出码 0
+- 脚本：channels/shared/scripts/contract_diff.py（路径级字面比对 + 方法集合 +
+  请求/响应字段级；白名单 = 导出侧 /actuator/**、/v3/**、/error、/swagger-ui**
+  + 契约侧 /bo/api/**）
+- 字段级实测口径归档：契约 required ⊆ 实现字段 ⊆ 契约 properties
+  （springdoc 2.8.9 对 Java record 无 required 标注；实现省略契约可选属性不计漂移
+  ——如 Account.interestRate/maturityDate 对客面不投影（Fineract /clients/{id}/accounts
+  投影实测无此数据）；实现多出契约外字段计漂移）；数组响应 required 下钻 items
+- 防假阴性自检（两轮注入）：
+  1) LoginResponse 缺 displayName → 检出 ✓
+  2) TransactionItem（数组 items）缺 runningBalance → 检出 ✓
+- 契约 YAML 解析：npx --yes js-yaml 转 JSON（宿主 python3 无 yaml 模块）
+
+----------------------------------------------------------------
+[VP2.6.3 编译门槛·Dart client] PASS（2026-11-08）
+- 生成命令（版本钉死入命令口径）：
+    npx --yes @openapitools/openapi-generator-cli generate -g dart-dio \
+      -i ../shared/api-contract/openapi.yaml -o openapi-generated/
+  （生成器引擎 7.27.0；npm 包 latest 线）
+- 生成后链路：cd openapi-generated && dart pub get
+  && dart run build_runner build --delete-conflicting-outputs（64 outputs——
+  dart-dio 走 built_value，.g.dart 序列化代码须 build_runner 产出）
+- 判据命令：cd $MOBILE && dart analyze openapi-generated/
+- 输出（verbatim）：No issues found!（退出码 0）
+- 生成面：5 个 API 类（auth/me/accounts/clients/loans——契约 18 路径全量）+ 32 个 model
+
+----------------------------------------------------------------
+[VP2.6.4 编译门槛·TS client] PASS（2026-11-08）
+- 生成命令：
+    npx --yes @openapitools/openapi-generator-cli generate -g typescript-axios \
+      -i ../shared/api-contract/openapi.yaml -o src/api/generated/
+  （引擎 7.27.0；VERSION 文件归档）
+- 判据命令：cd $BO && npm run typecheck
+- 输出：tsc --noEmit -p tsconfig.app.json 退出码 0、零错误
+- 附带复验：npm run lint 退出码 0（生成代码经 eslint ignores 豁免后项目 lint 不破坏）
+
+----------------------------------------------------------------
+[实现漂移修复记录]（diff 首跑前发现，按 D3 修网关实现、不改冻结 spec）
+1. POST /login 响应形态漂移：实现 {token,channel,sub,expiresIn} → 契约 LoginResponse
+   要求 {token,tokenType,expiresIn,channel,username,displayName,clientId}
+   —— LoginController 响应 record 重构补齐 7 字段（sub 从响应面移除——契约无此字段）
+2. 契约 POST /bo/login（Auth·内部）未实现：P2.5 时 admin 走 /login 签发 internal
+   token（跨契约通道）—— 新增 /bo/login 端点（BoLoginResponse 含 role=ADMIN）
+   并按契约 channel enum 单值口径改为通道严格匹配：admin 打 /login、alice 打
+   /bo/login 一律 401 invalid_credentials（运行时冒烟验证：alice /login 200
+   {tokenType:Bearer,expiresIn:900,channel:customer,username:alice,
+   displayName:"王 POC-A",clientId:28}；admin /bo/login 200
+   {...,channel:internal,username:admin,displayName:"运营管理员",role:ADMIN}；
+   跨通道双负向 401 ✓）
+3. 放行清单补 /bo/login 与 /v3/api-docs/**（BearerTokenFilter public-paths）
+4. displayName 数据源：UsersStore.GatewayUser 加可选 displayName 字段（缺失回退
+   username——登录零下游依赖，不查 Fineract）；三份用户表 JSON（data 双实例 +
+   测试 fixture）补 displayName（非敏感展示名）
+5. springdoc 响应 schema：12 个对客/登录端点补 @Operation(@ApiResponse(@Schema(
+   implementation=…))) 注解显式声明 200 响应（数组响应用 @ArraySchema）——
+   springdoc 2.8.9 默认对 Mono<ResponseEntity<Object>> 无法推断响应 schema
+6. 单测：LoginControllerTest 4→6 用例（契约全字段断言 + /bo/login 正反向 +
+   通道严格匹配负向×2）；全量回归 57/57（XML failures=0 errors=0）：
+   JwtServiceTest 6 + LoginControllerTest 6 + AccountsControllerTest 3
+   + BlacklistFilterTest 6 + IdentityControllerTest 6 + MaskingTest 7
+   + MeControllerTest 4 + BoRouteFilterTest 10 + TransferControllerTest 9
+
+----------------------------------------------------------------
+[交付物清单]
+- channels/shared/scripts/contract_diff.py（一致性校验脚本，可重跑，退出码口径 0/1）
+- channels/mobile-banking/openapi-generated/（dart-dio client：5 API 类 + 32 model
+  + .g.dart 序列化产物；生成物入库——契约变化即重新生成，diff 可审）
+- channels/backoffice/src/api/generated/（typescript-axios client：api/base/common/
+  configuration/index；生成物入库）
+- 网关实现修复：LoginController（契约 LoginResponse/BoLoginResponse + /bo/login）、
+  UsersStore（displayName）、application.yml（放行清单）、6 controller × 12 端点
+  springdoc 响应注解
+- backoffice 依赖补齐：axios@^1.21.0 入 dependencies（生成 client 运行时依赖）；
+  eslint.config.js ignores 追加 src/api/generated
+
+----------------------------------------------------------------
+[调试插曲归档]
+1.（/v3/api-docs 首验 401）BearerTokenFilter 拦截 springdoc 导出端点——放行清单
+   未含 /v3/api-docs/**；public-paths 追加后导出正常。此前 P2.1 装的 springdoc
+   依赖本身工作正常（openapi: 3.1.0，与冻结契约同版本线）
+2.（响应 schema 导出为空）springdoc 2.8.9 对 Mono<ResponseEntity<Object>> 返回
+   类型无法推断 200 响应 schema（统一错误分支用 ApiError 导致返回类型为 Object）——
+   12 端点补 @ApiResponse(@Schema(implementation=…)) 注解后导出 17 个 schema
+   （4 请求 + 13 响应）；注解未指定 mediaType 时导出 content key 为 */*，
+   diff 脚本兼容任意 media type
+3.（Dart client 首验 2431 errors）生成包未 pub get——package:openapi/... 自引用
+   URI 与 dio/built_value 依赖全部解析失败；pub get 后剩 12 条 warning 全为模板
+   噪声（unused_import ×11 + unused_element_parameter ×1，0 errors）
+4.（Dart 噪声豁免）openapi-generated/analysis_options.yaml 豁免两类模板噪声 +
+   删除生成器样板 test/（空壳冒烟，35 条 unused_local_variable）；两者经
+   .openapi-generator-ignore 登记防重新生成覆盖（同目录登记 lib/**/*.g.dart）
+5.（TS client 假通过——环境陷阱，重要）首验 typecheck"通过"实为假象：生成 api.ts
+   import axios 而项目无该依赖，Node 模块解析沿目录树向上爬到 ~/node_modules/axios
+   （用户主目录遗留安装，require.resolve 实证）；对照探针（不存在包名报 TS2307
+   而 axios 不报）定位后显式安装 axios@^1.21.0 入 dependencies，typecheck 转为
+   真实通过。教训：模块"意外可解析"须验 node_modules 本地存在性
+6.（npm 版本线混淆）@openapitools/openapi-generator-cli@7.27.0 报 ETARGET——
+   7.27.0 是生成引擎版本，npm 包版本线独立（latest）；引擎版本经
+   .openapi-generator/VERSION 文件归档
+7.（lint 连带破坏）生成代码的 no-explicit-any 4 errors 打挂 npm run lint——
+   eslint.config.js ignores 追加 src/api/generated（生成代码不按项目 lint 标准，
+   P1.4 lint 零错误口径保持）
+8.（验证方法学）管道后 $? 取到的是 tail/head 退出码——tsc/eslint 判据一律改为
+   重定向到文件后取真实退出码
+
+----------------------------------------------------------------
+[敏感复核]
+- 6 个真实演示口令（gateway-demo-passwords.json 双实例 local-prodform + server）
+  对 artifacts/phaseP2/、gateway/src、channels/shared、openapi-generated/、
+  backoffice/src/api/generated 全量 grep → 0 命中
+- displayName（王 POC-A / 李 POC-B / 运营管理员）为非敏感 UI 展示名，可入库
+- 证据文件不含任何口令明文与 JWT 密钥生产值

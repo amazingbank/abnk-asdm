@@ -1,0 +1,1322 @@
+{
+  "runAt": "2026-11-10T09:39:11",
+  "ok": true,
+  "summary": {
+    "designedSteps": 4,
+    "executedSteps": 4,
+    "assertsPassed": 23,
+    "assertsTotal": 23,
+    "credentialsInstance": "server",
+    "gatewayBase": "https://api.amazingbank.ai",
+    "fineractBase": "http://localhost:18081/fineract-provider/api/v1",
+    "amount": 10,
+    "gapEvidence": {
+      "expiredCustomer": "alice",
+      "identityStatus": "EXPIRED",
+      "transferHttpStatus": 200,
+      "gapPresent": true,
+      "note": "POC 要消灭的缺口：证件过期客户转账依然成功（基线无拦截）"
+    },
+    "rollback": "单向剧本，不做余额回滚（P3.3 改动详情声明）",
+    "error": null
+  },
+  "steps": [
+    {
+      "step": 1,
+      "name": "① alice 登录 → /me/identity 断言 EXPIRED（过期证照种子）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/login (alice)",
+          "status": 200,
+          "elapsed": 1.08
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/identity (alice)",
+          "status": 200,
+          "elapsed": 1.34
+        }
+      ],
+      "asserts": [
+        {
+          "label": "alice 登录 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "alice token 三段式（JWT）",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "label": "alice clientId=种子值",
+          "pass": true,
+          "evidence": "1 (期望 1)"
+        },
+        {
+          "label": "alice identity 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "alice status=EXPIRED（过期种子——旅程 §1.3 前提成立）",
+          "pass": true,
+          "evidence": "EXPIRED"
+        },
+        {
+          "label": "alice expiryDate 非空",
+          "pass": true,
+          "evidence": "2020-01-01"
+        },
+        {
+          "label": "documentKey 脱敏（含 *）",
+          "pass": true,
+          "evidence": "ID-A********626"
+        }
+      ],
+      "responses": [
+        {
+          "token": "<redacted>",
+          "tokenType": "Bearer",
+          "expiresIn": 900,
+          "channel": "customer",
+          "username": "alice",
+          "displayName": "alice",
+          "clientId": 1
+        },
+        {
+          "documentTypeId": 1,
+          "documentTypeName": "Passport",
+          "documentKey": "ID-A********626",
+          "status": "EXPIRED",
+          "issuanceDate": "2015-01-01",
+          "expiryDate": "2020-01-01"
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "name": "② bob 登录 → /me/identity 断言 VALID（对照）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/login (bob)",
+          "status": 200,
+          "elapsed": 1.12
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/identity (bob)",
+          "status": 200,
+          "elapsed": 0.45
+        }
+      ],
+      "asserts": [
+        {
+          "label": "bob 登录 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "bob clientId=种子值",
+          "pass": true,
+          "evidence": "2 (期望 2)"
+        },
+        {
+          "label": "bob identity 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "bob status=VALID（有效种子对照）",
+          "pass": true,
+          "evidence": "VALID"
+        }
+      ],
+      "responses": [
+        {
+          "token": "<redacted>",
+          "tokenType": "Bearer",
+          "expiresIn": 900,
+          "channel": "customer",
+          "username": "bob",
+          "displayName": "bob",
+          "clientId": 2
+        },
+        {
+          "documentTypeId": 1,
+          "documentTypeName": "Passport",
+          "documentKey": "ID-B********626",
+          "status": "VALID",
+          "issuanceDate": "2015-01-01",
+          "expiryDate": "2099-12-31"
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "name": "③ alice（EXPIRED）转账 10 → HTTP 200 成功（缺口存在——基线无拦截）",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/1 (before)",
+          "status": 200,
+          "elapsed": 0.48
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/1/transactions/search (before)",
+          "status": 200,
+          "elapsed": 0.69
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/2 (before)",
+          "status": 200,
+          "elapsed": 0.51
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/2/transactions/search (before)",
+          "status": 200,
+          "elapsed": 0.37
+        },
+        {
+          "method": "POST",
+          "path": "/abnk/api/v1/accounts/1/transfer",
+          "status": 200,
+          "elapsed": 2.19
+        }
+      ],
+      "asserts": [
+        {
+          "label": "Fineract 基线余额可读（账户 1）",
+          "pass": true,
+          "evidence": "HTTP 200 balance=10000.0"
+        },
+        {
+          "label": "Fineract 基线计数可读（账户 1）",
+          "pass": true,
+          "evidence": "HTTP 200 total=1"
+        },
+        {
+          "label": "Fineract 基线余额可读（账户 2）",
+          "pass": true,
+          "evidence": "HTTP 200 balance=0.0"
+        },
+        {
+          "label": "Fineract 基线计数可读（账户 2）",
+          "pass": true,
+          "evidence": "HTTP 200 total=0"
+        },
+        {
+          "label": "EXPIRED 客户转账 HTTP 200 成功 —— 缺口存在（这正是 POC 要消灭的缺口）",
+          "pass": true,
+          "evidence": "HTTP 200 {\"transactionId\":4,\"newSourceBalance\":9990.0}"
+        },
+        {
+          "label": "transactionId 存在",
+          "pass": true,
+          "evidence": "4"
+        },
+        {
+          "label": "newSourceBalance = 基线 − 金额（网关聚合落账一致）",
+          "pass": true,
+          "evidence": "9990.0 (期望 9990.0)"
+        }
+      ],
+      "responses": [
+        {
+          "id": 1,
+          "accountNo": "000000001",
+          "depositType": {
+            "id": 100,
+            "code": "depositAccountType.savingsDeposit",
+            "value": "Savings"
+          },
+          "externalId": "ABNK-POC-A-SRC-1107114626",
+          "clientId": 1,
+          "clientName": "王 POC-A1107114626",
+          "savingsProductId": 1,
+          "savingsProductName": "ABNK-POC活期1107114626",
+          "fieldOfficerId": 0,
+          "status": {
+            "id": 300,
+            "code": "savingsAccountStatusType.active",
+            "value": "Active",
+            "submittedAndPendingApproval": false,
+            "approved": false,
+            "rejected": false,
+            "withdrawnByApplicant": false,
+            "active": true,
+            "closed": false,
+            "prematureClosed": false,
+            "transferInProgress": false,
+            "transferOnHold": false,
+            "matured": false
+          },
+          "subStatus": {
+            "id": 0,
+            "code": "SavingsAccountSubStatusEnum.none",
+            "value": "None",
+            "none": true,
+            "inactive": false,
+            "dormant": false,
+            "escheat": false,
+            "block": false,
+            "blockCredit": false,
+            "blockDebit": false
+          },
+          "timeline": {
+            "submittedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "submittedByUsername": "mifos",
+            "submittedByFirstname": "App",
+            "submittedByLastname": "Administrator",
+            "approvedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "approvedByUsername": "mifos",
+            "approvedByFirstname": "App",
+            "approvedByLastname": "Administrator",
+            "activatedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "activatedByUsername": "mifos",
+            "activatedByFirstname": "App",
+            "activatedByLastname": "Administrator"
+          },
+          "currency": {
+            "code": "CNY",
+            "name": "Chinese Yuan Renminbi",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "nameCode": "currency.CNY",
+            "displayLabel": "Chinese Yuan Renminbi [CNY]"
+          },
+          "nominalAnnualInterestRate": 1.5,
+          "interestCompoundingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestPostingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestCalculationType": {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+          },
+          "interestCalculationDaysInYearType": {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+          },
+          "withdrawalFeeForTransfers": false,
+          "allowOverdraft": false,
+          "enforceMinRequiredBalance": false,
+          "lienAllowed": false,
+          "withHoldTax": false,
+          "lastActiveTransactionDate": [
+            2026,
+            11,
+            7
+          ],
+          "isDormancyTrackingActive": false,
+          "summary": {
+            "currency": {
+              "code": "CNY",
+              "name": "Chinese Yuan Renminbi",
+              "decimalPlaces": 2,
+              "inMultiplesOf": 0,
+              "nameCode": "currency.CNY",
+              "displayLabel": "Chinese Yuan Renminbi [CNY]"
+            },
+            "totalDeposits": 10000.0,
+            "totalInterestEarned": 0.42,
+            "totalInterestPosted": 0,
+            "accountBalance": 10000.0,
+            "totalOverdraftInterestDerived": 0,
+            "interestNotPosted": 0.42,
+            "lastInterestCalculationDate": [
+              2026,
+              11,
+              7
+            ],
+            "availableBalance": 10000.0,
+            "runningBalanceOnInterestPostingTillDate": 0,
+            "runningBalanceOnPivotDate": 0
+          },
+          "activationLocalDate": [
+            2026,
+            11,
+            7
+          ],
+          "newSavingsAccountTransactionData": [],
+          "savingsAccountTransactionData": [],
+          "interestPostingPeriodTypeId": 1,
+          "depositTypeId": 100,
+          "interestCompoundingPeriodTypeId": 1,
+          "interestCalculationTypeId": 1,
+          "interestCalculationDaysInYearTypeId": 360,
+          "existingTransactionIds": [],
+          "existingReversedTransactionIds": [],
+          "startInterestCalculationDate": [
+            2026,
+            11,
+            7
+          ],
+          "cashBasedAccountingEnabledOnSavingsProduct": false,
+          "accrualBasedAccountingEnabledOnSavingsProduct": false
+        },
+        {
+          "total": 1,
+          "content": [
+            {
+              "id": 1,
+              "transactionType": {
+                "id": 1,
+                "code": "savingsAccountTransactionType.deposit",
+                "value": "Deposit",
+                "deposit": true,
+                "dividendPayout": false,
+                "withdrawal": false,
+                "interestPosting": false,
+                "feeDeduction": false,
+                "initiateTransfer": false,
+                "approveTransfer": false,
+                "withdrawTransfer": false,
+                "rejectTransfer": false,
+                "overdraftInterest": false,
+                "writtenoff": false,
+                "overdraftFee": false,
+                "withholdTax": false,
+                "escheat": false,
+                "amountHold": false,
+                "amountRelease": false,
+                "accrual": false
+              },
+              "entryType": "CREDIT",
+              "accountId": 1,
+              "accountNo": "000000001",
+              "date": [
+                2026,
+                11,
+                7
+              ],
+              "currency": {
+                "code": "CNY",
+                "name": "Chinese Yuan Renminbi",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 0,
+                "nameCode": "currency.CNY",
+                "displayLabel": "Chinese Yuan Renminbi [CNY]"
+              },
+              "paymentDetailData": {
+                "id": 1,
+                "paymentType": {
+                  "id": 1,
+                  "name": "Money Transfer"
+                },
+                "accountNumber": "",
+                "checkNumber": "",
+                "routingCode": "",
+                "receiptNumber": "",
+                "bankNumber": ""
+              },
+              "amount": 10000.0,
+              "runningBalance": 10000.0,
+              "reversed": false,
+              "submittedOnDate": [
+                2026,
+                11,
+                7
+              ],
+              "interestedPostedAsOn": false,
+              "submittedByUsername": "mifos",
+              "note": "POC 源账户初始余额",
+              "isManualTransaction": false,
+              "isReversal": false,
+              "originalTransactionId": 0,
+              "lienTransaction": false,
+              "releaseTransactionId": 0,
+              "chargesPaidByData": [],
+              "isOverdraft": false
+            }
+          ],
+          "pageable": {
+            "sort": {
+              "orders": [
+                {
+                  "direction": "DESC",
+                  "property": "transaction_date",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "created_on_utc",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "id",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                }
+              ]
+            },
+            "pageNumber": 0,
+            "pageSize": 50
+          }
+        },
+        {
+          "id": 2,
+          "accountNo": "000000002",
+          "depositType": {
+            "id": 100,
+            "code": "depositAccountType.savingsDeposit",
+            "value": "Savings"
+          },
+          "externalId": "ABNK-POC-A-DST-1107114626",
+          "clientId": 1,
+          "clientName": "王 POC-A1107114626",
+          "savingsProductId": 1,
+          "savingsProductName": "ABNK-POC活期1107114626",
+          "fieldOfficerId": 0,
+          "status": {
+            "id": 300,
+            "code": "savingsAccountStatusType.active",
+            "value": "Active",
+            "submittedAndPendingApproval": false,
+            "approved": false,
+            "rejected": false,
+            "withdrawnByApplicant": false,
+            "active": true,
+            "closed": false,
+            "prematureClosed": false,
+            "transferInProgress": false,
+            "transferOnHold": false,
+            "matured": false
+          },
+          "subStatus": {
+            "id": 0,
+            "code": "SavingsAccountSubStatusEnum.none",
+            "value": "None",
+            "none": true,
+            "inactive": false,
+            "dormant": false,
+            "escheat": false,
+            "block": false,
+            "blockCredit": false,
+            "blockDebit": false
+          },
+          "timeline": {
+            "submittedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "submittedByUsername": "mifos",
+            "submittedByFirstname": "App",
+            "submittedByLastname": "Administrator",
+            "approvedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "approvedByUsername": "mifos",
+            "approvedByFirstname": "App",
+            "approvedByLastname": "Administrator",
+            "activatedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "activatedByUsername": "mifos",
+            "activatedByFirstname": "App",
+            "activatedByLastname": "Administrator"
+          },
+          "currency": {
+            "code": "CNY",
+            "name": "Chinese Yuan Renminbi",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "nameCode": "currency.CNY",
+            "displayLabel": "Chinese Yuan Renminbi [CNY]"
+          },
+          "nominalAnnualInterestRate": 1.5,
+          "interestCompoundingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestPostingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestCalculationType": {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+          },
+          "interestCalculationDaysInYearType": {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+          },
+          "withdrawalFeeForTransfers": false,
+          "allowOverdraft": false,
+          "enforceMinRequiredBalance": false,
+          "lienAllowed": false,
+          "withHoldTax": false,
+          "lastActiveTransactionDate": [
+            2026,
+            11,
+            7
+          ],
+          "isDormancyTrackingActive": false,
+          "summary": {
+            "currency": {
+              "code": "CNY",
+              "name": "Chinese Yuan Renminbi",
+              "decimalPlaces": 2,
+              "inMultiplesOf": 0,
+              "nameCode": "currency.CNY",
+              "displayLabel": "Chinese Yuan Renminbi [CNY]"
+            },
+            "totalInterestPosted": 0,
+            "accountBalance": 0.0,
+            "totalOverdraftInterestDerived": 0,
+            "interestNotPosted": 0,
+            "availableBalance": 0.0,
+            "runningBalanceOnInterestPostingTillDate": 0,
+            "runningBalanceOnPivotDate": 0
+          },
+          "activationLocalDate": [
+            2026,
+            11,
+            7
+          ],
+          "newSavingsAccountTransactionData": [],
+          "savingsAccountTransactionData": [],
+          "interestPostingPeriodTypeId": 1,
+          "depositTypeId": 100,
+          "interestCompoundingPeriodTypeId": 1,
+          "interestCalculationTypeId": 1,
+          "interestCalculationDaysInYearTypeId": 360,
+          "existingTransactionIds": [],
+          "existingReversedTransactionIds": [],
+          "startInterestCalculationDate": [
+            2026,
+            11,
+            7
+          ],
+          "cashBasedAccountingEnabledOnSavingsProduct": false,
+          "accrualBasedAccountingEnabledOnSavingsProduct": false
+        },
+        {
+          "total": 0,
+          "content": [],
+          "pageable": {
+            "sort": {
+              "orders": [
+                {
+                  "direction": "DESC",
+                  "property": "transaction_date",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "created_on_utc",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "id",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                }
+              ]
+            },
+            "pageNumber": 0,
+            "pageSize": 50
+          }
+        },
+        {
+          "transactionId": 4,
+          "newSourceBalance": 9990.0
+        }
+      ],
+      "externalId": "GAP-1794274742226"
+    },
+    {
+      "step": 4,
+      "name": "④ Fineract 侧独立核对：双账户余额变化 −10/+10 + 交易计数 +1",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/1 (after)",
+          "status": 200,
+          "elapsed": 0.26
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/1/transactions/search (after)",
+          "status": 200,
+          "elapsed": 0.37
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/2 (after)",
+          "status": 200,
+          "elapsed": 0.36
+        },
+        {
+          "method": "GET",
+          "path": "(fineract) savingsaccounts/2/transactions/search (after)",
+          "status": 200,
+          "elapsed": 0.39
+        }
+      ],
+      "asserts": [
+        {
+          "label": "账户 1 余额变化 = -10",
+          "pass": true,
+          "evidence": "10000.0 → 9990.0 (delta=-10.0)"
+        },
+        {
+          "label": "账户 1 交易计数 +1",
+          "pass": true,
+          "evidence": "1 → 2"
+        },
+        {
+          "label": "账户 2 余额变化 = +10",
+          "pass": true,
+          "evidence": "0.0 → 10.0 (delta=10.0)"
+        },
+        {
+          "label": "账户 2 交易计数 +1",
+          "pass": true,
+          "evidence": "0 → 1"
+        },
+        {
+          "label": "双账户余额变化对称（|−10| = |+10|）",
+          "pass": true,
+          "evidence": "src delta=-10.0, dst delta=10.0"
+        }
+      ],
+      "responses": [
+        {
+          "id": 1,
+          "accountNo": "000000001",
+          "depositType": {
+            "id": 100,
+            "code": "depositAccountType.savingsDeposit",
+            "value": "Savings"
+          },
+          "externalId": "ABNK-POC-A-SRC-1107114626",
+          "clientId": 1,
+          "clientName": "王 POC-A1107114626",
+          "savingsProductId": 1,
+          "savingsProductName": "ABNK-POC活期1107114626",
+          "fieldOfficerId": 0,
+          "status": {
+            "id": 300,
+            "code": "savingsAccountStatusType.active",
+            "value": "Active",
+            "submittedAndPendingApproval": false,
+            "approved": false,
+            "rejected": false,
+            "withdrawnByApplicant": false,
+            "active": true,
+            "closed": false,
+            "prematureClosed": false,
+            "transferInProgress": false,
+            "transferOnHold": false,
+            "matured": false
+          },
+          "subStatus": {
+            "id": 0,
+            "code": "SavingsAccountSubStatusEnum.none",
+            "value": "None",
+            "none": true,
+            "inactive": false,
+            "dormant": false,
+            "escheat": false,
+            "block": false,
+            "blockCredit": false,
+            "blockDebit": false
+          },
+          "timeline": {
+            "submittedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "submittedByUsername": "mifos",
+            "submittedByFirstname": "App",
+            "submittedByLastname": "Administrator",
+            "approvedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "approvedByUsername": "mifos",
+            "approvedByFirstname": "App",
+            "approvedByLastname": "Administrator",
+            "activatedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "activatedByUsername": "mifos",
+            "activatedByFirstname": "App",
+            "activatedByLastname": "Administrator"
+          },
+          "currency": {
+            "code": "CNY",
+            "name": "Chinese Yuan Renminbi",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "nameCode": "currency.CNY",
+            "displayLabel": "Chinese Yuan Renminbi [CNY]"
+          },
+          "nominalAnnualInterestRate": 1.5,
+          "interestCompoundingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestPostingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestCalculationType": {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+          },
+          "interestCalculationDaysInYearType": {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+          },
+          "withdrawalFeeForTransfers": false,
+          "allowOverdraft": false,
+          "enforceMinRequiredBalance": false,
+          "lienAllowed": false,
+          "withHoldTax": false,
+          "lastActiveTransactionDate": [
+            2027,
+            1,
+            16
+          ],
+          "isDormancyTrackingActive": false,
+          "summary": {
+            "currency": {
+              "code": "CNY",
+              "name": "Chinese Yuan Renminbi",
+              "decimalPlaces": 2,
+              "inMultiplesOf": 0,
+              "nameCode": "currency.CNY",
+              "displayLabel": "Chinese Yuan Renminbi [CNY]"
+            },
+            "totalDeposits": 10000.0,
+            "totalWithdrawals": 10.0,
+            "totalInterestEarned": 29.82,
+            "totalInterestPosted": 0,
+            "accountBalance": 9990.0,
+            "totalOverdraftInterestDerived": 0,
+            "interestNotPosted": 29.82,
+            "lastInterestCalculationDate": [
+              2027,
+              1,
+              16
+            ],
+            "availableBalance": 9990.0,
+            "runningBalanceOnInterestPostingTillDate": 0,
+            "runningBalanceOnPivotDate": 0
+          },
+          "activationLocalDate": [
+            2026,
+            11,
+            7
+          ],
+          "newSavingsAccountTransactionData": [],
+          "savingsAccountTransactionData": [],
+          "interestPostingPeriodTypeId": 1,
+          "depositTypeId": 100,
+          "interestCompoundingPeriodTypeId": 1,
+          "interestCalculationTypeId": 1,
+          "interestCalculationDaysInYearTypeId": 360,
+          "existingTransactionIds": [],
+          "existingReversedTransactionIds": [],
+          "startInterestCalculationDate": [
+            2026,
+            11,
+            7
+          ],
+          "cashBasedAccountingEnabledOnSavingsProduct": false,
+          "accrualBasedAccountingEnabledOnSavingsProduct": false
+        },
+        {
+          "total": 2,
+          "content": [
+            {
+              "id": 4,
+              "transactionType": {
+                "id": 2,
+                "code": "savingsAccountTransactionType.withdrawal",
+                "value": "Withdrawal",
+                "deposit": false,
+                "dividendPayout": false,
+                "withdrawal": true,
+                "interestPosting": false,
+                "feeDeduction": false,
+                "initiateTransfer": false,
+                "approveTransfer": false,
+                "withdrawTransfer": false,
+                "rejectTransfer": false,
+                "overdraftInterest": false,
+                "writtenoff": false,
+                "overdraftFee": false,
+                "withholdTax": false,
+                "escheat": false,
+                "amountHold": false,
+                "amountRelease": false,
+                "accrual": false
+              },
+              "entryType": "DEBIT",
+              "accountId": 1,
+              "accountNo": "000000001",
+              "externalId": "GAP-1794274742226-w",
+              "date": [
+                2027,
+                1,
+                16
+              ],
+              "currency": {
+                "code": "CNY",
+                "name": "Chinese Yuan Renminbi",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 0,
+                "nameCode": "currency.CNY",
+                "displayLabel": "Chinese Yuan Renminbi [CNY]"
+              },
+              "paymentDetailData": {
+                "id": 4,
+                "paymentType": {
+                  "id": 1,
+                  "name": "Money Transfer"
+                },
+                "accountNumber": "",
+                "checkNumber": "",
+                "routingCode": "",
+                "receiptNumber": "",
+                "bankNumber": ""
+              },
+              "amount": 10.0,
+              "runningBalance": 9990.0,
+              "reversed": false,
+              "submittedOnDate": [
+                2027,
+                1,
+                16
+              ],
+              "interestedPostedAsOn": false,
+              "submittedByUsername": "mifos",
+              "note": "网关转账 GAP-1794274742226：P3.3 缺口剧本（基线无拦截）",
+              "isManualTransaction": false,
+              "isReversal": false,
+              "originalTransactionId": 0,
+              "lienTransaction": false,
+              "releaseTransactionId": 0,
+              "chargesPaidByData": [],
+              "isOverdraft": false
+            },
+            {
+              "id": 1,
+              "transactionType": {
+                "id": 1,
+                "code": "savingsAccountTransactionType.deposit",
+                "value": "Deposit",
+                "deposit": true,
+                "dividendPayout": false,
+                "withdrawal": false,
+                "interestPosting": false,
+                "feeDeduction": false,
+                "initiateTransfer": false,
+                "approveTransfer": false,
+                "withdrawTransfer": false,
+                "rejectTransfer": false,
+                "overdraftInterest": false,
+                "writtenoff": false,
+                "overdraftFee": false,
+                "withholdTax": false,
+                "escheat": false,
+                "amountHold": false,
+                "amountRelease": false,
+                "accrual": false
+              },
+              "entryType": "CREDIT",
+              "accountId": 1,
+              "accountNo": "000000001",
+              "date": [
+                2026,
+                11,
+                7
+              ],
+              "currency": {
+                "code": "CNY",
+                "name": "Chinese Yuan Renminbi",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 0,
+                "nameCode": "currency.CNY",
+                "displayLabel": "Chinese Yuan Renminbi [CNY]"
+              },
+              "paymentDetailData": {
+                "id": 1,
+                "paymentType": {
+                  "id": 1,
+                  "name": "Money Transfer"
+                },
+                "accountNumber": "",
+                "checkNumber": "",
+                "routingCode": "",
+                "receiptNumber": "",
+                "bankNumber": ""
+              },
+              "amount": 10000.0,
+              "runningBalance": 10000.0,
+              "reversed": false,
+              "submittedOnDate": [
+                2026,
+                11,
+                7
+              ],
+              "interestedPostedAsOn": false,
+              "submittedByUsername": "mifos",
+              "note": "POC 源账户初始余额",
+              "isManualTransaction": false,
+              "isReversal": false,
+              "originalTransactionId": 0,
+              "lienTransaction": false,
+              "releaseTransactionId": 0,
+              "chargesPaidByData": [],
+              "isOverdraft": false
+            }
+          ],
+          "pageable": {
+            "sort": {
+              "orders": [
+                {
+                  "direction": "DESC",
+                  "property": "transaction_date",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "created_on_utc",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "id",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                }
+              ]
+            },
+            "pageNumber": 0,
+            "pageSize": 50
+          }
+        },
+        {
+          "id": 2,
+          "accountNo": "000000002",
+          "depositType": {
+            "id": 100,
+            "code": "depositAccountType.savingsDeposit",
+            "value": "Savings"
+          },
+          "externalId": "ABNK-POC-A-DST-1107114626",
+          "clientId": 1,
+          "clientName": "王 POC-A1107114626",
+          "savingsProductId": 1,
+          "savingsProductName": "ABNK-POC活期1107114626",
+          "fieldOfficerId": 0,
+          "status": {
+            "id": 300,
+            "code": "savingsAccountStatusType.active",
+            "value": "Active",
+            "submittedAndPendingApproval": false,
+            "approved": false,
+            "rejected": false,
+            "withdrawnByApplicant": false,
+            "active": true,
+            "closed": false,
+            "prematureClosed": false,
+            "transferInProgress": false,
+            "transferOnHold": false,
+            "matured": false
+          },
+          "subStatus": {
+            "id": 0,
+            "code": "SavingsAccountSubStatusEnum.none",
+            "value": "None",
+            "none": true,
+            "inactive": false,
+            "dormant": false,
+            "escheat": false,
+            "block": false,
+            "blockCredit": false,
+            "blockDebit": false
+          },
+          "timeline": {
+            "submittedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "submittedByUsername": "mifos",
+            "submittedByFirstname": "App",
+            "submittedByLastname": "Administrator",
+            "approvedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "approvedByUsername": "mifos",
+            "approvedByFirstname": "App",
+            "approvedByLastname": "Administrator",
+            "activatedOnDate": [
+              2026,
+              11,
+              7
+            ],
+            "activatedByUsername": "mifos",
+            "activatedByFirstname": "App",
+            "activatedByLastname": "Administrator"
+          },
+          "currency": {
+            "code": "CNY",
+            "name": "Chinese Yuan Renminbi",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 0,
+            "nameCode": "currency.CNY",
+            "displayLabel": "Chinese Yuan Renminbi [CNY]"
+          },
+          "nominalAnnualInterestRate": 1.5,
+          "interestCompoundingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestPostingPeriodType": {
+            "id": 1,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.daily",
+            "value": "Daily"
+          },
+          "interestCalculationType": {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+          },
+          "interestCalculationDaysInYearType": {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+          },
+          "withdrawalFeeForTransfers": false,
+          "allowOverdraft": false,
+          "enforceMinRequiredBalance": false,
+          "lienAllowed": false,
+          "withHoldTax": false,
+          "lastActiveTransactionDate": [
+            2027,
+            1,
+            16
+          ],
+          "isDormancyTrackingActive": false,
+          "summary": {
+            "currency": {
+              "code": "CNY",
+              "name": "Chinese Yuan Renminbi",
+              "decimalPlaces": 2,
+              "inMultiplesOf": 0,
+              "nameCode": "currency.CNY",
+              "displayLabel": "Chinese Yuan Renminbi [CNY]"
+            },
+            "totalDeposits": 10.0,
+            "totalInterestPosted": 0,
+            "accountBalance": 10.0,
+            "totalOverdraftInterestDerived": 0,
+            "interestNotPosted": 0,
+            "availableBalance": 10.0,
+            "runningBalanceOnInterestPostingTillDate": 0,
+            "runningBalanceOnPivotDate": 0
+          },
+          "activationLocalDate": [
+            2026,
+            11,
+            7
+          ],
+          "newSavingsAccountTransactionData": [],
+          "savingsAccountTransactionData": [],
+          "interestPostingPeriodTypeId": 1,
+          "depositTypeId": 100,
+          "interestCompoundingPeriodTypeId": 1,
+          "interestCalculationTypeId": 1,
+          "interestCalculationDaysInYearTypeId": 360,
+          "existingTransactionIds": [],
+          "existingReversedTransactionIds": [],
+          "startInterestCalculationDate": [
+            2026,
+            11,
+            7
+          ],
+          "cashBasedAccountingEnabledOnSavingsProduct": false,
+          "accrualBasedAccountingEnabledOnSavingsProduct": false
+        },
+        {
+          "total": 1,
+          "content": [
+            {
+              "id": 5,
+              "transactionType": {
+                "id": 1,
+                "code": "savingsAccountTransactionType.deposit",
+                "value": "Deposit",
+                "deposit": true,
+                "dividendPayout": false,
+                "withdrawal": false,
+                "interestPosting": false,
+                "feeDeduction": false,
+                "initiateTransfer": false,
+                "approveTransfer": false,
+                "withdrawTransfer": false,
+                "rejectTransfer": false,
+                "overdraftInterest": false,
+                "writtenoff": false,
+                "overdraftFee": false,
+                "withholdTax": false,
+                "escheat": false,
+                "amountHold": false,
+                "amountRelease": false,
+                "accrual": false
+              },
+              "entryType": "CREDIT",
+              "accountId": 2,
+              "accountNo": "000000002",
+              "externalId": "GAP-1794274742226-d",
+              "date": [
+                2027,
+                1,
+                16
+              ],
+              "currency": {
+                "code": "CNY",
+                "name": "Chinese Yuan Renminbi",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 0,
+                "nameCode": "currency.CNY",
+                "displayLabel": "Chinese Yuan Renminbi [CNY]"
+              },
+              "paymentDetailData": {
+                "id": 5,
+                "paymentType": {
+                  "id": 1,
+                  "name": "Money Transfer"
+                },
+                "accountNumber": "",
+                "checkNumber": "",
+                "routingCode": "",
+                "receiptNumber": "",
+                "bankNumber": ""
+              },
+              "amount": 10.0,
+              "runningBalance": 10.0,
+              "reversed": false,
+              "submittedOnDate": [
+                2027,
+                1,
+                16
+              ],
+              "interestedPostedAsOn": false,
+              "submittedByUsername": "mifos",
+              "note": "网关转账 GAP-1794274742226：P3.3 缺口剧本（基线无拦截）",
+              "isManualTransaction": false,
+              "isReversal": false,
+              "originalTransactionId": 0,
+              "lienTransaction": false,
+              "releaseTransactionId": 0,
+              "chargesPaidByData": [],
+              "isOverdraft": false
+            }
+          ],
+          "pageable": {
+            "sort": {
+              "orders": [
+                {
+                  "direction": "DESC",
+                  "property": "transaction_date",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "created_on_utc",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                },
+                {
+                  "direction": "DESC",
+                  "property": "id",
+                  "ignoreCase": false,
+                  "nullHandling": "NATIVE"
+                }
+              ]
+            },
+            "pageNumber": 0,
+            "pageSize": 50
+          }
+        }
+      ],
+      "fineractVerify": {
+        "1": {
+          "before": 10000.0,
+          "after": 9990.0,
+          "delta": -10.0,
+          "txnBefore": 1,
+          "txnAfter": 2
+        },
+        "2": {
+          "before": 0.0,
+          "after": 10.0,
+          "delta": 10.0,
+          "txnBefore": 0,
+          "txnAfter": 1
+        }
+      }
+    }
+  ]
+}

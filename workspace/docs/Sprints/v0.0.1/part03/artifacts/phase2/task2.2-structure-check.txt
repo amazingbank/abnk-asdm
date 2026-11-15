@@ -1,0 +1,17 @@
+# 任务 2.2 双语数据集结构对齐校验（V2.2.2）
+
+> 日期：2026-11-12 · 校验脚本 = Phase 2 文档 V2.2.2 原文 node 脚本（递归键集合比对 + 记录数比对）
+
+```
+$ node -e '...' $BO/src/api/mock/mockData/zh-cn/clients.json $BO/src/api/mock/mockData/en-us/clients.json $BO/src/api/mock/mockData/zh-cn/operators.json $BO/src/api/mock/mockData/en-us/operators.json
+
+clientsCount=true
+clientsKeys=true
+operators=true
+```
+
+## 判读
+
+- `clientsCount=true`：两数据集客户数相等（3 = 3）
+- `clientsKeys=true`：逐客户（按数组下标配对）递归键集合完全一致
+- `operators=true`：运营员数相等（1 = 1）且逐条递归键集合一致

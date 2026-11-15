@@ -1,0 +1,93 @@
+Task P2.5 内部通道与通道隔离 —— 执行证据（2026-11-08）
+====================================================================
+
+[环境基线]
+- 网关：channels/gateway（:8080，bootRun，JDK 25.0.5+8-tem，Boot 3.5.6 + SCG 2025.0.0）
+- 转发目标：本地生产形态栈 abnk-fineract（:8081）——health UP
+- 用户表：ABNK_USERS_FILE=../../data/gateway_users.local.json（本地栈实例，P2.3/P2.4 口径：
+  alice clientId=28 / bob clientId=29 / admin 无 clientId → sub=username）
+- 种子：P0.3 本地种子（客户 A=alice/28 过期证照 expiryDate=2020-01-01；客户 B=bob/29；客户 C=30 逾期贷款）
+- 网关重启基线：kill :8080 → bootRun → "Started GatewayApplication" 计数 1、/actuator/health UP；
+  日志仅 1 条 netty macOS DNS native 库告警（已知无害，非错误）
+
+[VP2.5.1 编译门槛 + 单测] PASS（2026-11-08）
+- 命令：cd $GW && JAVA_HOME=$JDK25 ./gradlew test --tests '*internal*'
+  （含 -DsocksProxyHost= 空覆盖——沿用 P2.2 归档的全局 SOCKS 代理坑位口径）
+- 输出：BUILD SUCCESSFUL in 8s；internal 单测 10/10 全绿（BoRouteFilterTest，
+  XML failures=0 errors=0）：
+  * 隔离三类 3：customerTokenOnBoChannelForbidden（filter 直测 403）+
+    customerTokenOnBoChannelThroughFullChain（真实 JWT 全链路 403）、internalTokenPassesThrough
+    （桩链 200 = SCG 转发发生）、fineractJsonBlockedOnInternalChannel（404）+
+    fineractJsonThroughFullChain（真实 JWT 404）
+  * 放行矩阵余项 4：jobsAllowedOnInternalChannel / configurationsAllowedOnInternalChannel
+    （对内合法）、missingChannelAttributeBlocked（无通道属性防御 403）、nonBoPathsUntouched
+    （非 /bo/api/ 前缀不干预——对客面归 BlacklistFilter）
+  * 鉴权先行 1：missingTokenOnBoChannelStill401（BearerTokenFilter 先于通道隔离）
+- 全量回归：./gradlew test → BUILD SUCCESSFUL，55/55 全绿
+  （auth 10 + customer 26 + transfer 9 + internal 10——P2.2/P2.3/P2.4 组件无破坏）
+- 单测设计声明：internal token 的 200 放行在 MOCK 环境下不发起真实 bo 请求
+  （SCG 转发会触真实下游），密闭性由桩链承载，运行时 200 判据由 VP2.5.2 落地
+
+[VP2.5.2 API·admin 登录与 bo 面] PASS（2026-11-08）
+- admin 登录（口令自 .github-private/kbank-poc/gateway-demo-passwords.json
+  local-prodform 节读取，不入本证据）→ 200：
+  channel=internal、sub=admin（admin 无 clientId → sub=username，P2.2 口径）、expiresIn=900
+- JWT 第二段 base64url 解码（python3 urlsafe_b64decode）：
+  {"channel":"internal","sub":"admin","exp":...,"iat":...,"jti":"8c4b97ca46a52021"}
+- GET /bo/api/v1/clients?limit=10（Bearer admin token）→ HTTP 200：
+  totalFilteredRecords=29（≥ 3 断言 PASS）、pageItems=10
+  种子客户 A/B/C 可见：28 王POC-A1107104347 / 29 李POC-B1107104347 / 30 赵POC-C1107104347
+  （与 local 实例 alice=28 bob=29 对齐）
+
+[VP2.5.3 API·identifiers PUT 经网关] PASS（2026-11-08）
+- 定位：GET /bo/api/v1/clients/28/identifiers → id=8（documentKey=ID-A-1107104347，
+  description=身份证(已过期)，expiryDate=2020-01-01，documentType=Passport）
+- PUT /bo/api/v1/clients/28/identifiers/8
+  载荷 {"expiryDate":"2099-12-31","locale":"en","dateFormat":"yyyy-MM-dd"}
+  （P0.2 VP0.2.1 归档形态）→ HTTP 200，响应 {"officeId":1,"clientId":28,"resourceId":8,
+  "changes":{"expiryDate":[2099,12,31]}}
+- 回读 GET .../identifiers/8 → expiryDate=[2099,12,31]（Fineract 回读为数组形态 [Y,M,D]，
+  归一化 2099-12-31 与 PUT 一致）——旅程 Step 7 证照修复端点的网关侧前提成立
+- 种子恢复（配对命令）：PUT expiryDate=2020-01-01 → HTTP 200；回读 [2020,1,1] →
+  **恢复断言 PASS：expiryDate = 2020-01-01**
+- 交叉验证（双通道种子态确认）：对客通道 alice GET /abnk/api/v1/me/identity →
+  {"status":"EXPIRED","expiryDate":"2020-01-01"}——种子过期态经 bo 写 + 对客读双向确认恢复
+
+[VP2.5.4 API·隔离负向] PASS（2026-11-08）
+- alice 登录 → channel=customer、sub=28
+- GET /bo/api/v1/clients?limit=10（Bearer alice token）→ HTTP 403：
+  {"error":"forbidden","message":"internal channel requires internal channel token"}
+  ——BoRouteFilter 通道隔离生效（对客 token 永不可达内部面）
+- 附加断言 1：无 token 打 bo 面 → 401（BearerTokenFilter 鉴权先于隔离，载荷
+  {"error":"unauthorized","message":"missing bearer token"}）
+- 附加断言 2：alice 打 /bo/api/v1/fineract.json → 403（通道判定先于路径判定——
+  对客 token 不因路径黑名单降级 404 而泄露路径存在性）
+
+[交付物清单]
+- internal/BoRouteFilter.java（/bo/api/** 通道隔离：channel=internal 放行 / customer 403 /
+  fineract.json 404；jobs、configurations 对内合法放行；WebFilter order -80——
+  BearerTokenFilter(-100) → BlacklistFilter(-90) → 本过滤器）
+- src/test/java/.../internal/BoRouteFilterTest.java（隔离单测 10 用例，两层覆盖：
+  filter 直测桩链 + 全链路真实 JWT 短路断言）
+- application.yml（bo-channel 路由注释登记放行矩阵：
+  internal → jobs ✅ / configurations ✅ / fineract.json ❌(404) / 其余 ✅；
+  customer → /bo/api/** 全部 ❌(403)）
+
+[调试插曲归档]
+1.（VP2.5.2 首验 401）口令提取路径误取 gateway-demo-passwords.json 的 users.admin
+   整对象（dict 含 password/clientId 两键）作 password 传入登录载荷；改为
+   users.admin.password 后登录通过。前置自检（PBKDF2 复算 admin hash 与
+   gateway_users.local.json 比对 = True）先行通过，排除口令值本身错误
+2.（VP2.5.3 断言脚本误报）恢复断言将回读 expiryDate 与字符串 '2020-01-01' 直比，
+   而 Fineract 回读日期为数组形态 [2020,1,1]（数据本身已正确恢复）；归一化
+   （[Y,M,D] → Y-M-D）后断言通过。非网关缺陷，属断言脚本形态口径
+3.（构建环境）~/.gradle/gradle.properties 全局 SOCKS 代理（127.0.0.1:3322）未运行——
+   沿用 P2.2 归档口径，构建/测试/bootRun 命令一律追加
+   -DsocksProxyHost= -DsocksProxyPort= 空覆盖直连
+4.（网关重启后日志）1 条 netty MacOSDnsServerAddressStreamProvider 告警（ERROR 级
+   但为 native 库缺失的已知无害告警，fallback 系统默认解析）——不影响功能，归档备查
+
+[敏感复核]
+- 6 个演示口令真实值（local-prodform + server 双实例 × alice/bob/admin）对
+  artifacts/phaseP2/ 与 channels/gateway/src 递归 grep 命中总数 = 0
+- 短时效 JWT token（TTL 15min）不出现在本证据正文

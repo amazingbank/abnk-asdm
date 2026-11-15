@@ -1,0 +1,4 @@
+zh keys = 13 ['appName', 'errAuth', 'errForbidden', 'errNetwork', 'errServer', 'errUnknown', 'navHome', 'navLoans', 'navProfile', 'navTransactions', 'profileLanguageEn', 'profileLanguageTitle', 'profileLanguageZh']
+en keys = 13 ['appName', 'errAuth', 'errForbidden', 'errNetwork', 'errServer', 'errUnknown', 'navHome', 'navLoans', 'navProfile', 'navTransactions', 'profileLanguageEn', 'profileLanguageTitle', 'profileLanguageZh']
+diff = {'zh_only': [], 'en_only': []}
+keySetsIdentical = True

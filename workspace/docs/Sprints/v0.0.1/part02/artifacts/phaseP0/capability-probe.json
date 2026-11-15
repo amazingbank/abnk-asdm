@@ -1,0 +1,402 @@
+{
+  "runAt": "2026-11-07T10:08:19",
+  "baseUrl": "http://localhost:8081/fineract-provider/api/v1",
+  "businessDate": "2026-11-08",
+  "tsSuffix": "1107100818",
+  "contractNote": "生产形态栈 /api-docs 实测返回空 paths（springdoc 未产出），契约以 Fineract 源码 Swagger 注解与集成测试 helper 为事实源",
+  "scenarios": [
+    {
+      "scenario": "VP0.2.1",
+      "name": "identifiers PUT 闭环",
+      "purpose": "旅程 Step 7 证照有效期修复端点实测",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/clients",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/clients/12/identifiers",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/clients/12/identifiers/4",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/clients/12/identifiers/4",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/clients/12/identifiers/4",
+          "status": 200
+        }
+      ],
+      "asserts": [
+        {
+          "label": "建证照成功（200 + resourceId）",
+          "pass": true,
+          "evidence": "status=200 identifierId=4"
+        },
+        {
+          "label": "PUT 前回读 expiryDate = 2020-01-01",
+          "pass": true,
+          "evidence": "2020-01-01"
+        },
+        {
+          "label": "PUT 后回读 expiryDate = 2099-12-31",
+          "pass": true,
+          "evidence": "2099-12-31"
+        }
+      ],
+      "readback": {
+        "clientId": 12,
+        "documentTypeId": 1,
+        "expiryDateBeforePut": "2020-01-01",
+        "expiryDateAfterPut": "2099-12-31",
+        "putPayload": "{\"expiryDate\": \"2099-12-31\", \"locale\": \"en\", \"dateFormat\": \"yyyy-MM-dd\"}"
+      },
+      "conclusion": "PUT /clients/{clientId}/identifiers/{identifierId} 可用：expiry_date 由 2020-01-01 更新为 2099-12-31 回读一致；旅程 Step 7 证照修复可直接走 PUT 闭环（载荷须带 locale+dateFormat）"
+    },
+    {
+      "scenario": "VP0.2.2",
+      "name": "贷款全链路",
+      "purpose": "POC 主线贷款端点行为基线（产品→申请→审批→发放→还款）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/clients",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/loanproducts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/loans",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/loans/4?command=approve",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/loans/4?command=disburse",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/loans/4?associations=all",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/loans/4/transactions?command=repayment",
+          "status": 200
+        }
+      ],
+      "asserts": [
+        {
+          "label": "客户储蓄账户就绪（申请→审批→激活）",
+          "pass": true,
+          "evidence": "savingsId=5"
+        },
+        {
+          "label": "储蓄账户余额 = 8000（两笔交易后）",
+          "pass": true,
+          "evidence": "8000.0"
+        },
+        {
+          "label": "建贷款产品成功",
+          "pass": true,
+          "evidence": "productId=4"
+        },
+        {
+          "label": "贷款申请成功",
+          "pass": true,
+          "evidence": "loanId=4"
+        },
+        {
+          "label": "approve 200",
+          "pass": true,
+          "evidence": "200"
+        },
+        {
+          "label": "disburse 200",
+          "pass": true,
+          "evidence": "200"
+        },
+        {
+          "label": "贷款状态 active（Phase 1 行为基线）",
+          "pass": true,
+          "evidence": "{'id': 300, 'code': 'loanStatusType.active', 'value': 'Active', 'pendingApproval': False, 'waitingForDisbursal': False, 'active': True, 'closedObligationsMet': False, 'closedWrittenOff': False, 'closedRescheduled': False, 'closed': False, 'overpaid': False}"
+        },
+        {
+          "label": "还款计划 ≥13 期（含放款行）",
+          "pass": true,
+          "evidence": "periods=13"
+        },
+        {
+          "label": "repayment 4000 成功（200）",
+          "pass": true,
+          "evidence": "12"
+        }
+      ],
+      "readback": {
+        "clientId": 13,
+        "savingsAccountId": 5,
+        "savingsProductId": 5,
+        "savingsTxnIds": [
+          9,
+          10
+        ],
+        "savingsBalance": 8000.0,
+        "loanProductId": 4,
+        "loanId": 4,
+        "loanStatus": {
+          "id": 300,
+          "code": "loanStatusType.active",
+          "value": "Active",
+          "pendingApproval": false,
+          "waitingForDisbursal": false,
+          "active": true,
+          "closedObligationsMet": false,
+          "closedWrittenOff": false,
+          "closedRescheduled": false,
+          "closed": false,
+          "overpaid": false
+        },
+        "repaymentPeriods": 13,
+        "totalOutstandingAfterRepayment": 48749.54
+      },
+      "conclusion": "贷款全链路对生产形态全绿：等额本息 12 期、发放 50000、还款 4000 后状态 active、 totalOutstanding=48749.54；与 Phase 1 行为基线一致"
+    },
+    {
+      "scenario": "VP0.2.3",
+      "name": "定期开户链路",
+      "purpose": "旅程 Step 5 定期产品前提：产品→账户→审批→激活→maturity 回读",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/clients",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/fixeddepositproducts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/fixeddepositaccounts",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/fixeddepositaccounts/6?command=approve",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/fixeddepositaccounts/6?command=activate",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/fixeddepositaccounts/6",
+          "status": 200
+        }
+      ],
+      "asserts": [
+        {
+          "label": "建定期产品成功",
+          "pass": true,
+          "evidence": "status=200 productId=6"
+        },
+        {
+          "label": "定期账户申请成功",
+          "pass": true,
+          "evidence": "status=200 accountId=6"
+        },
+        {
+          "label": "定期账户 approve 200",
+          "pass": true,
+          "evidence": "200"
+        },
+        {
+          "label": "定期账户 activate 200",
+          "pass": true,
+          "evidence": "200"
+        },
+        {
+          "label": "定期账户状态 active",
+          "pass": true,
+          "evidence": "{'id': 300, 'code': 'savingsAccountStatusType.active', 'value': 'Active', 'submittedAndPendingApproval': False, 'approved': False, 'rejected': False, 'withdrawnByApplicant': False, 'active': True, 'closed': False, 'prematureClosed': False, 'transferInProgress': False, 'transferOnHold': False, 'matured': False}"
+        },
+        {
+          "label": "maturity 日期字段存在",
+          "pass": true,
+          "evidence": "2027-11-08"
+        },
+        {
+          "label": "maturityAmount 字段存在",
+          "pass": true,
+          "evidence": "10304.18"
+        },
+        {
+          "label": "对年对月对日判定：到期日 = 激活日 + 12 个月（2027-11-08）",
+          "pass": true,
+          "evidence": "maturityDate=2027-11-08 expected=2027-11-08"
+        }
+      ],
+      "readback": {
+        "clientId": 14,
+        "fdProductId": 6,
+        "fdAccountId": 6,
+        "maturityDate": "2027-11-08",
+        "maturityAmount": 10304.18,
+        "depositPeriod": 12,
+        "fdStatus": {
+          "id": 300,
+          "code": "savingsAccountStatusType.active",
+          "value": "Active",
+          "submittedAndPendingApproval": false,
+          "approved": false,
+          "rejected": false,
+          "withdrawnByApplicant": false,
+          "active": true,
+          "closed": false,
+          "prematureClosed": false,
+          "transferInProgress": false,
+          "transferOnHold": false,
+          "matured": false
+        }
+      },
+      "conclusion": "定期开户链路全绿：12 个月期 maturityDate=2027-11-08（对年对月对日成立），maturityAmount=10304.18；旅程 Step 5 数据前提成立"
+    },
+    {
+      "scenario": "VP0.2.4",
+      "name": "储蓄交易明细字段",
+      "purpose": "旅程 Step 6 明细展示与 P2.3 透传聚合的数据前提",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/savingsaccounts/5/transactions/search",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/savingsaccounts/5/transactions/query",
+          "status": 200
+        }
+      ],
+      "asserts": [
+        {
+          "label": "search 200",
+          "pass": true,
+          "evidence": "200"
+        },
+        {
+          "label": "分页结构（content + total，实测 Spring 标准分页）",
+          "pass": true,
+          "evidence": "keys=['content', 'pageable', 'total']"
+        },
+        {
+          "label": "交易明细 ≥2 笔（存 10000 + 取 2000）",
+          "pass": true,
+          "evidence": "items=2"
+        },
+        {
+          "label": "item 含 runningBalance 字段",
+          "pass": true,
+          "evidence": "[8000.0, 10000.0]"
+        },
+        {
+          "label": "query 高级查询 200",
+          "pass": true,
+          "evidence": "status=200"
+        }
+      ],
+      "readback": {
+        "savingsAccountId": 5,
+        "searchPageShape": {
+          "total": 2
+        },
+        "searchItemFields": [
+          "accountId",
+          "accountNo",
+          "amount",
+          "chargesPaidByData",
+          "currency",
+          "date",
+          "entryType",
+          "id",
+          "interestedPostedAsOn",
+          "isManualTransaction",
+          "isOverdraft",
+          "isReversal",
+          "lienTransaction",
+          "note",
+          "originalTransactionId",
+          "paymentDetailData",
+          "releaseTransactionId",
+          "reversed",
+          "runningBalance",
+          "submittedByUsername",
+          "submittedOnDate",
+          "transactionType"
+        ],
+        "searchItemSample": {
+          "id": 10,
+          "transactionType": "Withdrawal",
+          "amount": 2000.0,
+          "runningBalance": 8000.0
+        },
+        "runningBalanceSeries": [
+          [
+            "Withdrawal",
+            2000.0,
+            8000.0
+          ],
+          [
+            "Deposit",
+            10000.0,
+            10000.0
+          ]
+        ],
+        "queryPayload": "{\"page\": 0, \"size\": 50, \"locale\": \"en\", \"dateFormat\": \"yyyy-MM-dd\", \"request\": {\"baseQuery\": {\"columnFilters\": [{\"column\": \"amount\", \"filters\": [{\"operator\": \"GTE\", \"values\": [\"0\"]}]}], \"resultColumns\": [\"id\", \"transaction_date\", \"amount\", \"transaction_type_enum\", \"running_balance_derived\"]}}}",
+        "queryResponseShape": "spring-page(content/total)",
+        "queryItemCount": 2,
+        "queryFirstItem": {
+          "id": 10,
+          "transaction_date": "2026-11-08",
+          "amount": 2000.0,
+          "transaction_type_enum": 2,
+          "running_balance_derived": 8000.0
+        }
+      },
+      "conclusion": "两种明细形态均可用：GET search 为分页结构（实测字段 content/total/pageable——与计划文档预设的 totalFilteredRecords/pageItems 有差异，P2.3 按实测字段名对接），item 含 runningBalance/transactionType/amount 共 22 字段；POST query 高级查询实测 200；旅程 Step 6 明细展示建议采用 search 形态"
+    }
+  ],
+  "summary": {
+    "allPassed": true,
+    "scenarioCount": 4,
+    "keyEndpoints": [
+      "PUT /clients/{id}/identifiers/{id}",
+      "POST /loanproducts",
+      "POST /loans + approve/disburse/repayment",
+      "POST /fixeddepositproducts",
+      "POST /fixeddepositaccounts",
+      "GET /savingsaccounts/{id}/transactions/search",
+      "POST /savingsaccounts/{id}/transactions/query"
+    ]
+  }
+}

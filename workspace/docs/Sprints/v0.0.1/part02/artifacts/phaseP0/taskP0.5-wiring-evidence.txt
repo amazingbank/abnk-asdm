@@ -1,0 +1,8 @@
+=== VP0.5.3 devRun with --args='--abnk.localization.enabled=true' (2026-11-07) ===
+    APACHE FINERACT IS READY
+[2m2026-11-07 11:59:20.156[0;39m [32m- INFO[0;39m [35m58923[0;39m [32m[0;39m [        default] [2m---[0;39m [2m[           main][0;39m [36mc.a.f.l.s.AbnkLocalizationStarterMarker [0;39m [2m:[0;39m ABNK localization starter loaded
+marker-count=1
+
+=== VP0.5.4 devRun WITHOUT --args (default abnk.localization.enabled unset) (2026-11-07) ===
+    APACHE FINERACT IS READY
+marker-count=0 (expected 0)

@@ -1,0 +1,610 @@
+{
+  "runAt": "2026-10-25T09:41:57",
+  "ok": true,
+  "summary": {
+    "businessDate": "2026-10-24",
+    "advancedTo": "2026-10-25",
+    "ts": "1025094135",
+    "officeId": 14,
+    "staffId": 11,
+    "clientId": 11,
+    "savingsId": 6,
+    "loanId": 3
+  },
+  "steps": [
+    {
+      "step": 1,
+      "name": "建办公室",
+      "request": "POST /offices",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "resourceId": 14
+      },
+      "asserts": [
+        {
+          "label": "返回办公室 id",
+          "pass": true,
+          "evidence": 14
+        },
+        {
+          "label": "offices 列表可见",
+          "pass": true,
+          "evidence": "ABNK冒烟支行1025094135"
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "name": "建职员",
+      "request": "POST /staff",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "resourceId": 11
+      },
+      "asserts": [
+        {
+          "label": "返回职员 id",
+          "pass": true,
+          "evidence": 11
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "name": "建客户",
+      "request": "POST /clients",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "resourceId": 11,
+        "resourceExternalId": "ABNK-CLI-1025094135"
+      },
+      "asserts": [
+        {
+          "label": "返回客户 id",
+          "pass": true,
+          "evidence": 11
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "name": "激活客户",
+      "request": "POST /clients/11?command=activate",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "resourceId": 11,
+        "resourceExternalId": "ABNK-CLI-1025094135"
+      },
+      "asserts": [
+        {
+          "label": "客户状态 active",
+          "pass": true,
+          "evidence": "Active"
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "name": "建储蓄产品",
+      "request": "POST /savingsproducts",
+      "status": 200,
+      "response": {
+        "resourceId": 6
+      },
+      "asserts": [
+        {
+          "label": "返回产品 id",
+          "pass": true,
+          "evidence": 6
+        },
+        {
+          "label": "币种 CNY 生效",
+          "pass": true,
+          "evidence": null
+        }
+      ]
+    },
+    {
+      "step": 6,
+      "name": "储蓄账户三段式",
+      "request": "POST /savingsaccounts",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "savingsId": 6,
+        "resourceId": 6,
+        "gsimId": 0
+      },
+      "asserts": [
+        {
+          "label": "返回账户 id",
+          "pass": true,
+          "evidence": 6
+        },
+        {
+          "label": "账户状态 active",
+          "pass": true,
+          "evidence": {
+            "id": 300,
+            "code": "savingsAccountStatusType.active",
+            "value": "Active",
+            "submittedAndPendingApproval": false,
+            "approved": false,
+            "rejected": false,
+            "withdrawnByApplicant": false,
+            "active": true,
+            "closed": false,
+            "prematureClosed": false,
+            "transferInProgress": false,
+            "transferOnHold": false,
+            "matured": false
+          }
+        }
+      ]
+    },
+    {
+      "step": 7,
+      "name": "存款与取款",
+      "asserts": [
+        {
+          "label": "存在可用支付方式",
+          "pass": true,
+          "evidence": [
+            "Money Transfer",
+            "Repayment Adjustment Chargeback",
+            "Repayment Adjustment Refund"
+          ]
+        },
+        {
+          "label": "存款 10000 成功",
+          "pass": true,
+          "evidence": 9
+        },
+        {
+          "label": "取款 2000 成功",
+          "pass": true,
+          "evidence": 10
+        },
+        {
+          "label": "余额 = 8000",
+          "pass": true,
+          "evidence": 8000.0
+        }
+      ],
+      "request": "POST /savingsaccounts/6/transactions?command=withdrawal",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "savingsId": 6,
+        "resourceId": 10,
+        "changes": {
+          "paymentTypeId": 1
+        }
+      }
+    },
+    {
+      "step": 8,
+      "name": "贷款四段式",
+      "request": "POST /loans",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "loanId": 3,
+        "resourceId": 3,
+        "resourceExternalId": "ABNK-LN-1025094135"
+      },
+      "asserts": [
+        {
+          "label": "返回贷款产品 id",
+          "pass": true,
+          "evidence": 3
+        },
+        {
+          "label": "返回贷款 id",
+          "pass": true,
+          "evidence": 3
+        },
+        {
+          "label": "贷款状态 active",
+          "pass": true,
+          "evidence": {
+            "id": 300,
+            "code": "loanStatusType.active",
+            "value": "Active",
+            "pendingApproval": false,
+            "waitingForDisbursal": false,
+            "active": true,
+            "closedObligationsMet": false,
+            "closedWrittenOff": false,
+            "closedRescheduled": false,
+            "closed": false,
+            "overpaid": false
+          }
+        },
+        {
+          "label": "还款计划 13 期（含放款行）",
+          "pass": true,
+          "evidence": "periods=13"
+        },
+        {
+          "label": "还款计划可查询",
+          "pass": true,
+          "evidence": [
+            [
+              2026,
+              10,
+              24
+            ],
+            [
+              2026,
+              11,
+              24
+            ],
+            [
+              2026,
+              12,
+              24
+            ],
+            [
+              2027,
+              1,
+              24
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "step": 9,
+      "name": "部分还款",
+      "request": "POST /loans/3/transactions?command=repayment",
+      "status": 200,
+      "response": {
+        "officeId": 14,
+        "clientId": 11,
+        "loanId": 3,
+        "resourceId": 7,
+        "changes": {
+          "transactionDate": "2026-10-24",
+          "transactionAmount": "4000",
+          "locale": "en",
+          "dateFormat": "yyyy-MM-dd",
+          "note": "phase1 repayment"
+        }
+      },
+      "asserts": [
+        {
+          "label": "还款 4000 成功",
+          "pass": true,
+          "evidence": 7
+        }
+      ]
+    },
+    {
+      "step": 10,
+      "name": "推进业务日期",
+      "request": "POST /businessdate",
+      "status": 200,
+      "response": {
+        "description": "Business Date",
+        "type": "BUSINESS_DATE",
+        "date": [
+          2026,
+          10,
+          25
+        ],
+        "changes": {
+          "COB_DATE": [
+            2026,
+            10,
+            24
+          ],
+          "BUSINESS_DATE": [
+            2026,
+            10,
+            25
+          ]
+        }
+      },
+      "asserts": [
+        {
+          "label": "业务日期推进到 2026-10-25",
+          "pass": true,
+          "evidence": [
+            2026,
+            10,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "step": 11,
+      "name": "触发日终 COB 与作业",
+      "request": "POST /jobs/LOAN_COB/inline",
+      "status": 200,
+      "response": {},
+      "asserts": [
+        {
+          "label": "LOAN_COB inline 200",
+          "pass": true,
+          "evidence": "{}"
+        },
+        {
+          "label": "executeJob Post Interest For Savings 触发",
+          "pass": true,
+          "evidence": 202
+        },
+        {
+          "label": "executeJob Add Accrual Transactions 触发",
+          "pass": true,
+          "evidence": 202
+        },
+        {
+          "label": "executeJob Update Loan Arrears Ageing 触发",
+          "pass": true,
+          "evidence": 202
+        },
+        {
+          "label": "executeJob Loan Delinquency Classification 触发",
+          "pass": true,
+          "evidence": 202
+        }
+      ]
+    },
+    {
+      "step": 12,
+      "name": "日终效果与关户校验",
+      "asserts": [
+        {
+          "label": "对比完成（差异已入报告）",
+          "pass": true,
+          "evidence": {
+            "loan": [],
+            "savings": [
+              "summary.accountBalance",
+              "summary.totalInterestPosted",
+              "summary.totalInterestEarned",
+              "summary.availableBalance"
+            ]
+          }
+        },
+        {
+          "label": "关户被拒（负向：账户未清）",
+          "pass": true,
+          "evidence": "HTTP 400"
+        }
+      ]
+    }
+  ],
+  "snapshots": {
+    "loan_schedule": [
+      [
+        2026,
+        10,
+        24
+      ],
+      [
+        2026,
+        11,
+        24
+      ],
+      [
+        2026,
+        12,
+        24
+      ],
+      [
+        2027,
+        1,
+        24
+      ],
+      [
+        2027,
+        2,
+        24
+      ],
+      [
+        2027,
+        3,
+        24
+      ],
+      [
+        2027,
+        4,
+        24
+      ],
+      [
+        2027,
+        5,
+        24
+      ],
+      [
+        2027,
+        6,
+        24
+      ],
+      [
+        2027,
+        7,
+        24
+      ],
+      [
+        2027,
+        8,
+        24
+      ],
+      [
+        2027,
+        9,
+        24
+      ],
+      [
+        2027,
+        10,
+        24
+      ]
+    ],
+    "loan_before_cob": {
+      "summary.totalPrincipal": 50000.0,
+      "summary.totalCapitalizedIncome": 0.0,
+      "summary.totalCapitalizedIncomeAdjustment": 0.0,
+      "summary.principalDisbursed": 50000.0,
+      "summary.principalAdjustments": 0.0,
+      "summary.principalPaid": 3583.33,
+      "summary.principalWrittenOff": 0.0,
+      "summary.principalOutstanding": 46416.67,
+      "summary.principalOverdue": 0,
+      "summary.interestCharged": 2749.54,
+      "summary.interestPaid": 416.67,
+      "summary.interestWaived": 0.0,
+      "summary.interestWrittenOff": 0.0,
+      "summary.interestOutstanding": 2332.87,
+      "summary.interestOverdue": 0,
+      "summary.feeChargesCharged": 0.0,
+      "summary.feeAdjustments": 0.0,
+      "summary.feeChargesDueAtDisbursementCharged": 0.0,
+      "summary.feeChargesPaid": 0.0,
+      "summary.feeChargesWaived": 0.0,
+      "summary.feeChargesWrittenOff": 0.0,
+      "summary.feeChargesOutstanding": 0.0,
+      "summary.feeChargesOverdue": 0,
+      "summary.penaltyChargesCharged": 0.0,
+      "summary.penaltyAdjustments": 0.0,
+      "summary.penaltyChargesPaid": 0.0,
+      "summary.penaltyChargesWaived": 0.0,
+      "summary.penaltyChargesWrittenOff": 0.0,
+      "summary.penaltyChargesOutstanding": 0.0,
+      "summary.penaltyChargesOverdue": 0,
+      "summary.totalExpectedRepayment": 52749.54,
+      "summary.totalRepayment": 4000.0,
+      "summary.totalExpectedCostOfLoan": 2749.54,
+      "summary.totalCostOfLoan": 416.67,
+      "summary.totalWaived": 0.0,
+      "summary.totalWrittenOff": 0.0,
+      "summary.totalOutstanding": 48749.54,
+      "summary.totalOverdue": 0,
+      "summary.totalRecovered": 0,
+      "summary.totalMerchantRefund": 0,
+      "summary.totalMerchantRefundReversed": 0,
+      "summary.totalPayoutRefund": 0,
+      "summary.totalPayoutRefundReversed": 0,
+      "summary.totalGoodwillCredit": 0,
+      "summary.totalGoodwillCreditReversed": 0,
+      "summary.totalChargeAdjustment": 0,
+      "summary.totalChargeAdjustmentReversed": 0,
+      "summary.totalChargeback": 0,
+      "summary.totalCreditBalanceRefund": 0,
+      "summary.totalCreditBalanceRefundReversed": 0,
+      "summary.totalRepaymentTransaction": 4000.0,
+      "summary.totalRepaymentTransactionReversed": 0,
+      "summary.totalInterestPaymentWaiver": 0,
+      "summary.totalInterestRefund": 0,
+      "summary.totalUnpaidPayableDueInterest": 0,
+      "summary.totalUnpaidPayableNotDueInterest": 0,
+      "status": "loanStatusType.active",
+      "currency": "CNY",
+      "inArrears": false,
+      "overdueCharges": []
+    },
+    "savings_before_cob": {
+      "summary.totalDeposits": 10000.0,
+      "summary.totalWithdrawals": 2000.0,
+      "summary.totalInterestEarned": 0.33,
+      "summary.totalInterestPosted": 0,
+      "summary.accountBalance": 8000.0,
+      "summary.totalOverdraftInterestDerived": 0,
+      "summary.interestNotPosted": 0.33,
+      "summary.availableBalance": 8000.0,
+      "summary.runningBalanceOnInterestPostingTillDate": 0,
+      "summary.runningBalanceOnPivotDate": 0,
+      "status": "savingsAccountStatusType.active",
+      "currency": "CNY"
+    },
+    "loan_after_cob": {
+      "summary.totalPrincipal": 50000.0,
+      "summary.totalCapitalizedIncome": 0.0,
+      "summary.totalCapitalizedIncomeAdjustment": 0.0,
+      "summary.principalDisbursed": 50000.0,
+      "summary.principalAdjustments": 0.0,
+      "summary.principalPaid": 3583.33,
+      "summary.principalWrittenOff": 0.0,
+      "summary.principalOutstanding": 46416.67,
+      "summary.principalOverdue": 0,
+      "summary.interestCharged": 2749.54,
+      "summary.interestPaid": 416.67,
+      "summary.interestWaived": 0.0,
+      "summary.interestWrittenOff": 0.0,
+      "summary.interestOutstanding": 2332.87,
+      "summary.interestOverdue": 0,
+      "summary.feeChargesCharged": 0.0,
+      "summary.feeAdjustments": 0.0,
+      "summary.feeChargesDueAtDisbursementCharged": 0.0,
+      "summary.feeChargesPaid": 0.0,
+      "summary.feeChargesWaived": 0.0,
+      "summary.feeChargesWrittenOff": 0.0,
+      "summary.feeChargesOutstanding": 0.0,
+      "summary.feeChargesOverdue": 0,
+      "summary.penaltyChargesCharged": 0.0,
+      "summary.penaltyAdjustments": 0.0,
+      "summary.penaltyChargesPaid": 0.0,
+      "summary.penaltyChargesWaived": 0.0,
+      "summary.penaltyChargesWrittenOff": 0.0,
+      "summary.penaltyChargesOutstanding": 0.0,
+      "summary.penaltyChargesOverdue": 0,
+      "summary.totalExpectedRepayment": 52749.54,
+      "summary.totalRepayment": 4000.0,
+      "summary.totalExpectedCostOfLoan": 2749.54,
+      "summary.totalCostOfLoan": 416.67,
+      "summary.totalWaived": 0.0,
+      "summary.totalWrittenOff": 0.0,
+      "summary.totalOutstanding": 48749.54,
+      "summary.totalOverdue": 0,
+      "summary.totalRecovered": 0,
+      "summary.totalMerchantRefund": 0,
+      "summary.totalMerchantRefundReversed": 0,
+      "summary.totalPayoutRefund": 0,
+      "summary.totalPayoutRefundReversed": 0,
+      "summary.totalGoodwillCredit": 0,
+      "summary.totalGoodwillCreditReversed": 0,
+      "summary.totalChargeAdjustment": 0,
+      "summary.totalChargeAdjustmentReversed": 0,
+      "summary.totalChargeback": 0,
+      "summary.totalCreditBalanceRefund": 0,
+      "summary.totalCreditBalanceRefundReversed": 0,
+      "summary.totalRepaymentTransaction": 4000.0,
+      "summary.totalRepaymentTransactionReversed": 0,
+      "summary.totalInterestPaymentWaiver": 0,
+      "summary.totalInterestRefund": 0,
+      "summary.totalUnpaidPayableDueInterest": 0,
+      "summary.totalUnpaidPayableNotDueInterest": 0,
+      "status": "loanStatusType.active",
+      "currency": "CNY",
+      "inArrears": false,
+      "overdueCharges": []
+    },
+    "savings_after_cob": {
+      "summary.totalDeposits": 10000.0,
+      "summary.totalWithdrawals": 2000.0,
+      "summary.totalInterestEarned": 0.66,
+      "summary.totalInterestPosted": 0.33,
+      "summary.accountBalance": 8000.33,
+      "summary.totalOverdraftInterestDerived": 0,
+      "summary.interestNotPosted": 0.33,
+      "summary.availableBalance": 8000.33,
+      "summary.runningBalanceOnInterestPostingTillDate": 0,
+      "summary.runningBalanceOnPivotDate": 0,
+      "status": "savingsAccountStatusType.active",
+      "currency": "CNY"
+    }
+  }
+}

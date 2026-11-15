@@ -1,0 +1,56 @@
+- generic [ref=f10e1]:
+  - generic [ref=f10e4]:
+    - banner [ref=f10e5]:
+      - generic [ref=f10e6]:
+        - generic [ref=f10e7]: Amazing Bank
+        - generic [ref=f10e8]: Backoffice 运营后台
+      - generic [ref=f10e9]:
+        - button "Switch to English" [active] [ref=f10e102] [cursor=pointer]:
+          - img "translation" [ref=f10e12]
+        - button "user ABNK 运营管理员" [ref=f10e16] [cursor=pointer]:
+          - img "user" [ref=f10e18]
+          - generic [ref=f10e21]: ABNK 运营管理员
+    - generic [ref=f10e22]:
+      - complementary [ref=f10e23]:
+        - menu [ref=f10e25]:
+          - menuitem "team 客户列表" [ref=f10e103] [cursor=pointer]:
+            - img "team" [ref=f10e27]
+            - generic [ref=f10e30]: 客户列表
+          - menuitem "account-book 贷款运营" [ref=f10e104] [cursor=pointer]:
+            - img "account-book" [ref=f10e32]
+            - generic [ref=f10e35]: 贷款运营
+      - main [ref=f10e36]:
+        - generic [ref=f10e37]:
+          - heading "贷款运营" [level=4] [ref=f10e105]
+          - alert [ref=f10e41]:
+            - img "info-circle" [ref=f10e42]
+            - generic [ref=f10e45]: POC 基线只读——审批/放款为预埋操作位，P2.5 网关内部通道（/bo/api/*）接入后启用
+          - table [ref=f10e62]:
+            - rowgroup [ref=f10e72]:
+              - row [ref=f10e106]:
+                - columnheader "贷款号" [ref=f10e107]
+                - columnheader "客户" [ref=f10e108]
+                - columnheader "产品" [ref=f10e109]
+                - columnheader "本金" [ref=f10e110]
+                - columnheader "利率" [ref=f10e111]
+                - columnheader "期限(月)" [ref=f10e112]
+                - columnheader "状态" [ref=f10e113]
+                - columnheader "操作" [ref=f10e114]
+            - rowgroup [ref=f10e82]:
+              - row [ref=f10e115]:
+                - cell "6" [ref=f10e84]
+                - cell "赵POC-C1107104347" [ref=f10e85]
+                - cell "ABNK-POC消费贷1107104347" [ref=f10e86]
+                - cell "¥50,000.00" [ref=f10e87]
+                - cell "10.0%" [ref=f10e88]
+                - cell "12" [ref=f10e89]
+                - cell "Active 逾期 40 天（ABNK_POC_OD）" [ref=f10e116]:
+                  - generic [ref=f10e91]:
+                    - generic [ref=f10e92]: Active
+                    - generic [ref=f10e94]: 逾期 40 天（ABNK_POC_OD）
+                - cell [ref=f10e117]:
+                  - generic [ref=f10e97]:
+                    - button "审 批" [disabled] [ref=f10e118]
+                    - button "放 款" [disabled] [ref=f10e119]
+          - generic [ref=f10e57]: 数据口径：P0.3 种子快照（客户 C 贷款 6——业务日期 2027-03-29 下逾期 40 天，分档 ABNK_POC_OD）
+  - tooltip "Switch to English" [ref=f10e122]

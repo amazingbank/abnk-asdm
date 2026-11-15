@@ -1,0 +1,119 @@
+# 任务 P3.5 生产部署证据（DNS 与生产部署，两阶段铁门）
+
+日期：2026-11-10 · 执行：abnk-debugger（ASDM）· 服务器：abnk-vm001（`$PROD_HOST` 解析自 private config）
+
+---
+
+## VP3.5.1 敏感信息审计（Step 0）
+
+- 首跑：❌ 拦截 1 项——生产 IP 出现于 P3 文档 DNS 前置行（第 2 节命中）
+- 处置：清除为 `$PROD_HOST` 占位符 + commit `.asdm` `91f9191`；泄漏 commit 未推送远端（`origin/main..HEAD` 核实），无需凭据轮换
+- 复跑：exit 0，6 节全 ✅（私钥/IP/凭据模式/密钥形态/PAT 扫描/private 完整性）
+
+## VP3.5.2 版本与基线
+
+- 镜像 tag 源：gateway `0.1.0`（gradle.properties）/ website `0.1.2`（package.json）/ mweb `1.0.0`（pubspec）/ bo `0.1.0`（package.json）/ fineract `7b896ad6`（fineract 仓短 hash）
+- abnk-system HEAD = `fb3b944`，推送后 `origin/main..HEAD` = 0
+- D8 前置：`data/gateway_users.json` 恢复 server 实例态（`ff79f62` 版）随 `fb3b944` 推送（口令与服务器在产种子一致；usernames/clientIds 两实例一致、仅 PBKDF2 哈希差异）
+
+## VP3.5.3 服务器就绪与拉取
+
+- Docker 29.9.2 / Compose v5.6.1；磁盘 117G 可用、内存 5.3G 可用（≥ 20G/4G ✅）
+- 80/443 被现网官网栈占用（切换即接管，预期态）；TLS notAfter 2027-05-12（SAN *.amazingbank.ai）
+- `git pull` 后 HEAD = `fb3b944`（与本地一致 ✅）
+- fineract 仓 HEAD 变化处置：P0.4 镜像基线 `ad988473` → 现 HEAD `7b896ad6` → WAR 重建（`BUILD SUCCESSFUL`，210,053,708 字节）+ scp 部署根 + sha256 双向一致：`de6d8a6824d0b61a29929d34576a6cdb5c59eef0f36876bf704e84023137de55`
+
+## VP3.5.4 服务端构建 + ghcr 推送（D8）
+
+ghcr 登录：PAT 经 stdin 注入 → `auths: ['ghcr.io']`
+
+| 镜像 FQN | digest（前 12） | 构建时长 |
+|---|---|---|
+| `ghcr.io/amazingbank/abnk-fineract:7b896ad6` | `21749b6d5410` | 35s |
+| `ghcr.io/amazingbank/abnk-website:0.1.2` | `269d1c5c0f17` | 服务端已构建，tag FQN |
+| `ghcr.io/amazingbank/abnk-gateway:0.1.0` | `b114d38618ad` | 1m52s |
+| `ghcr.io/amazingbank/abnk-bo:0.1.0` | `5d36f3779a96` | 42s |
+| `ghcr.io/amazingbank/abnk-mweb:1.0.0` | `a483680189ca` | ~4 min（Flutter SDK 归档） |
+
+推送：五镜像全部成功（首批批量 4 个瞬时 `denied`，逐个重试即过——非权限问题）
+挂账：ghcr 包可见性 public + 关联源仓库需 org admin 网页操作（org 包 REST API 实测 GET 200 / PATCH 404，不支持 visibility 修改）
+→ 2026-11-10 追记：可见性 public 已由用户网页完成——五包匿名 manifest 全 200（fineract:7b896ad6 / gateway:0.1.0 / website:0.1.2 / mweb:1.0.0 / bo:0.1.0），本机无凭据 docker pull 认证通过（错误为 arm64/x86_64 平台不匹配而非 401——匿名免登录生效）；源仓库关联仍挂账（PUT repositories API 亦 404，需各包 Package settings → Manage repository access 手动添加 abnk-system）
+
+## VP3.5.5 IRON GATE
+
+- Release Note：`.asdm/workspace/sre/ReleaseNotes/fullstack-0.1.0/release-note.md` 完整输出
+- 用户裁决：「确认发版」（Phase B 授权涵盖两项 compose down：平台栈退役 + 官网栈切换）
+
+## VP3.5.6 栈切换与全栈上线
+
+- 部署根 `.env` 扩容：10 变量（五镜像 ghcr FQN + `ABNK_JWT_SECRET` 生产值 + DB 凭据沿用 + 平台栈 legacy `ABNK_FINERACT_IMAGE_TAG` 保留供 down 解析）
+- ① 平台栈 `abnk-prod-platform` down：容器移除，卷 `abnk-pg-platform-data` 保留（数据不动）
+- ② 官网栈 down → 全栈 up
+- 七容器 3 min 内全部 healthy：
+
+```
+abnk-bo | Up 3 minutes (healthy)
+abnk-fineract | Up 3 minutes (healthy)
+abnk-gateway | Up 3 minutes (healthy)
+abnk-mweb | Up 3 minutes (healthy)
+abnk-nginx | Up 3 minutes (healthy)
+abnk-pg-platform | Up 3 minutes (healthy)
+abnk-website | Up 3 minutes (healthy)
+```
+
+- `abnk-fineract` 实例计数 = `1`（docker ps grep）；compose 项目仅 `abnk-prod running(7)`——平台栈零残留
+
+## VP3.5.7 公网验证（五值）
+
+| 验证项 | 期望 | 实测 |
+|---|---|---|
+| `https://api.amazingbank.ai/actuator/health` | `"status":"UP"` | ✅ `{"status":"UP"}` |
+| `https://api.amazingbank.ai/abnk/api/v1/loan-products`（无 token） | `401` | ✅ `401` |
+| `https://app.amazingbank.ai/` | `200` | ✅ `200` |
+| `https://bo.amazingbank.ai/` | `200` | ✅ `200` |
+| `http://amazingbank.ai/` | `301` | ✅ `301` |
+
+DNS 已生效（六条 A 记录 2026-11-10 就位），无需 `--resolve` 降级。
+
+## VP3.5.8 公网缺口剧本
+
+- 命令：`ABNK_GATEWAY_BASE=https://api.amazingbank.ai ABNK_FINERACT_BASE=http://localhost:18081/...（SSH 隧道→容器内网 172.18.0.6:8080） ABNK_DEMO_CREDENTIALS=<private> ABNK_CREDENTIALS_INSTANCE=server python3 baseline_gap_test.py`
+- 结果：**退出码 0，段 4/4、断言 23/23**
+  - ① alice（EXPIRED）公网登录 200，identity `status=EXPIRED`、expiryDate `2020-01-01`
+  - ② bob 对照 `VALID`
+  - ③ alice 转账 10 → **HTTP 200**（`transactionId:4, newSourceBalance:9990.0`）——缺口在生产域名下成立
+  - ④ Fineract 独立核对：账户 1 `10000→9990`（−10）、账户 2 `0→10`（+10），双账户计数 +1，对称成立
+- 报告：`artifacts/phaseP3/gap-report-20261110-093911.json`
+- 附带闭环：server 实例口令登录成功 = D8 网关用户表实例对齐验证（镜像 bake 口令 = 服务器在产种子口令）
+
+## 挂账清单（随发版记录）
+
+1. ghcr 五包可见性 public + 关联源仓库（org admin 网页操作，不阻塞）
+2. NSG 8080 规则可收紧（D7 直暴形态已随全栈切换退役，Azure Portal 操作）
+3. 审计门第 2 节曾拦截的生产 IP 泄漏已修复（`91f9191`，未推送即清除）
+
+---
+
+## 追记（2026-11-10 下午）：ghcr 挂账闭环 + multi-arch 补齐
+
+### 挂账 1 闭环
+
+- 可见性 public：用户网页操作完成——五包匿名 manifest 全 200，本机无凭据 `docker pull` 认证通过
+- 关联源仓库：用户网页操作完成（API 实测回读）——gateway/website/mweb/bo → `amazingbank/abnk-system`；fineract → `amazingbank/fineract`
+
+### multi-arch 补齐（`linux/amd64` + `linux/arm64`，latest tag）
+
+- Dockerfile 改造（`19bb0f6`）：gateway/bo/website builder 层钉 `$BUILDPLATFORM`（jar/npm/vite 产物架构无关，构建机原生跑零 QEMU）；mweb builder 已钉 amd64（Flutter SDK x64-only）；fineract runtime apt 层 QEMU 模拟（量小）
+- 服务器构建环境：`tonistiigi/binfmt --install arm64`（qemu-aarch64 注册）+ buildx builder `abnk-multiarch`（docker-container driver）
+- 五镜像 `--platform linux/amd64,linux/arm64` 构建并推送 **latest** tag（版本 tag 遵禁覆盖纪律不动；latest 首推非覆盖）：
+
+| 镜像 | latest manifest digest | 构建时长 |
+|---|---|---|
+| `abnk-fineract:latest` | `sha256:b2c7bdf02793` | 2m48s |
+| `abnk-website:latest` | `sha256:8e9544f93b98` | 45s |
+| `abnk-bo:latest` | `sha256:c5c7bc5350f0` | 53s |
+| `abnk-gateway:latest` | `sha256:eba5858a37ed` | 3m30s |
+| `abnk-mweb:latest` | `sha256:5ef1a3a776ee` | ~5 min |
+
+- 端到端验证：本机 Apple Silicon（arm64）无凭据 `docker pull` 两镜像（bo/mweb latest）成功且 `arch=arm64 os=linux` 自动选择 ✅（拉取后已清理）
+- 新增维护纪律：后续发版在服务器以同 buildx 命令更新 latest（双平台）；服务器重启后 binfmt 注册可能丢失，需重跑 `tonistiigi/binfmt --install arm64`

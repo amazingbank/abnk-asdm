@@ -1,0 +1,75 @@
+任务 P2.7 网关集成测试 —— 执行证据（2026-11-08）
+====================================================
+
+【环境基线】
+- 网关 abnk-gateway :8080 运行中（GET /actuator/health → 200 UP；启动命令 bootRun，
+  JAVA_HOME=JDK25，ABNK_USERS_FILE 指向 data/gateway_users.local.json 本地实例——
+  alice 登录 claims 实测 sub=28 / channel=customer 确认）
+- Fineract 生产形态栈 abnk-fineract :8081 运行中
+  （GET /fineract-provider/actuator/health → 200 UP）
+- 演示口令来源：.github-private/kbank-poc/gateway-demo-passwords.json
+  实例 local-prodform（alice clientId=28 / bob clientId=29 / admin 无 clientId），
+  经环境变量 ABNK_DEMO_CREDENTIALS 注入剧本进程，不入代码与报告
+
+【VP2.7.1 运行时·全剧本首跑】
+命令：
+  cd $ABNK_REPO/tests/gateway
+  ABNK_DEMO_CREDENTIALS=<.github-private>/kbank-poc/gateway-demo-passwords.json \
+    python3 gateway_test.py
+退出码：0
+结果：PASS | 步骤 11/11 | 断言 55/55
+报告：artifacts/phaseP2/gateway-report-20261108-170841.json
+
+剧本 11 步逐段实测记录：
+1. 环境前置——网关 health 200 UP；Fineract 生产形态栈 health 200 UP（3 断言）
+2. 登录三用户——alice /login 200（channel=customer、clientId=28、token 三段式、
+   expiresIn=900）；bob /login 200（clientId=29）；admin /bo/login 200
+   （channel=internal、role=ADMIN）；负向：admin 打 /login → 401、alice 打
+   /bo/login → 401（通道严格匹配，P2.6 口径）（13 断言）
+3. me 聚合——200；displayName="王 P."；mobileNo="135******01"（含 * 脱敏）；
+   键集合无 documentKey/idNumber 明文字段（5 断言）
+4. identity 状态计算——alice → status=EXPIRED、expiryDate=2020-01-01、
+   documentKey="ID-A********347"（脱敏）；bob → status=VALID（6 断言）
+5. 账户与明细——/me/accounts savingsAccounts 2 项、accountNo 尾号脱敏
+   ["0000**0011","0000**0012"]；/accounts/11/transactions 2 项、
+   item 含 runningBalance（收敛 6 字段）（7 断言）
+6. 转账正向——POST /abnk/api/v1/accounts/11/transfer（toAccountId=12、amount=100、
+   externalId=GT-<毫秒时间戳>）→ 200 {"transactionId":20,"newSourceBalance":9800.0}（3 断言）
+7. 转账幂等重放——同载荷重放 → 200，响应与首次逐字一致（transactionId=20 不变
+   = 未重复落账）（2 断言）
+8. 转账越权——alice token 转出账户填 bob 的 13 → 403（服务端归属校验）（1 断言）
+9. bo 面 + 隔离——admin /bo/api/v1/clients?limit=10 → 200、total=29（≥3 种子口径）；
+   alice token → 403（通道隔离）；无 token → 401（鉴权先于隔离）（4 断言）
+10. identifiers PUT→恢复——GET /bo/api/v1/clients/28/identifiers 列出 1 条
+    （identifierId=8，原始 expiryDate=2020-01-01）；PUT 2099-12-31 → 200、回读
+    2099-12-31；恢复 PUT 2020-01-01 → 200、回读 2020-01-01；交叉验证：对客
+    /me/identity 仍 EXPIRED（种子态复原）（11 断言）
+11. 黑名单三断言——/abnk/api/v1/jobs → 403；/abnk/api/v1/internal/cache/evict
+    → 403；/abnk/api/v1/loans/999/command → 404（契约外路径）（3 断言）
+
+报告 JSON 校验（VP2.7.1 判据「步骤计数=剧本设计步骤数、无空字段」）：
+- steps 计数 = 11 = DESIGNED_STEPS ✓
+- 每步 name/requests/asserts 非空（空字段步骤：无）✓
+- token 字段一律 <redacted>（登录响应三段式 token 未入报告）✓
+
+【VP2.7.2 运行时·可重跑幂等】
+命令：同 VP2.7.1（立即重跑，间隔约 16 s）
+退出码：0
+结果：PASS | 步骤 11/11 | 断言 55/55
+报告：artifacts/phaseP2/gateway-report-20261108-170857.json
+幂等机制实测：转账 externalId 携带毫秒时间戳后缀（GT-<ts>），第二轮使用全新键，
+双交易正常落账；identifiers 恢复逻辑保证种子态每轮复原（重跑后 alice 证照仍
+2020-01-01、identity 仍 EXPIRED）；两轮报告文件名按秒级时间戳区分、互不覆盖。
+
+【交付物清单】
+- tests/gateway/gateway_test.py —— 网关集成测试剧本（纯 Python 标准库；
+  直连网关 :8080 + Bearer 头；11 步 55 断言；fail-fast；退出码 0/1/2 语义；
+  演示口令经 ABNK_DEMO_CREDENTIALS 环境变量注入；报告 token 脱敏）
+- artifacts/phaseP2/gateway-report-20261108-170841.json —— 首跑报告
+- artifacts/phaseP2/gateway-report-20261108-170857.json —— 重跑报告
+
+【敏感复核】
+- 演示口令 6 个真实值（local-prodform + server 双实例）对首跑/重跑报告 JSON 与
+  gateway_test.py 剧本代码 grep：0 命中
+- 剧本代码零硬编码口令（口令仅运行时从环境变量指向的 .github-private 归档读取，
+  存于进程内存局部变量）；报告 token 字段全部 <redacted>

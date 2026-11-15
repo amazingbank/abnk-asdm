@@ -1,0 +1,6 @@
+me.json: 0 diff (top-keys-match=True, recursive-shape-match=True)
+identity.json: 0 diff (top-keys-match=True, recursive-shape-match=True)
+accounts.json: 0 diff (top-keys-match=True, recursive-shape-match=True)
+transactions.json: 0 diff (top-keys-match=True, recursive-shape-match=True)
+loan_products.json: 0 diff (top-keys-match=True, recursive-shape-match=True)
+RESULT: all 5 files 0 diff

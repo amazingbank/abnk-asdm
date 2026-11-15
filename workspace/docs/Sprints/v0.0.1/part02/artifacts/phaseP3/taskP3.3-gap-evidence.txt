@@ -1,0 +1,30 @@
+# 任务 P3.3 缺口验证资产 —— 执行证据归档（VP3.3.1–VP3.3.3）
+
+- **日期**：2026-11-09
+- **环境**：ABNK 网关 dev 形态（:8080，bootRun）+ Fineract 生产形态栈（:8081）+ abnk-pg-prod（:5433）
+- **凭据**：经 `ABNK_DEMO_CREDENTIALS` 注入 `.github-private/kbank-poc/gateway-demo-passwords.json`（local-prodform 节——alice clientId 28 / bob clientId 29），口令不入脚本与报告
+- **剧本**：`tests/poc/baseline_gap_test.py`（纯标准库，四段：① alice EXPIRED / ② bob VALID 对照 / ③ EXPIRED 转账 200（缺口存在）/ ④ Fineract 侧独立核对）
+
+## VP3.3.1 首跑
+
+- 命令：`cd $ABNK_REPO/tests/poc && ABNK_DEMO_CREDENTIALS=<归档处>/gateway-demo-passwords.json python3 baseline_gap_test.py`
+- **退出码：`0`**（PASS · 段 4/4 · 断言 23/23）
+- 报告路径：`artifacts/phaseP3/gap-report-20261109-131638.json`
+- ③ 段缺口断言记录（报告摘录）：
+  - label：`EXPIRED 客户转账 HTTP 200 成功 —— 缺口存在（这正是 POC 要消灭的缺口）`
+  - pass：`true`；evidence：`HTTP 200 {"transactionId":1034,"newSourceBalance":9319.82}`
+- ④ 段 Fineract 独立核对：账户 11 余额 9329.82 → 9319.82（−10）、交易计数 79 → 80；账户 12 余额 700.00 → 710.00（+10）、计数 7 → 8；双账户变化对称
+- 四段无空字段（requests/asserts 均非空、无 error）；报告 token 脱敏（`<redacted>`）、无口令明文
+- `gapEvidence`：`{"expiredCustomer":"alice","identityStatus":"EXPIRED","transferHttpStatus":200,"gapPresent":true}`
+
+## VP3.3.2 立即重跑（可重跑验证）
+
+- **退出码：`0`**（PASS · 段 4/4 · 断言 23/23）
+- 报告路径：`artifacts/phaseP3/gap-report-20261109-131702.json`
+- 幂等后缀隔离成立：新 externalId（毫秒 TS）→ 新交易流水 1036（非首跑 1034 的幂等重放）；账户 11 计数 80 → 81 精确 +1，余额基线接续首跑末态（9319.82 → 9309.82，再 −10）；账户 12 同式 +10（710.00 → 720.00，计数 8 → 9）
+
+## 交付物
+
+- `tests/poc/baseline_gap_test.py`（缺口剧本——POC 演示「当前状态」开场证据；POC 结束后同一脚本改造为拦截回归对照）
+- 首跑 + 重跑报告 JSON × 2（上述路径）
+- 运行口径声明：单向剧本（转账 10 × 2 轮，无余额回滚）；Fineract 核对通道为独立直连（Basic + 租户头，基址经 `ABNK_FINERACT_BASE` 可配——为 VP3.5.8 生产域名基址复用预留）

@@ -1,0 +1,32 @@
+{
+  "runAt": "2026-10-25",
+  "task": "./gradlew :fineract-e2e-tests-runner:cucumber -Pcucumber.features=src/test/resources/features/SavingsProduct.feature",
+  "env": {
+    "java": "25.0.5+8-tem（PATH 前置 + JAVA_HOME）",
+    "app": "https://localhost:8443 devRun（本机）",
+    "gradle": "9.7.1",
+    "网络": "socks 127.0.0.1:3322（allure 依赖下载）"
+  },
+  "result": "BUILD SUCCESSFUL — 1 scenario (1 passed), 10 steps (10 passed), 38s",
+  "cases": [
+    {
+      "name": "As a user I would like to retrieve savings products when office-specific product restriction is enab",
+      "status": "passed",
+      "steps": 3,
+      "startMs": 1792894037213,
+      "stopMs": 1792894037854
+    }
+  ],
+  "reportPaths": [
+    "fineract/fineract-e2e-tests-runner/build/reports/allure-report/allureReport/index.html",
+    "fineract/fineract-e2e-tests-runner/build/allure-results/"
+  ],
+  "用法备忘": {
+    "跑全部": "./gradlew :fineract-e2e-tests-runner:cucumber",
+    "跑单feature": "-Pcucumber.features=src/test/resources/features/<X>.feature",
+    "按标签": "-Pcucumber.tags=@WorkingCapital",
+    "按场景名": "-Pcucumber.name=...",
+    "硬约束": "PATH 必须前置 JDK25（fork 的 cucumber JVM 走 PATH，默认 21 会 UnsupportedClassVersionError）",
+    "默认连接": "BASE_URL=https://localhost:8443 + mifos/password + tenant default（零配置）"
+  }
+}

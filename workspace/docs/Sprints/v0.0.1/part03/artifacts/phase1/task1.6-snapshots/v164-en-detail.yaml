@@ -1,0 +1,150 @@
+- generic [ref=f8e4]:
+  - banner [ref=f8e5]:
+    - generic [ref=f8e6]:
+      - generic [ref=f8e7]: Amazing Bank
+      - generic [ref=f8e8]: Backoffice Operations Console
+    - generic [ref=f8e9]:
+      - button "切换到中文" [ref=f8e10] [cursor=pointer]:
+        - img "translation" [ref=f8e12]
+      - button "user ABNK 运营管理员" [ref=f8e16] [cursor=pointer]:
+        - img "user" [ref=f8e18]
+        - generic [ref=f8e21]: ABNK 运营管理员
+  - generic [ref=f8e22]:
+    - complementary [ref=f8e23]:
+      - menu [ref=f8e25]:
+        - menuitem "team Clients" [ref=f8e26] [cursor=pointer]:
+          - img "team" [ref=f8e27]
+          - generic [ref=f8e30]: Clients
+        - menuitem "account-book Loan Operations" [ref=f8e31] [cursor=pointer]:
+          - img "account-book" [ref=f8e32]
+          - generic [ref=f8e35]: Loan Operations
+    - main [ref=f8e36]:
+      - generic [ref=f8e45]:
+        - generic [ref=f8e47]:
+          - button "arrow-left Back" [ref=f8e48] [cursor=pointer]:
+            - img "arrow-left" [ref=f8e50]
+            - generic [ref=f8e53]: Back
+          - heading "Client Details · 王POC-A1107104347" [level=4] [ref=f8e54]
+        - generic [ref=f8e56]:
+          - generic [ref=f8e57]: Client Profile
+          - table [ref=f8e63]:
+            - rowgroup [ref=f8e64]:
+              - row [ref=f8e65]:
+                - 'cell "Client ID : 28" [ref=f8e66]':
+                  - generic [ref=f8e67]:
+                    - generic [ref=f8e68]: "Client ID :"
+                    - generic [ref=f8e69]: "28"
+                - 'cell "External ID : ABNK-POC-A-1107104347" [ref=f8e70]':
+                  - generic [ref=f8e71]:
+                    - generic [ref=f8e72]: "External ID :"
+                    - generic [ref=f8e73]: ABNK-POC-A-1107104347
+              - row [ref=f8e74]:
+                - 'cell "Name : POC-A1107104347 王" [ref=f8e75]':
+                  - generic [ref=f8e76]:
+                    - generic [ref=f8e77]: "Name :"
+                    - generic [ref=f8e78]: POC-A1107104347 王
+                - 'cell "Mobile Number : 13504347001" [ref=f8e79]':
+                  - generic [ref=f8e80]:
+                    - generic [ref=f8e81]: "Mobile Number :"
+                    - generic [ref=f8e82]: "13504347001"
+              - row [ref=f8e83]:
+                - 'cell "Email : wang.a@abnk.example.com" [ref=f8e84]':
+                  - generic [ref=f8e85]:
+                    - generic [ref=f8e86]: "Email :"
+                    - generic [ref=f8e87]: wang.a@abnk.example.com
+                - 'cell "Branch : Head Office" [ref=f8e88]':
+                  - generic [ref=f8e89]:
+                    - generic [ref=f8e90]: "Branch :"
+                    - generic [ref=f8e91]: Head Office
+              - row [ref=f8e92]:
+                - 'cell "Status : ACTIVE" [ref=f8e93]':
+                  - generic [ref=f8e94]:
+                    - generic [ref=f8e95]: "Status :"
+                    - generic [ref=f8e96]: ACTIVE
+        - generic [ref=f8e99]:
+          - generic [ref=f8e100]: Identity Documents (editable)
+          - generic [ref=f8e103]:
+            - table [ref=f8e106]:
+              - rowgroup [ref=f8e107]:
+                - row [ref=f8e108]:
+                  - 'cell "Document Type : 身份证" [ref=f8e109]':
+                    - generic [ref=f8e110]:
+                      - generic [ref=f8e111]: "Document Type :"
+                      - generic [ref=f8e112]: 身份证
+                  - 'cell "Document Number : ID-A-1107104347" [ref=f8e113]':
+                    - generic [ref=f8e114]:
+                      - generic [ref=f8e115]: "Document Number :"
+                      - generic [ref=f8e116]: ID-A-1107104347
+                - row [ref=f8e117]:
+                  - 'cell "Issue Date : 2015-01-01" [ref=f8e118]':
+                    - generic [ref=f8e119]:
+                      - generic [ref=f8e120]: "Issue Date :"
+                      - generic [ref=f8e121]: 2015-01-01
+                  - 'cell "Expiry Date : 2020-01-01" [ref=f8e122]':
+                    - generic [ref=f8e123]:
+                      - generic [ref=f8e124]: "Expiry Date :"
+                      - generic [ref=f8e125]: 2020-01-01
+                - row [ref=f8e126]:
+                  - 'cell "Record Status : ACTIVE" [ref=f8e127]':
+                    - generic [ref=f8e128]:
+                      - generic [ref=f8e129]: "Record Status :"
+                      - generic [ref=f8e130]: ACTIVE
+                  - 'cell "Expiry Status (derived) : Expired" [ref=f8e132]':
+                    - generic [ref=f8e133]:
+                      - generic [ref=f8e134]: "Expiry Status (derived) :"
+                      - generic [ref=f8e135]: Expired
+            - separator [ref=f8e137]
+            - generic [ref=f8e138]: Identifier editing (mock submit with echo-back) — expiry status is derived from the expiry date against the business date (2027-03-29)
+            - generic [ref=f8e140]:
+              - generic [ref=f8e143]:
+                - generic "Expiry Date" [ref=f8e145]: "* Expiry Date"
+                - generic [ref=f8e150]:
+                  - textbox "* Expiry Date" [ref=f8e151]:
+                    - /placeholder: Select date
+                    - text: 2020-01-01
+                  - generic:
+                    - img "calendar"
+                  - button [ref=f8e152] [cursor=pointer]:
+                    - img "close-circle" [ref=f8e153]
+              - generic [ref=f8e158]:
+                - generic "Document number (optional)" [ref=f8e160]
+                - textbox "Document number (optional)" [ref=f8e164]:
+                  - /placeholder: Fill in only when changing it
+                  - text: ID-A-1107104347
+              - generic [ref=f8e167]:
+                - generic "Description (optional)" [ref=f8e169]
+                - textbox "Description (optional)" [ref=f8e173]:
+                  - /placeholder: Description
+                  - text: 身份证(已过期)
+              - button "Save changes" [ref=f8e180] [cursor=pointer]
+        - generic [ref=f8e183]:
+          - generic [ref=f8e184]: Accounts
+          - generic [ref=f8e188]:
+            - strong [ref=f8e191]: Current Accounts
+            - table [ref=f8e199]:
+              - rowgroup [ref=f8e205]:
+                - row [ref=f8e206]:
+                  - columnheader "Account Number" [ref=f8e207]
+                  - columnheader "Product" [ref=f8e208]
+                  - columnheader "Balance" [ref=f8e209]
+                  - columnheader "Status" [ref=f8e210]
+              - rowgroup [ref=f8e211]:
+                - row [ref=f8e212]:
+                  - cell "0000**0011" [ref=f8e213]
+                  - cell "ABNK 活期储蓄" [ref=f8e214]
+                  - cell "¥10,000.00" [ref=f8e215]
+                  - cell "ACTIVE" [ref=f8e216]
+                - row [ref=f8e218]:
+                  - cell "0000**0012" [ref=f8e219]
+                  - cell "ABNK 活期储蓄" [ref=f8e220]
+                  - cell "¥0.00" [ref=f8e221]
+                  - cell "ACTIVE" [ref=f8e222]
+            - strong [ref=f8e226]: Fixed Deposits
+            - generic [ref=f8e228]:
+              - img "No data" [ref=f8e230]
+              - generic [ref=f8e236]: No fixed deposits
+        - generic [ref=f8e238]:
+          - generic [ref=f8e239]: Loan
+          - generic [ref=f8e243]:
+            - img "No data" [ref=f8e245]
+            - generic [ref=f8e251]: No loan records

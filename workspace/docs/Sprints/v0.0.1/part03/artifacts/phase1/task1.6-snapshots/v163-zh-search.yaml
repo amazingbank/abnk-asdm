@@ -1,0 +1,79 @@
+- generic [ref=f5e195]:
+  - banner [ref=f5e196]:
+    - generic [ref=f5e197]:
+      - generic [ref=f5e198]: Amazing Bank
+      - generic [ref=f5e199]: Backoffice 运营后台
+    - generic [ref=f5e200]:
+      - button "Switch to English" [ref=f5e201] [cursor=pointer]:
+        - img "translation" [ref=f5e203]
+      - button "user ABNK 运营管理员" [ref=f5e207] [cursor=pointer]:
+        - img "user" [ref=f5e209]
+        - generic [ref=f5e212]: ABNK 运营管理员
+  - generic [ref=f5e213]:
+    - complementary [ref=f5e214]:
+      - menu [ref=f5e216]:
+        - menuitem "team 客户列表" [ref=f5e217] [cursor=pointer]:
+          - img "team" [ref=f5e218]
+          - generic [ref=f5e221]: 客户列表
+        - menuitem "account-book 贷款运营" [ref=f5e222] [cursor=pointer]:
+          - img "account-book" [ref=f5e223]
+          - generic [ref=f5e226]: 贷款运营
+    - main [ref=f5e227]:
+      - generic [ref=f5e228]:
+        - generic [ref=f5e230]:
+          - heading "客户列表" [level=4] [ref=f5e231]
+          - generic [ref=f5e233]:
+            - generic [ref=f5e234]:
+              - img "search" [ref=f5e236]
+              - searchbox "搜索姓名 / 外部编号 / 手机号" [ref=f5e239]
+            - button [ref=f5e242] [cursor=pointer]:
+              - img "search" [ref=f5e244]
+        - generic [ref=f5e250]:
+          - table [ref=f5e254]:
+            - rowgroup [ref=f5e263]:
+              - row [ref=f5e264]:
+                - columnheader "客户号" [ref=f5e265]
+                - columnheader "姓名" [ref=f5e266]
+                - columnheader "外部编号" [ref=f5e267]
+                - columnheader "手机号" [ref=f5e268]
+                - columnheader "证照状态" [ref=f5e269]
+                - columnheader "证照到期日" [ref=f5e270]
+                - columnheader "操作" [ref=f5e271]
+            - rowgroup [ref=f5e272]:
+              - row [ref=f5e273] [cursor=pointer]:
+                - cell "28" [ref=f5e274]
+                - cell "王POC-A1107104347" [ref=f5e275]
+                - cell "ABNK-POC-A-1107104347" [ref=f5e276]
+                - cell "13504347001" [ref=f5e277]
+                - cell "已过期" [ref=f5e278]
+                - cell "2020-01-01" [ref=f5e280]
+                - cell [ref=f5e281]:
+                  - button "详情" [ref=f5e282]
+              - row [ref=f5e284] [cursor=pointer]:
+                - cell "29" [ref=f5e285]
+                - cell "李POC-B1107104347" [ref=f5e286]
+                - cell "ABNK-POC-B-1107104347" [ref=f5e287]
+                - cell "13504347002" [ref=f5e288]
+                - cell "有效" [ref=f5e289]
+                - cell "2099-12-31" [ref=f5e291]
+                - cell [ref=f5e292]:
+                  - button "详情" [ref=f5e293]
+              - row [ref=f5e295] [cursor=pointer]:
+                - cell "30" [ref=f5e296]
+                - cell "赵POC-C1107104347" [ref=f5e297]
+                - cell "ABNK-POC-C-1107104347" [ref=f5e298]
+                - cell "13504347003" [ref=f5e299]
+                - cell "有效" [ref=f5e300]
+                - cell "2099-12-31" [ref=f5e302]
+                - cell [ref=f5e303]:
+                  - button "详情" [ref=f5e304]
+          - list [ref=f5e306]:
+            - listitem [ref=f5e307]: 共 3 名客户
+            - listitem "上一页" [ref=f5e308]:
+              - button [disabled] [ref=f5e309]:
+                - img "left" [ref=f5e310]
+            - listitem "1" [ref=f5e313] [cursor=pointer]
+            - listitem "下一页" [ref=f5e315]:
+              - button [disabled] [ref=f5e316]:
+                - img "right" [ref=f5e317]
+        - generic [ref=f5e320]: 数据口径：P0.3 种子快照（王/李/赵 POC-A/B/C，业务日期 2027-03-29）；证照状态由到期日对业务日期推导（基线只读展示）——金额格式示例 ¥10,000.00

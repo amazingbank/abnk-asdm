@@ -1,0 +1,181 @@
+{
+  "asserts": [
+    {
+      "label": "Delinquency range 施加成功（minAge=1 无上界）",
+      "pass": true,
+      "evidence": "rangeId=1"
+    },
+    {
+      "label": "Delinquency bucket 施加成功（REGULAR，挂 1 range）",
+      "pass": true,
+      "evidence": "bucketId=1"
+    },
+    {
+      "label": "贷款产品施加深成功（等额本息 + delinquencyBucketId）",
+      "pass": true,
+      "evidence": "productId=1 bucketId=1"
+    },
+    {
+      "label": "定期产品施加深成功（含利率 chart）",
+      "pass": true,
+      "evidence": "productId=2"
+    },
+    {
+      "label": "客户 A（过期证照）+ 源/目标账户施加深成功",
+      "pass": true,
+      "evidence": "clientId=1 src=1 dst=2 源余额=10000.0"
+    },
+    {
+      "label": "客户 B（有效证照）+ 账户 + 定期账户施加深成功",
+      "pass": true,
+      "evidence": "clientId=2 sav=3 fd=4 maturity=2027-11-07"
+    },
+    {
+      "label": "客户 C 贷款施加深成功（发放后零还款）",
+      "pass": true,
+      "evidence": "loanId=1"
+    },
+    {
+      "label": "业务日期推进到 2027-01-16（首期 due 2026-12-07 + 40 天，单向不回拨）",
+      "pass": true,
+      "evidence": "businessDate=2027-01-16"
+    },
+    {
+      "label": "executeJob Update Loan Arrears Ageing 触发（jobId=2）",
+      "pass": true,
+      "evidence": "HTTP 202 "
+    },
+    {
+      "label": "executeJob Loan Delinquency Classification 触发（jobId=35）",
+      "pass": true,
+      "evidence": "HTTP 202 "
+    },
+    {
+      "label": "客户 C 贷款逾期天数 ≥40（业务日期 2027-01-16 − 首期 due 2026-12-07）",
+      "pass": true,
+      "evidence": "days=40"
+    },
+    {
+      "label": "客户 C 贷款 inArrears = true",
+      "pass": true,
+      "evidence": "True"
+    },
+    {
+      "label": "delinquency 分档字段命中种子 range（classification=ABNK_POC_OD 非空）",
+      "pass": true,
+      "evidence": "classification=ABNK_POC_OD"
+    },
+    {
+      "label": "overdueSinceDate 字段存在",
+      "pass": true,
+      "evidence": "2026-12-07"
+    },
+    {
+      "label": "gateway_users.json 三用户就位",
+      "pass": true,
+      "evidence": "['admin', 'alice', 'bob']"
+    },
+    {
+      "label": "alice PBKDF2 复算 hash 一致（跨端互验契约自检）",
+      "pass": true,
+      "evidence": "match=True iterations=100000"
+    }
+  ],
+  "readback": {
+    "businessDateAdvanced": {
+      "to": "2027-01-16",
+      "firstDueDate": "2026-12-07",
+      "daysAdvancedPastFirstDue": 40
+    },
+    "clientCLoan": {
+      "loanId": 1,
+      "inArrears": true,
+      "delinquencyRange": {
+        "id": 1,
+        "classification": "ABNK_POC_OD",
+        "minimumAgeDays": 1
+      },
+      "overdueSinceDate": "2026-12-07",
+      "totalOverdue": 8791.58,
+      "overdueDaysCalculated": 40,
+      "businessDate": "2027-01-16",
+      "firstDueDate": "2026-12-07"
+    },
+    "seed": {
+      "clientA": {
+        "clientId": 1,
+        "externalId": "ABNK-POC-A-1107114626",
+        "identifierExpiry": "2020-01-01",
+        "sourceAccount": 1,
+        "targetAccount": 2,
+        "sourceBalance": 10000.0
+      },
+      "clientB": {
+        "clientId": 2,
+        "externalId": "ABNK-POC-B-1107114626",
+        "identifierExpiry": "2099-12-31",
+        "savingsAccount": 3,
+        "fixedDepositAccount": 4,
+        "fdMaturityDate": "2027-11-07"
+      },
+      "clientC": {
+        "clientId": 3,
+        "externalId": "ABNK-POC-C-1107114626",
+        "loanId": 1,
+        "loanExternalId": "ABNK-POC-C-LN-1107114626"
+      },
+      "products": {
+        "savingsProductId": 1,
+        "loanProductId": 1,
+        "fixedDepositProductId": 2,
+        "delinquencyRangeId": 1,
+        "delinquencyBucketId": 1,
+        "delinquencyClassification": "ABNK_POC_OD"
+      },
+      "gatewayUsers": {
+        "file": "data/gateway_users.json",
+        "usernames": [
+          "admin",
+          "alice",
+          "bob"
+        ],
+        "iterations": 100000
+      }
+    },
+    "vp047PublicVerify": {
+      "method": "公网回读抽查（http://amazingbank.ai:8080，D7 直暴露）",
+      "clientA": {
+        "externalId": "ABNK-POC-A-1107114626",
+        "totalFilteredRecords": 1,
+        "clientId": 1
+      },
+      "clientB": {
+        "externalId": "ABNK-POC-B-1107114626",
+        "totalFilteredRecords": 1,
+        "clientId": 2
+      },
+      "clientC": {
+        "externalId": "ABNK-POC-C-1107114626",
+        "totalFilteredRecords": 1,
+        "clientId": 3
+      },
+      "loan1": {
+        "inArrears": true,
+        "classification": "ABNK_POC_OD",
+        "overdueSinceDate": "2026-12-07"
+      },
+      "businessDateConfigNote": "服务器新库 enable-business-date 默认 false（changelog 种子值），经 PUT /configurations/44 启用后施加——与本地栈差异归档",
+      "conclusion": "公网种子施加退出码 0（16 断言全过）；公网回读 A/B/C 各命中 1，贷款逾期分档就绪"
+    }
+  },
+  "runAt": "2026-11-07T11:46:27",
+  "baseUrl": "http://amazingbank.ai:8080/fineract-provider/api/v1",
+  "tsSuffix": "1107114626",
+  "businessDateBeforeAdvance": "2026-11-07",
+  "summary": {
+    "allPassed": true,
+    "assertCount": 16,
+    "note": "明文演示口令不入本证据文件（仅打印一次性，由执行者存 .github-private/）",
+    "vp047AllPassed": true
+  }
+}

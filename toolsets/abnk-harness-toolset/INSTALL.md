@@ -52,7 +52,7 @@ EOF
 cat > .claude/commands/abnk-doc-review.md << 'EOF'
 ---
 description: "Five-dimension review of a Sprint/Phase design doc under .asdm/workspace/docs/Sprints/ with code-evidence verification"
-argument-hint: "[path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/...Phase1-*.md]"
+argument-hint: "[path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/...Phase1-*.md]"
 ---
 
 Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md to review: $ARGUMENTS
@@ -79,7 +79,7 @@ cat > .github/prompts/abnk-doc-review.prompt.md << 'EOF'
 ---
 agent: 'agent'
 description: 'Five-dimension review of a Sprint/Phase design doc under .asdm/workspace/docs/Sprints/ with code-evidence verification'
-argument-hint: 'Path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/...Phase1-*.md'
+argument-hint: 'Path to the doc, e.g. .asdm/workspace/docs/Sprints/v0.0.1/part01/zh-CN/...Phase1-*.md'
 ---
 
 Follow the instructions in .asdm/toolsets/abnk-harness-toolset/actions/abnk-doc-review.md to review: $ARGUMENTS

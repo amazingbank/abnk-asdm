@@ -1,0 +1,51 @@
+[✓] Flutter (Channel stable, 3.47.9, on macOS 26.6.2 25G83 darwin-arm64, locale en-CN) [2.5s]
+    • Flutter version 3.47.9 on channel stable at /Users/leixu/development/flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision c197ca5199 (9 days ago), 2026-10-29 10:10:20 -0400
+    • Engine revision 89c39edfdf
+    • Dart version 3.13.7
+    • DevTools version 2.60.0
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, enable-record-use, enable-swift-package-manager, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 36.0.0) [6.8s]
+    • Android SDK at /Users/leixu/Library/Android/sdk
+    • Emulator version 37.2.13.0 (build_id 16740729) (CL:N/A)
+    • Platform android-36, build-tools 36.0.0
+    • ANDROID_HOME = /Users/leixu/Library/Android/sdk
+    • ANDROID_SDK_ROOT = /Users/leixu/Library/Android/sdk
+    • Java binary at: /Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java
+      This is the JDK bundled with the latest Android Studio installation on this machine.
+      To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.
+    • Java version OpenJDK Runtime Environment (build 25.0.4+-16339643-b508.27)
+    • All Android licenses accepted.
+
+[✓] Xcode - develop for iOS and macOS (Xcode 27.2) [4.1s]
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 27B52
+    • CocoaPods version 1.17.0
+
+[✓] Chrome - develop for the web [11ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (2 available) [9.9s]
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 26.6.2 25G83 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 156.0.8078.80
+
+[!] Network resources [77.2s]
+    ✗ A network error occurred while checking "https://maven.google.com/": Operation timed out
+
+! Doctor found issues in 1 category.
+
+=== 归档说明（2026-11-07 任务 P1.1 VP1.1.4）===
+[!] Network resources —— flutter doctor 的网络探测用 Dart HttpClient（不读 ALL_PROXY/HTTPS_PROXY 代理环境变量），
+    直连 maven.google.com 在本地网络超时（77.2s）。属计划明文允许的网络类 warning。
+    影响与缓解：Flutter 首次 Android 构建需 Gradle 拉 maven.google.com 依赖——构建期可走本机
+    socks5 代理（127.0.0.1:3322，实测出口 0.82s/HTTP200）注入 gradle.properties 的
+    systemProp.https.proxyHost/Port，或配置国内镜像；不影响 doctor 主判据（0 红叉、五绿）。
+工具链处置记录：
+  - Android：brew cask 安装 Android Studio + cmdline-tools；sdkmanager 装 platform-tools/emulator/
+    platforms;android-36/system-images;android-36;google_apis;arm64-v8a/build-tools;36.0.0；
+    AVD abnk_api36（pixel_6）创建并启动验证（emulator-5554 已启动态）。
+  - iOS：iOS 27.2 Simulator runtime 经 xcodebuild -downloadPlatform iOS 下载安装（8.32GB，
+    Apple CDN 直连约 13MB/s，约 15 分钟）；CocoaPods 1.17.0（brew）。
+  - 代理：socks5h://127.0.0.1:3322 用于 brew/sdkmanager 下载（用户提供的本地代理）。

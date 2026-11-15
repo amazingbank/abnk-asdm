@@ -1,0 +1,83 @@
+- generic [active] [ref=f9e1]:
+  - generic [ref=f9e195]:
+    - banner [ref=f9e196]:
+      - generic [ref=f9e197]:
+        - generic [ref=f9e198]: Amazing Bank
+        - generic [ref=f9e199]: Backoffice Operations Console
+      - generic [ref=f9e200]:
+        - button "切换到中文" [ref=f9e201] [cursor=pointer]:
+          - img "translation" [ref=f9e203]
+        - button "user ABNK 运营管理员" [ref=f9e207] [cursor=pointer]:
+          - img "user" [ref=f9e209]
+          - generic [ref=f9e212]: ABNK 运营管理员
+    - generic [ref=f9e213]:
+      - complementary [ref=f9e214]:
+        - menu [ref=f9e216]:
+          - menuitem "team Clients" [ref=f9e217] [cursor=pointer]:
+            - img "team" [ref=f9e218]
+            - generic [ref=f9e221]: Clients
+          - menuitem "account-book Loan Operations" [ref=f9e222] [cursor=pointer]:
+            - img "account-book" [ref=f9e223]
+            - generic [ref=f9e226]: Loan Operations
+      - main [ref=f9e227]:
+        - generic [ref=f9e228]:
+          - generic [ref=f9e230]:
+            - heading "Clients" [level=4] [ref=f9e231]
+            - generic [ref=f9e233]:
+              - generic [ref=f9e234]:
+                - img "search" [ref=f9e236]
+                - searchbox "Search by name, external ID, or mobile number" [ref=f9e239]
+              - button [ref=f9e242] [cursor=pointer]:
+                - img "search" [ref=f9e244]
+          - generic [ref=f9e250]:
+            - table [ref=f9e254]:
+              - rowgroup [ref=f9e263]:
+                - row [ref=f9e264]:
+                  - columnheader "Client ID" [ref=f9e265]
+                  - columnheader "Name" [ref=f9e266]
+                  - columnheader "External ID" [ref=f9e267]
+                  - columnheader "Mobile Number" [ref=f9e268]
+                  - columnheader "Identifier Status" [ref=f9e269]
+                  - columnheader "Identifier Expiry Date" [ref=f9e270]
+                  - columnheader "Actions" [ref=f9e271]
+              - rowgroup [ref=f9e272]:
+                - row [ref=f9e273] [cursor=pointer]:
+                  - cell "28" [ref=f9e274]
+                  - cell "王POC-A1107104347" [ref=f9e275]
+                  - cell "ABNK-POC-A-1107104347" [ref=f9e276]
+                  - cell "13504347001" [ref=f9e277]
+                  - cell "Expired" [ref=f9e278]
+                  - cell "2020-01-01" [ref=f9e280]
+                  - cell [ref=f9e281]:
+                    - button "Details" [ref=f9e282]
+                - row [ref=f9e284] [cursor=pointer]:
+                  - cell "29" [ref=f9e285]
+                  - cell "李POC-B1107104347" [ref=f9e286]
+                  - cell "ABNK-POC-B-1107104347" [ref=f9e287]
+                  - cell "13504347002" [ref=f9e288]
+                  - cell "Valid" [ref=f9e289]
+                  - cell "2099-12-31" [ref=f9e291]
+                  - cell [ref=f9e292]:
+                    - button "Details" [ref=f9e293]
+                - row [ref=f9e295] [cursor=pointer]:
+                  - cell "30" [ref=f9e296]
+                  - cell "赵POC-C1107104347" [ref=f9e297]
+                  - cell "ABNK-POC-C-1107104347" [ref=f9e298]
+                  - cell "13504347003" [ref=f9e299]
+                  - cell "Valid" [ref=f9e300]
+                  - cell "2099-12-31" [ref=f9e302]
+                  - cell [ref=f9e303]:
+                    - button "Details" [ref=f9e304]
+            - list [ref=f9e306]:
+              - listitem [ref=f9e307]: Total 3 clients
+              - listitem "Previous Page" [ref=f9e308]:
+                - button [disabled] [ref=f9e309]:
+                  - img "left" [ref=f9e310]
+              - listitem "1" [ref=f9e313] [cursor=pointer]
+              - listitem "Next Page" [ref=f9e315]:
+                - button [disabled] [ref=f9e316]:
+                  - img "right" [ref=f9e317]
+          - generic [ref=f9e320]: "Data source: P0.3 seed snapshot (Wang/Li/Zhao POC-A/B/C, business date 2027-03-29); identifier status is derived from the expiry date against the business date (read-only baseline) — money format sample: ¥10,000.00"
+  - generic [ref=f9e322]:
+    - img "check-circle" [ref=f9e323]
+    - generic [ref=f9e326]: Welcome, ABNK 运营管理员

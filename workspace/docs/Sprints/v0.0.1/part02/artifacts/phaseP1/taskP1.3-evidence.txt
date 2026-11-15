@@ -1,0 +1,105 @@
+# Task P1.3 验收证据 — Flutter 手机银行原型（mock）
+
+日期：2026-11-07　|　执行者：abnk-debugger（CodeBuddy agent）
+工程：abnk-system/channels/mobile-banking（flutter create --org ai.amazingbank --project-name abnk_mobile --platforms=android,ios,web）
+
+## VP1.3.1 依赖就位 + 静态分析
+
+```
+$ flutter pub get && flutter analyze
+No issues found! (ran in 9.7s)
+```
+
+要点：
+- 依赖：google_fonts ^6.3.1（唯一外部依赖，仅做字体族匹配）；integration_test（sdk）
+- P1.2 主题经 google_fonts 6.x 实包口径修正：生成方法不再接受 fontFamilyFallback 形参，
+  回退栈改经 TextStyle.copyWith 附加（app_theme.dart，token 数值不变——VP1.2.2 色值 grep 复验通过）
+- 自托管字体（no-CDN）落地：assets/fonts/ 静态字重 TTF 12 个（Oxanium ×4、Noto Sans SC ×3、
+  Noto Serif SC ×2、JetBrains Mono ×3，共约 67MB），pubspec 同时登记 assets 段（google_fonts
+  按「族名去空格-变体名.ttf」文件名约定经 AssetManifest 命中——实测 google_fonts-6.3.3 源码口径）
+  与 fonts 段（fontFamilyFallback 直连族名）。GoogleFonts.config.allowRuntimeFetching = false。
+- 过程记录：CJK 全字面体积偏大，按 P1.2 风险表「字体子集化；POC 内网演示无感，归档说明」口径接受，
+  子集化列入 P4 优化清单。
+
+## VP1.3.2 flutter test（13 个用例 ≥ 7）
+
+```
+$ flutter test
+00:04 +13: All tests passed!
+```
+
+分布：login 3 / home 2 / transfer 2 / fixed_deposit 1 / loans 1 / transactions 2 / profile 2
+（7 个页面模块每模块 ≥1 个 smoke 用例；数据断言对齐 P0.3 种子快照值：
+账户 11 ¥10,000.00 / 证照过期 2020-01-01 / FD 到期 2028-01-17 / 贷款产品 12.0% 等额本息）
+
+过程记录（测试环境已知约束，非产品代码问题）：
+1. flutter_test 的 FakeAsync 用例边界会让 rootBundle 真实异步资产加载回复悬置，
+   污染 CachingAssetBundle 的跨用例缓存（第二次加载同一资产挂起）→ 测试路径用
+   FixtureBundle.seedForTests（dart:io 直读磁盘预置缓存）完全绕开 rootBundle；运行时路径不受影响。
+2. IndexedStack 未选中页签对默认 finder 不可见 → 测试先 switchTab 再断言。
+3. 结果对话框 await 会阻塞按钮 spinner 复位（无限动画 → pumpAndSettle 超时）→
+   提交成功先停 spinner，对话框不 await、关闭回调里退页（transfer/fixed_deposit 两页）。
+
+## VP1.3.3 分层纪律（业务模块零网络痕迹）
+
+```
+$ grep -rn "http" lib/features/ | wc -l
+       0
+```
+
+（`grep -rn "fetch|HttpClient|dio"` 命中的 2 行为 Icons.radio_button_* 的 "dio" 子串误匹配，非网络痕迹）
+
+## VP1.3.4 web 载体走查
+
+载体：flutter run -d web-server --web-port 6280 --web-hostname 127.0.0.1（ADR-009 62xx 段）
+自动化：playwright-cli，视口 390×844（移动比例），Flutter web 语义树（a11y）驱动交互
+记录：taskP1.3-web-walkthrough.md（七页面主路径 + 截图相对路径 + console 观察）
+
+console 观察记录：
+- 未捕获异常（红错）：0（修复 1 例：390px 窄视口下账户下拉 InputDecorator 溢出 29px，
+  DropdownButtonFormField 加 isExpanded: true 后消除）
+- warning 3 条：Flutter 框架语义路由标签提示（"route is currently ignored / always ignored"），
+  框架层提示、非应用异常，不阻塞验收
+
+## VP1.3.5 iOS 模拟器走查（iPhone 16 Pro, C6520335-8D10-4F34-9A6C-6142AE94D2D5）
+
+```
+$ flutter drive --driver=test_driver/integration_test.dart \
+    --target=integration_test/walkthrough_test.dart -d C6520335-…-6142AE94D2D5
+All tests passed.
+```
+
+四页截图：artifacts/phaseP1/screenshots/ios-01-login.png / ios-02-home.png /
+ios-03-transfer.png / ios-04-transactions.png（integration_test takeScreenshot 通道）
+
+## VP1.3.6 Android 模拟器走查（abnk_api36, emulator-5554）
+
+```
+$ flutter drive … -d emulator-5554
+All tests passed.
+```
+
+四页截图：artifacts/phaseP1/screenshots/android-01-login.png / android-02-home.png /
+android-03-transfer.png / android-04-transactions.png
+（Android 先 convertFlutterSurfaceToImage 一次性转换再截图；本 Flutter 版本未提供 revert API）
+构建期：android/gradle.properties 注入本机 socks5 代理（P1.1 归档口径，maven.google.com 直连超时规避）；
+NDK r28c 经代理拉取。
+
+核心闭环断言（三载体一致）：转账 ¥2,500（11→12，附言「还房贷」）成功后，
+明细页出现新流水「-¥2,500.00 余额 ¥7,500.00」（交易成功 → 明细出现新流水，旅程 Step 8 口径）。
+
+## VP1.3.7 flutter build web
+
+```
+$ flutter build web
+Compiling lib/main.dart for the Web...   39.4s
+✓ Built build/web
+```
+
+（图标字体 tree-shake：CupertinoIcons -99.4% / MaterialIcons -99.4%；自托管 TTF 按原样进产物 assets）
+
+## VP1.3.8 调试端口登记
+
+`.asdm/toolsets/abnk-harness-toolset/config.json` environments.local.processes 追加
+`abnk-mobile-web`（:6280，ADR-009 62xx 段；健康检查 GET / → 200；readyPattern "is being served at"）。
+JSON 语法校验通过（python3 json.load）。

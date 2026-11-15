@@ -171,7 +171,7 @@ dig +short amazingbank.ai A && dig +short www.amazingbank.ai A
 
 ### Step 4: 生成 Release Note 并请求确认（IRON GATE）
 
-生成 `.asdm/workspace/sre/ReleaseNotes/<version>/release-note.md`（模板见下），向用户完整输出并明确询问：
+生成 `.asdm/workspace/sre/ReleaseNotes/<version>/zh-CN/release-note.md`（模板见下），向用户完整输出并明确询问：
 
 > - 回复 **"确认发版"** 开始 Phase B
 > - 回复 **"修改"** + 意见，更新后重新提交 review

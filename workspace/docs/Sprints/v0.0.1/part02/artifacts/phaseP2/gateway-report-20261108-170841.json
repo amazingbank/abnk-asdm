@@ -1,0 +1,1312 @@
+{
+  "runAt": "2026-11-08T17:08:41",
+  "ok": true,
+  "summary": {
+    "designedSteps": 11,
+    "executedSteps": 11,
+    "assertsPassed": 55,
+    "assertsTotal": 55,
+    "credentialsInstance": "local-prodform",
+    "gatewayBase": "http://localhost:8080",
+    "fineractHealth": "http://localhost:8081/fineract-provider/actuator/health",
+    "error": null
+  },
+  "steps": [
+    {
+      "step": 1,
+      "name": "环境前置：网关与 Fineract 生产形态栈健康",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/actuator/health",
+          "status": 200,
+          "elapsed": 0.07
+        },
+        {
+          "method": "GET",
+          "path": "(:8081) /fineract-provider/actuator/health",
+          "status": 200,
+          "elapsed": 0.01
+        }
+      ],
+      "asserts": [
+        {
+          "label": "网关 health HTTP 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "网关 status=UP",
+          "pass": true,
+          "evidence": "UP"
+        },
+        {
+          "label": "Fineract 生产形态栈 status=UP",
+          "pass": true,
+          "evidence": "HTTP 200"
+        }
+      ],
+      "responses": [
+        {
+          "status": "UP"
+        },
+        {
+          "groups": [
+            "liveness",
+            "readiness"
+          ],
+          "status": "UP"
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "name": "登录三用户（alice/bob 对客、admin 内部）+ 通道严格匹配负向",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/login (alice)",
+          "status": 200,
+          "elapsed": 0.22
+        },
+        {
+          "method": "POST",
+          "path": "/login (bob)",
+          "status": 200,
+          "elapsed": 0.19
+        },
+        {
+          "method": "POST",
+          "path": "/bo/login (admin)",
+          "status": 200,
+          "elapsed": 0.18
+        },
+        {
+          "method": "POST",
+          "path": "/login (admin——负向)",
+          "status": 401,
+          "elapsed": 0.0
+        },
+        {
+          "method": "POST",
+          "path": "/bo/login (alice——负向)",
+          "status": 401,
+          "elapsed": 0.0
+        }
+      ],
+      "asserts": [
+        {
+          "label": "alice 登录 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "alice channel=customer",
+          "pass": true,
+          "evidence": "customer"
+        },
+        {
+          "label": "alice clientId=种子值",
+          "pass": true,
+          "evidence": "28 (期望 28)"
+        },
+        {
+          "label": "alice token 三段式（JWT）",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "label": "alice expiresIn=900",
+          "pass": true,
+          "evidence": "900"
+        },
+        {
+          "label": "bob 登录 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "bob channel=customer",
+          "pass": true,
+          "evidence": "customer"
+        },
+        {
+          "label": "bob clientId=种子值",
+          "pass": true,
+          "evidence": "29 (期望 29)"
+        },
+        {
+          "label": "admin /bo/login 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "admin channel=internal",
+          "pass": true,
+          "evidence": "internal"
+        },
+        {
+          "label": "admin role=ADMIN",
+          "pass": true,
+          "evidence": "ADMIN"
+        },
+        {
+          "label": "admin 打 /login → 401（通道严格匹配）",
+          "pass": true,
+          "evidence": "HTTP 401"
+        },
+        {
+          "label": "alice 打 /bo/login → 401（通道严格匹配）",
+          "pass": true,
+          "evidence": "HTTP 401"
+        }
+      ],
+      "responses": [
+        {
+          "token": "<redacted>",
+          "tokenType": "Bearer",
+          "expiresIn": 900,
+          "channel": "customer",
+          "username": "alice",
+          "displayName": "王 POC-A",
+          "clientId": 28
+        },
+        {
+          "token": "<redacted>",
+          "tokenType": "Bearer",
+          "expiresIn": 900,
+          "channel": "customer",
+          "username": "bob",
+          "displayName": "李 POC-B",
+          "clientId": 29
+        },
+        {
+          "token": "<redacted>",
+          "tokenType": "Bearer",
+          "expiresIn": 900,
+          "channel": "internal",
+          "username": "admin",
+          "displayName": "运营管理员",
+          "role": "ADMIN"
+        },
+        {
+          "error": "invalid_credentials"
+        },
+        {
+          "error": "invalid_credentials"
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "name": "对客 me 聚合（姓名/手机号脱敏）",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me",
+          "status": 200,
+          "elapsed": 0.06
+        }
+      ],
+      "asserts": [
+        {
+          "label": "me 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "clientId=alice 种子值",
+          "pass": true,
+          "evidence": "28"
+        },
+        {
+          "label": "displayName 非空",
+          "pass": true,
+          "evidence": "王 P."
+        },
+        {
+          "label": "mobileNo 脱敏（含 *）",
+          "pass": true,
+          "evidence": "135******01"
+        },
+        {
+          "label": "无证件号明文字段",
+          "pass": true,
+          "evidence": "键集合 ['clientId', 'displayName', 'emailAddress', 'externalId', 'firstname', 'lastname', 'mobileNo', 'officeName']"
+        }
+      ],
+      "responses": [
+        {
+          "clientId": 28,
+          "externalId": "ABNK-POC-A-1107104347",
+          "firstname": "王",
+          "lastname": "POC-A1107104347",
+          "displayName": "王 P.",
+          "mobileNo": "135******01",
+          "emailAddress": null,
+          "officeName": "Head Office"
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "name": "identity 状态计算（EXPIRED/VALID 两态）",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/identity (alice)",
+          "status": 200,
+          "elapsed": 0.02
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/identity (bob)",
+          "status": 200,
+          "elapsed": 0.01
+        }
+      ],
+      "asserts": [
+        {
+          "label": "alice identity 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "alice status=EXPIRED（过期种子）",
+          "pass": true,
+          "evidence": "EXPIRED"
+        },
+        {
+          "label": "alice expiryDate 非空",
+          "pass": true,
+          "evidence": "2020-01-01"
+        },
+        {
+          "label": "documentKey 脱敏（含 *）",
+          "pass": true,
+          "evidence": "ID-A********347"
+        },
+        {
+          "label": "bob identity 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "bob status=VALID（有效种子）",
+          "pass": true,
+          "evidence": "VALID"
+        }
+      ],
+      "responses": [
+        {
+          "documentTypeId": 1,
+          "documentTypeName": "Passport",
+          "documentKey": "ID-A********347",
+          "status": "EXPIRED",
+          "issuanceDate": "2015-01-01",
+          "expiryDate": "2020-01-01"
+        },
+        {
+          "documentTypeId": 1,
+          "documentTypeName": "Passport",
+          "documentKey": "ID-B********347",
+          "status": "VALID",
+          "issuanceDate": "2015-01-01",
+          "expiryDate": "2099-12-31"
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "name": "账户总览与单账户明细（尾号脱敏 + runningBalance）",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/accounts",
+          "status": 200,
+          "elapsed": 0.04
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/accounts/11/transactions",
+          "status": 200,
+          "elapsed": 0.05
+        }
+      ],
+      "asserts": [
+        {
+          "label": "me/accounts 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "savingsAccounts ≥ 2 项（种子口径）",
+          "pass": true,
+          "evidence": "2 项"
+        },
+        {
+          "label": "accountNo 尾号脱敏（含 *）",
+          "pass": true,
+          "evidence": "['0000**0011', '0000**0012']"
+        },
+        {
+          "label": "transactions 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "明细 ≥ 1 项",
+          "pass": true,
+          "evidence": "2 项"
+        },
+        {
+          "label": "明细含 runningBalance 字段",
+          "pass": true,
+          "evidence": "['amount', 'date', 'id', 'note', 'runningBalance', 'transactionType']"
+        }
+      ],
+      "responses": [
+        {
+          "savingsAccounts": [
+            {
+              "id": 11,
+              "accountNo": "0000**0011",
+              "productName": "ABNK-POC活期1107104347",
+              "accountType": "SAVINGS",
+              "currency": "CNY",
+              "accountBalance": 9900.0,
+              "availableBalance": 9900.0,
+              "status": "Active"
+            },
+            {
+              "id": 12,
+              "accountNo": "0000**0012",
+              "productName": "ABNK-POC活期1107104347",
+              "accountType": "SAVINGS",
+              "currency": "CNY",
+              "accountBalance": 100.0,
+              "availableBalance": 100.0,
+              "status": "Active"
+            }
+          ],
+          "fixedDepositAccounts": []
+        },
+        [
+          {
+            "id": 18,
+            "date": "2027-03-29",
+            "transactionType": "Withdrawal",
+            "amount": 100.0,
+            "runningBalance": 9900.0,
+            "note": "网关转账 T1：P2.4 正向转账"
+          },
+          {
+            "id": 15,
+            "date": "2027-01-17",
+            "transactionType": "Deposit",
+            "amount": 10000.0,
+            "runningBalance": 10000.0,
+            "note": "POC 源账户初始余额"
+          }
+        ]
+      ]
+    },
+    {
+      "step": 6,
+      "name": "转账正向（withdraw+deposit 聚合）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/abnk/api/v1/accounts/11/transfer",
+          "status": 200,
+          "elapsed": 0.09
+        }
+      ],
+      "asserts": [
+        {
+          "label": "转账 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "transactionId 存在",
+          "pass": true,
+          "evidence": "20"
+        },
+        {
+          "label": "newSourceBalance 为数值",
+          "pass": true,
+          "evidence": "9800.0"
+        }
+      ],
+      "responses": [
+        {
+          "transactionId": 20,
+          "newSourceBalance": 9800.0
+        }
+      ],
+      "firstResponse": {
+        "transactionId": 20,
+        "newSourceBalance": 9800.0
+      }
+    },
+    {
+      "step": 7,
+      "name": "转账幂等重放（同 externalId 同结果）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/abnk/api/v1/accounts/11/transfer",
+          "status": 200,
+          "elapsed": 0.0
+        }
+      ],
+      "asserts": [
+        {
+          "label": "重放 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "重放响应与首次逐字一致（transactionId 不变=未重复落账）",
+          "pass": true,
+          "evidence": "transactionId=20"
+        }
+      ],
+      "responses": [
+        {
+          "transactionId": 20,
+          "newSourceBalance": 9800.0
+        }
+      ]
+    },
+    {
+      "step": 8,
+      "name": "转账越权负向（bob 账户 → 403）",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/abnk/api/v1/accounts/13/transfer",
+          "status": 403,
+          "elapsed": 0.03
+        }
+      ],
+      "asserts": [
+        {
+          "label": "越权转账 403（转出账户不属于当前客户）",
+          "pass": true,
+          "evidence": "HTTP 403"
+        }
+      ],
+      "responses": [
+        {
+          "status": 403,
+          "error": "Forbidden",
+          "message": "转出账户不属于当前客户"
+        }
+      ]
+    },
+    {
+      "step": 9,
+      "name": "内部通道 bo 面 + 通道隔离",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients?limit=10",
+          "status": 200,
+          "elapsed": 0.08
+        },
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients?limit=10 (alice——负向)",
+          "status": 403,
+          "elapsed": 0.0
+        },
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients?limit=10 (无 token——负向)",
+          "status": 401,
+          "elapsed": 0.0
+        }
+      ],
+      "asserts": [
+        {
+          "label": "admin 查 bo 客户面 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "客户总数 ≥ 3（种子客户 A/B/C）",
+          "pass": true,
+          "evidence": "total=29"
+        },
+        {
+          "label": "alice 打 bo 面 → 403（通道隔离）",
+          "pass": true,
+          "evidence": "HTTP 403"
+        },
+        {
+          "label": "无 token 打 bo 面 → 401（鉴权先于隔离）",
+          "pass": true,
+          "evidence": "HTTP 401"
+        }
+      ],
+      "responses": [
+        {
+          "totalFilteredRecords": 29,
+          "pageItems": [
+            {
+              "id": 30,
+              "accountNo": "000000030",
+              "externalId": "ABNK-POC-C-1107104347",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2027,
+                1,
+                17
+              ],
+              "firstname": "赵",
+              "lastname": "POC-C1107104347",
+              "displayName": "赵 POC-C1107104347",
+              "mobileNo": "13504347003",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 29,
+              "accountNo": "000000029",
+              "externalId": "ABNK-POC-B-1107104347",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2027,
+                1,
+                17
+              ],
+              "firstname": "李",
+              "lastname": "POC-B1107104347",
+              "displayName": "李 POC-B1107104347",
+              "mobileNo": "13504347002",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 28,
+              "accountNo": "000000028",
+              "externalId": "ABNK-POC-A-1107104347",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2027,
+                1,
+                17
+              ],
+              "firstname": "王",
+              "lastname": "POC-A1107104347",
+              "displayName": "王 POC-A1107104347",
+              "mobileNo": "13504347001",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2027,
+                  1,
+                  17
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 27,
+              "accountNo": "000000027",
+              "externalId": "ABNK-POC-C-1107103718",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2026,
+                11,
+                8
+              ],
+              "firstname": "赵",
+              "lastname": "POC-C1107103718",
+              "displayName": "赵 POC-C1107103718",
+              "mobileNo": "13503718003",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 26,
+              "accountNo": "000000026",
+              "externalId": "ABNK-POC-B-1107103718",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2026,
+                11,
+                8
+              ],
+              "firstname": "李",
+              "lastname": "POC-B1107103718",
+              "displayName": "李 POC-B1107103718",
+              "mobileNo": "13503718002",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 25,
+              "accountNo": "000000025",
+              "externalId": "ABNK-POC-A-1107103718",
+              "status": {
+                "id": 300,
+                "code": "clientStatusType.active",
+                "value": "Active"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": true,
+              "activationDate": [
+                2026,
+                11,
+                8
+              ],
+              "firstname": "王",
+              "lastname": "POC-A1107103718",
+              "displayName": "王 POC-A1107103718",
+              "mobileNo": "13503718001",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator",
+                "activatedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "activatedByUsername": "mifos",
+                "activatedByFirstname": "App",
+                "activatedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 24,
+              "accountNo": "000000024",
+              "externalId": "ABNK-DBG-8",
+              "status": {
+                "id": 100,
+                "code": "clientStatusType.pending",
+                "value": "Pending"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": false,
+              "firstname": "调试",
+              "lastname": "复现8",
+              "displayName": "调试 复现8",
+              "mobileNo": "13503429001",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 23,
+              "accountNo": "000000023",
+              "externalId": "ABNK-DBG-6b",
+              "status": {
+                "id": 100,
+                "code": "clientStatusType.pending",
+                "value": "Pending"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": false,
+              "firstname": "调试",
+              "lastname": "复现6b",
+              "displayName": "调试 复现6b",
+              "mobileNo": "13503336002",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 22,
+              "accountNo": "000000022",
+              "externalId": "ABNK-DBG-5",
+              "status": {
+                "id": 100,
+                "code": "clientStatusType.pending",
+                "value": "Pending"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": false,
+              "firstname": "调试",
+              "lastname": "复现5",
+              "displayName": "调试 复现5",
+              "mobileNo": "13503101001",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            },
+            {
+              "id": 21,
+              "accountNo": "000000021",
+              "externalId": "ABNK-DBG-AFTER_FD",
+              "status": {
+                "id": 100,
+                "code": "clientStatusType.pending",
+                "value": "Pending"
+              },
+              "subStatus": {
+                "active": false,
+                "mandatory": false
+              },
+              "active": false,
+              "firstname": "调",
+              "lastname": "AFTER_FD",
+              "displayName": "调 AFTER_FD",
+              "mobileNo": "1350000036270",
+              "gender": {},
+              "clientType": {},
+              "clientClassification": {},
+              "isStaff": false,
+              "officeId": 1,
+              "officeName": "Head Office",
+              "timeline": {
+                "submittedOnDate": [
+                  2026,
+                  11,
+                  8
+                ],
+                "submittedByUsername": "mifos",
+                "submittedByFirstname": "App",
+                "submittedByLastname": "Administrator"
+              },
+              "legalForm": {
+                "id": 1,
+                "code": "legalFormType.person",
+                "value": "Person"
+              },
+              "clientNonPersonDetails": {
+                "constitution": {},
+                "mainBusinessLine": {}
+              }
+            }
+          ]
+        },
+        {
+          "error": "forbidden",
+          "message": "internal channel requires internal channel token"
+        },
+        {
+          "error": "unauthorized",
+          "message": "missing bearer token"
+        }
+      ]
+    },
+    {
+      "step": 10,
+      "name": "identifiers PUT→回读→恢复（过期证照修复链路）",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients/28/identifiers",
+          "status": 200,
+          "elapsed": 0.01
+        },
+        {
+          "method": "PUT",
+          "path": "/bo/api/v1/clients/28/identifiers/8",
+          "status": 200,
+          "elapsed": 0.02
+        },
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients/28/identifiers (回读)",
+          "status": 200,
+          "elapsed": 0.01
+        },
+        {
+          "method": "PUT",
+          "path": "/bo/api/v1/clients/28/identifiers/8 (恢复)",
+          "status": 200,
+          "elapsed": 0.02
+        },
+        {
+          "method": "GET",
+          "path": "/bo/api/v1/clients/28/identifiers (恢复回读)",
+          "status": 200,
+          "elapsed": 0.01
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/me/identity (交叉验证)",
+          "status": 200,
+          "elapsed": 0.01
+        }
+      ],
+      "asserts": [
+        {
+          "label": "列出 alice 证照 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "alice 至少 1 条证照（种子）",
+          "pass": true,
+          "evidence": "1 条"
+        },
+        {
+          "label": "锁定目标证照",
+          "pass": true,
+          "evidence": "identifierId=8"
+        },
+        {
+          "label": "原始 expiryDate 可读",
+          "pass": true,
+          "evidence": "2020-01-01"
+        },
+        {
+          "label": "PUT 2099-12-31 → 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "回读 expiryDate=2099-12-31",
+          "pass": true,
+          "evidence": "2099-12-31"
+        },
+        {
+          "label": "恢复 PUT → 200",
+          "pass": true,
+          "evidence": "HTTP 200"
+        },
+        {
+          "label": "恢复回读 expiryDate=2020-01-01",
+          "pass": true,
+          "evidence": "2020-01-01"
+        },
+        {
+          "label": "恢复后对客 identity 仍 EXPIRED（种子态复原）",
+          "pass": true,
+          "evidence": "HTTP 200 status=EXPIRED"
+        }
+      ],
+      "responses": [
+        [
+          {
+            "id": 8,
+            "clientId": 28,
+            "documentType": {
+              "id": 1,
+              "name": "Passport"
+            },
+            "documentKey": "ID-A-1107104347",
+            "description": "身份证(已过期)",
+            "status": "clientIdentifierStatusType.active",
+            "issuanceDate": "2015-01-01",
+            "expiryDate": "2020-01-01"
+          }
+        ],
+        {
+          "officeId": 1,
+          "clientId": 28,
+          "resourceId": 8,
+          "changes": {
+            "expiryDate": [
+              2099,
+              12,
+              31
+            ]
+          }
+        },
+        [
+          {
+            "id": 8,
+            "clientId": 28,
+            "documentType": {
+              "id": 1,
+              "name": "Passport"
+            },
+            "documentKey": "ID-A-1107104347",
+            "description": "身份证(已过期)",
+            "status": "clientIdentifierStatusType.active",
+            "issuanceDate": "2015-01-01",
+            "expiryDate": "2099-12-31"
+          }
+        ],
+        {
+          "officeId": 1,
+          "clientId": 28,
+          "resourceId": 8,
+          "changes": {
+            "expiryDate": [
+              2020,
+              1,
+              1
+            ]
+          }
+        },
+        [
+          {
+            "id": 8,
+            "clientId": 28,
+            "documentType": {
+              "id": 1,
+              "name": "Passport"
+            },
+            "documentKey": "ID-A-1107104347",
+            "description": "身份证(已过期)",
+            "status": "clientIdentifierStatusType.active",
+            "issuanceDate": "2015-01-01",
+            "expiryDate": "2020-01-01"
+          }
+        ],
+        {
+          "documentTypeId": 1,
+          "documentTypeName": "Passport",
+          "documentKey": "ID-A********347",
+          "status": "EXPIRED",
+          "issuanceDate": "2015-01-01",
+          "expiryDate": "2020-01-01"
+        }
+      ]
+    },
+    {
+      "step": 11,
+      "name": "对客通道黑名单与收敛负向",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/jobs (黑名单)",
+          "status": 403,
+          "elapsed": 0.0
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/internal/cache/evict (黑名单)",
+          "status": 403,
+          "elapsed": 0.0
+        },
+        {
+          "method": "GET",
+          "path": "/abnk/api/v1/loans/999/command (契约外)",
+          "status": 404,
+          "elapsed": 0.0
+        }
+      ],
+      "asserts": [
+        {
+          "label": "jobs → 403（黑名单）",
+          "pass": true,
+          "evidence": "HTTP 403"
+        },
+        {
+          "label": "internal/cache/evict → 403（黑名单）",
+          "pass": true,
+          "evidence": "HTTP 403"
+        },
+        {
+          "label": "loans/999/command → 404（非契约路径）",
+          "pass": true,
+          "evidence": "HTTP 404"
+        }
+      ],
+      "responses": [
+        {
+          "error": "forbidden",
+          "message": "path not available on customer channel"
+        },
+        {
+          "error": "forbidden",
+          "message": "path not available on customer channel"
+        },
+        {
+          "error": "not_found",
+          "message": "no such endpoint on customer channel"
+        }
+      ]
+    }
+  ]
+}
