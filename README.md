@@ -39,15 +39,20 @@ amazingbank-ws/
 └── logs/                         # 运行时日志（fineract.log + postgres.log + PID），运行时生成
 ```
 
-**目录速查表：**
+**目录速查表**（开放性口径依据 [ADR-010](workspace/docs/planning/abnk-design/adr/010-repository-openness.md)）：
 
-| 目录 | 性质 | 用途 | 是否必需 |
-|---|---|---|---|
-| `.asdm` | git 仓库（github.com:amazingbank/amazingbank-asdm） | 工具集、规划文档 | 必需 |
-| `abnk-system` | git 仓库（github.com:amazingbank/abnk-system） | **基础设施编排**（当前仅 PostgreSQL compose，含 Kafka/Keycloak 接入模板） | 必需 |
-| `fineract` | git 仓库（github.com:amazingbank/fineract，develop） | **ABNK 核心账务引擎**（当前阶段唯一代码仓库） | 必需 |
-| `.codebuddy` | 非 git | CodeBuddy `/abnk-debugger` 快捷命令 | 推荐 |
-| `logs` | 运行时生成 | 栈进程日志与 PID | 自动生成 |
+| 目录 | 性质 | 用途 | 开放性 | 是否必需 |
+|---|---|---|---|---|
+| `.asdm` | git 仓库（github.com:amazingbank/amazingbank-asdm） | 工具集、规划文档、Sprint 迭代与过程证据 | **public** | 必需 |
+| `abnk-system` | git 仓库（github.com:amazingbank/abnk-system） | **基础设施编排**（当前仅 PostgreSQL compose，含 Kafka/Keycloak 接入模板） | **public** | 必需 |
+| `fineract` | git 仓库（github.com:amazingbank/fineract，develop） | **ABNK 核心账务引擎**（当前阶段唯一代码仓库） | public（上游 fork） | 必需 |
+| `abnk-devportal` | git 仓库（github.com:amazingbank/abnk-devportal，空仓已建） | dev portal 站点——ASDM 过程资产的对外展示窗口（Sprint v0.0.1 Part04 交付） | **public** | Part04 启动后必需 |
+| `abnk-website` | git 仓库（github.com:amazingbank/abnk-website，工作区外独立 clone） | 官网 + 社区运营（注册/认证/活动/统计——ASDM 团队对 ABNK 范例项目的运营动作） | **private** | 部署官网时 |
+| `.github-private` | 非 git 工作区目录 | 密钥与部署敏感件（PAT/口令/私钥）——仅开发/测试/构建时获取 | **private** | 必需 |
+| `.codebuddy` | 非 git | CodeBuddy `/abnk-debugger` 快捷命令 | — | 推荐 |
+| `logs` | 运行时生成 | 栈进程日志与 PID | — | 自动生成 |
+
+> **两条保密边界**（ADR-010）：①密钥 → `.github-private`；②社区运营 → abnk-website。其余一律能开尽开；public 仓触碰 evidence/报告类文件必跑凭据扫描门（Part03 Phase 6 落地）。
 
 > **`abnk-system` 必须克隆到 `amazingbank-ws/abnk-system/`**。其 `deploy/.env` 里 `ABNK_LOGS_DIR=../../logs` 是相对 compose 文件位置解析的（PostgreSQL 日志要落到工作区统一的 `logs/postgres.log`，与 `logs/fineract.log` 并列，`abnk-debugger` 依赖该布局）。放在别的路径就把该变量改成绝对路径。
 
