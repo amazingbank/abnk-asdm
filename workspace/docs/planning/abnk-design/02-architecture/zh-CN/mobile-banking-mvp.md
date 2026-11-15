@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 渠道层 MVP 设计：手机银行（Flutter）+ 对客 API + Backoffice
 
 > **性质**：设计文档（Phase 3 渠道层开项前细化）。技术栈已定：SCG 网关 + React 管理后台 + **Flutter 手机银行**（ADR-008 / 待拍板 ADR-009）。

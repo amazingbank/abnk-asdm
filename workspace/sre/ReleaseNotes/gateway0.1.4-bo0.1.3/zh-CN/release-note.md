@@ -1,3 +1,8 @@
+---
+version: gateway0.1.4-bo0.1.3
+date: 2026-11-13
+locale: zh-CN
+---
 # ABNK Gateway 0.1.4 + BO 0.1.3 — Release Notes
 
 **版本**：`gateway 0.1.4` + `bo 0.1.3`（镜像 tag，双 patch 递增）

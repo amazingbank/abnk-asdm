@@ -1,3 +1,8 @@
+---
+section: 01-product
+status: stable
+locale: zh-CN
+---
 # 用户角色（Personas）
 
 > **性质**：设计文档。角色集合决定前端形态（ADR-005 三套）与权限模型（`04-operations/security-compliance.md`）。

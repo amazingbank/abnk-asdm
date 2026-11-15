@@ -1,3 +1,8 @@
+---
+section: 00-baseline
+status: stable
+locale: zh-CN
+---
 # 官方扩展点体系（custom 模块机制）
 
 > **性质**：实测事实记录。来自官方文档 + `custom/acme` 参考实现的源码解析（2026-10-24/25）。

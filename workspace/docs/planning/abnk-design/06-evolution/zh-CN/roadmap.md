@@ -1,3 +1,8 @@
+---
+section: 06-evolution
+status: stable
+locale: zh-CN
+---
 # 路线图（Phase 0–5）
 
 > **性质**：设计文档。每阶段有明确入口/出口判据；当前状态实时同步到本文档与主 README 状态看板。

@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-001：不重写 Fineract，核心账务直接复用
 
 - 状态：Accepted

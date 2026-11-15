@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 官网渠道多语言与字体方案（channels/website）
 
 > 状态：✅ 已实施（2026-10-27）· 细化 ADR-008 中"官网零业务 API"的官网范围

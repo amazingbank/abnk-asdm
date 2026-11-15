@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-004：采用 Fineract 多租户架构（分阶段落地）
 
 - 状态：Accepted

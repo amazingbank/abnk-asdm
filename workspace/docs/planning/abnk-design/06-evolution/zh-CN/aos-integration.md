@@ -1,3 +1,8 @@
+---
+section: 06-evolution
+status: stable
+locale: zh-CN
+---
 # AOS 集成（数据智能层）
 
 > **性质**：设计框架（Phase 2 建立基线，Phase 5 深化）。

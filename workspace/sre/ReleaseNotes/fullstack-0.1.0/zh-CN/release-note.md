@@ -1,3 +1,8 @@
+---
+version: fullstack-0.1.0
+date: 2026-11-10
+locale: zh-CN
+---
 # ABNK Fullstack — Release Notes
 
 **版本**：`fullstack-0.1.0`（全栈首次发布——七容器拓扑；网关版本 `0.1.0` 为主版本口径）

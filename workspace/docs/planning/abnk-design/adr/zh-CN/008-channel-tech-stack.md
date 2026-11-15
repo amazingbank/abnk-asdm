@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-008：渠道层技术架构（网关 SCG + 前端 React + 移动混合）
 
 - 状态：Accepted

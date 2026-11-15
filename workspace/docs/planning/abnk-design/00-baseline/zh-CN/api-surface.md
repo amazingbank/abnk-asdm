@@ -1,3 +1,8 @@
+---
+section: 00-baseline
+status: stable
+locale: zh-CN
+---
 # API 面与实测坑
 
 > **性质**：实测事实记录。数据来自 2026-10-24/25 对运行中实例（603 路径 OpenAPI spec + curl 实测）。

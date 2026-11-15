@@ -1,3 +1,8 @@
+---
+section: 05-domains
+status: stable
+locale: zh-CN
+---
 # 贷款域（第一波消费贷 + 第二波经营贷，ADR-006）
 
 > **性质**：设计文档，三段式。事实锚点：贷款端点族 99 个、progressive-loan/working-capital 模块、7 种交易处理器、COB 已实测可触发（`00-baseline/`）。

@@ -1,3 +1,8 @@
+---
+section: 05-domains
+status: stable
+locale: zh-CN
+---
 # 存款域（第一波产品线，ADR-006）
 
 > **性质**：设计文档，三段式。事实锚点：savings 端点族 31 个（实测）；`fineract-savings` 模块。

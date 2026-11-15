@@ -1,3 +1,8 @@
+---
+section: 05-domains
+status: stable
+locale: zh-CN
+---
 # 监管报送域（Phase 4）
 
 > **性质**：骨架（Phase 4 开项时细化）。

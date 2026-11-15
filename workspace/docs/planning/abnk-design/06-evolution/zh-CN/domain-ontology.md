@@ -1,3 +1,8 @@
+---
+section: 06-evolution
+status: stable
+locale: zh-CN
+---
 # 银行领域本体（数据智能层·建法）
 
 > **性质**：设计框架（Phase 2 建概念骨架，Phase 5 深化）。本文是 `aos-integration.md` §2"双本体愿景"中**银行领域本体**的落地建法；代码本体见彼文。

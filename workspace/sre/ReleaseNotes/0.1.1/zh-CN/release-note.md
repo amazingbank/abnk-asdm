@@ -1,3 +1,8 @@
+---
+version: 0.1.1
+date: 2026-10-26
+locale: zh-CN
+---
 # ABNK Website — Release Notes
 
 **版本**：`0.1.1`

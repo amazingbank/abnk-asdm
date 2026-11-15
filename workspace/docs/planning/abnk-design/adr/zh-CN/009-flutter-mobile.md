@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-009：手机银行移动端采用 Flutter（取代 ADR-008 的"原生薄壳 + H5"移动方案）
 
 - 状态：Accepted（2026-11-07 转正——决策已由 Part02 主计划 D4 落定：Flutter web + iOS + Android 三目标；执行载体为 Sprint v0.0.1 Part02 Phase P1，工具链经任务 P1.1 实测就位）

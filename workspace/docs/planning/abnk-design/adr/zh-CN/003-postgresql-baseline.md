@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-003：PostgreSQL 单一数据库宿主，root/postgres 三方对齐
 
 - 状态：Accepted

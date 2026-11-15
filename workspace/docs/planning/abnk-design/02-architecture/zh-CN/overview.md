@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 架构总览：L1–L5 分层
 
 > **性质**：设计文档。分层事实依据：`00-baseline/`（Fineract 能力与扩展点）、ADR-001~006。

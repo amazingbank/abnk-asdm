@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-007：信创兼容策略（主线开源 + 兼容层）
 
 - 状态：Accepted

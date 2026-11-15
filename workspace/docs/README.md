@@ -1,3 +1,8 @@
+---
+section: workspace-structure
+status: stable
+locale: zh-CN
+---
 # workspace/docs —— 结构树与 locale 叶子层规则
 
 > 结构树（Sprints 各 part / planning 各分区 / sre 各版本目录）**语言无关**；

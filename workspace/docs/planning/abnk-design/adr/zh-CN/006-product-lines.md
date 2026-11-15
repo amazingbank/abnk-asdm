@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-006：产品线——储蓄+消费贷先行，经营贷后续
 
 - 状态：Accepted

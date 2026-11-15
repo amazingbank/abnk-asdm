@@ -1,3 +1,8 @@
+---
+section: 04-operations
+status: stable
+locale: zh-CN
+---
 # 安全与合规
 
 > **性质**：设计框架（Phase 3/4 分阶段落地）。现状事实：Basic Auth + 租户头（实测开箱即用）；OAuth2/2FA 端点存在但默认关闭。

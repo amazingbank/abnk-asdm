@@ -1,3 +1,8 @@
+---
+section: zh-CN
+status: stable
+locale: zh-CN
+---
 # Amazing Bank 设计文档（abnk-design）
 
 > 本目录是 Amazing Bank IT 系统的设计文档区。结构于 2026-10-25 评审通过并**全部成文**（40 篇，含 2026-10-26 新增 ADR-007/008、2026-10-27 新增 website-i18n-fonts 与 domain-ontology、2026-11-03 新增 mobile-banking-mvp 与 ADR-009（Flutter 移动端））。

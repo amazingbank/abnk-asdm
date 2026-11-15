@@ -1,3 +1,8 @@
+---
+section: 03-data-model
+status: stable
+locale: zh-CN
+---
 # 字段扩展决策树（datatable vs custom 表）
 
 > **性质**：设计规范。机制事实：datatables 为 Fineract 原生机制；custom 表走 ADR-002 独立迁移。

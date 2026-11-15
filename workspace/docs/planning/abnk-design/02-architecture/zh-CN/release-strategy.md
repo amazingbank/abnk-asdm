@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 上游同步策略（fork 与 develop 的长期可合并性）
 
 > **性质**：设计框架（Phase 2 建立 CI 后执行）。依据 ADR-001/002；机制事实见 `extension-points.md`。

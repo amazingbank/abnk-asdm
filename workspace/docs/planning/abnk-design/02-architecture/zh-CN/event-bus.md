@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 事件总线（Kafka）
 
 > **性质**：设计框架（Phase 4 启动时细化）。机制事实：`00-baseline/fineract-codebase.md` §3（外部事件）、`api-surface.md`。

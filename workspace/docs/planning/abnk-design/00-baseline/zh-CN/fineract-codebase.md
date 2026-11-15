@@ -1,3 +1,8 @@
+---
+section: 00-baseline
+status: stable
+locale: zh-CN
+---
 # Fineract 代码库测绘
 
 > **性质**：实测事实记录。数据来自 2026-10-24 对 `amazingbank/fineract`（develop 分支）的静态探查。

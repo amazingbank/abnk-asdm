@@ -1,3 +1,8 @@
+---
+section: 03-data-model
+status: stable
+locale: zh-CN
+---
 # Fineract 核心领域概念
 
 > **性质**：概念地图（基于 API 面与模块结构整理；Phase 1 实跑后补充实测细节）。供 L2/L3 设计者建立词汇表。

@@ -1,3 +1,8 @@
+---
+section: 04-operations
+status: stable
+locale: zh-CN
+---
 # 可观测性
 
 > **性质**：设计框架（Phase 2 落地）。**原则：复用官方栈，不另造**（`00-baseline/fineract-codebase.md` §5）。

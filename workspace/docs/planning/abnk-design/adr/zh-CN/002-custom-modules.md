@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-002：全部定制走 `custom/abnk/` 模块
 
 - 状态：Accepted

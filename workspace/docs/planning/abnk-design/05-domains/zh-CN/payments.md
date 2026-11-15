@@ -1,3 +1,8 @@
+---
+section: 05-domains
+status: stable
+locale: zh-CN
+---
 # 支付域（Phase 4）
 
 > **性质**：骨架（Phase 4 开项时细化）。三段式结构预留，当前以集成面盘点为主。

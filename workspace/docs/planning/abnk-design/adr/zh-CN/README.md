@@ -1,3 +1,8 @@
+---
+section: adr
+status: proposed
+locale: zh-CN
+---
 # 架构决策记录（ADR）
 
 > ADR 记录**已拍板**的架构决策及其后果。一旦写入即生效，推翻需新开一条并标注 `Superseded by`。

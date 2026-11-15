@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # 定制策略（custom/abnk 宪法）
 
 > **性质**：设计文档 ★ 全部定制工作的执行规范。决策依据 ADR-002；机制事实见 `00-baseline/extension-points.md`。

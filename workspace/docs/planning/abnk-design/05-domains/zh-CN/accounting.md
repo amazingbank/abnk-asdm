@@ -1,3 +1,8 @@
+---
+section: 05-domains
+status: stable
+locale: zh-CN
+---
 # 会计域（★ L1 核心工作量）
 
 > **性质**：设计文档，三段式（原生能力 / 中国差距 / 定制方案）。

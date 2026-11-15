@@ -1,3 +1,8 @@
+---
+section: 02-architecture
+status: stable
+locale: zh-CN
+---
 # API 网关（渠道层）
 
 > **性质**：设计框架（Phase 3 启动时细化）。已定约束来自 ADR-005；API 事实来自 `00-baseline/api-surface.md`。

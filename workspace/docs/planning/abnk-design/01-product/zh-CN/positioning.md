@@ -1,3 +1,8 @@
+---
+section: 01-product
+status: stable
+locale: zh-CN
+---
 # 产品定位与价值主张
 
 > **性质**：设计文档（非实测事实）。事实依据来自 `00-baseline/` 与 ADR-001/006。

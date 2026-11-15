@@ -1,3 +1,8 @@
+---
+version: bo0.1.1-mweb1.0.1
+date: 2026-11-12
+locale: zh-CN
+---
 # ABNK App Channels Release — bo 0.1.1 + mweb 1.0.1（Part03 i18n 双语全量）
 
 **版本**：`abnk-bo:0.1.1` + `abnk-mweb:1.0.1`（ghcr 公共包）

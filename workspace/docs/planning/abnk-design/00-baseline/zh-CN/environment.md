@@ -1,3 +1,8 @@
+---
+section: 00-baseline
+status: stable
+locale: zh-CN
+---
 # 环境基线（Phase 0）
 
 > **性质**：实测事实记录，非设计文档。全部内容来自 2026-10-24 的实际搭建与验证。

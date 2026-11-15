@@ -1,3 +1,8 @@
+---
+section: 06-evolution
+status: stable
+locale: zh-CN
+---
 # Phase 1 实施方案：原生能力端到端验证
 
 > **目标**：不写任何后端代码，用纯 API 把 Fineract 原生业务链路完整跑通一遍，形成 ABNK 的第一条可回归验证基线。

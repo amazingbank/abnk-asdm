@@ -1,3 +1,8 @@
+---
+section: adr
+status: accepted
+locale: zh-CN
+---
 # ADR-010：仓库开放与保密边界（能开尽开 + 两条例外）
 
 - 状态：Accepted

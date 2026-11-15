@@ -1,3 +1,8 @@
+---
+section: 03-data-model
+status: stable
+locale: zh-CN
+---
 # 本地化数据规则
 
 > **性质**：设计文档（L1 数据面）。事实锚点：默认时区 `Asia/Kolkata`（`application.properties:61`，实测）；领域差距详见 `05-domains/`。

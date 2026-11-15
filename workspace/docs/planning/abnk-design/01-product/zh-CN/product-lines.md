@@ -1,3 +1,8 @@
+---
+section: 01-product
+status: stable
+locale: zh-CN
+---
 # 产品线规划（依 ADR-006 展开）
 
 > **性质**：设计文档。决策已定（ADR-006，2026-10-25），本文展开产品明细与范围影响。

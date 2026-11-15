@@ -1,3 +1,8 @@
+---
+version: 0.1.3
+date: 2026-11-10
+locale: zh-CN
+---
 # ABNK Website — Release Notes
 
 **版本**：`0.1.3`（镜像 tag，= abnk-website 仓 package.json version）
