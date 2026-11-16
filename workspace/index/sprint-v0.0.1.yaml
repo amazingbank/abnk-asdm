@@ -437,8 +437,9 @@ parts:
       0）
   - id: '3.1'
     title: 路由与布局骨架 + 正式双语 UI 词条
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V3.1.1–V3.1.3 全过；react-router-dom ^6.30.6 选型落定（backoffice 同构先例核验）、路由↔词条双向编译期互锁（satisfies）、20
+      路由两语言全可达 console 0 红错、截图 20 张归档、key 集合 diff 缺失 0、preview 冒烟过）
   - id: '3.2'
     title: 迭代时间线四层下钻页（灵魂页面）
     status: pending
@@ -534,3 +535,8 @@ portal_content:
   locale: en-US
   status: published
   date: '2026-11-16'
+moved_links:
+- from_task: part01:2.1
+  to_task: part02:P0.5
+- from_task: part03:5.5
+  to_task: part04:1.1

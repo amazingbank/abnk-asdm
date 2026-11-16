@@ -13,7 +13,12 @@
 #   $INDEX/sprint-v0.0.1.yaml      Sprint→Part→Phase→Task 层级索引 + portal-content
 #                                   分区条目（Part04 任务 2.3 locale 路由：同 doc id
 #                                   逐 locale 注册，单语条目带 fallback 标记——渲染
-#                                   层按此路由，无需扫描目录）
+#                                   层按此路由，无需扫描目录）+ moved_links 移交
+#                                   返链（Part04 任务 3.2 增量：跨 Part 任务移交的
+#                                   结构化往返链，人工维护常量 + fail-loud 校验）
+#   $INDEX/sprint-v0.0.1.json      同一层级索引的 JSON 形态（Part04 任务 3.2 增量，
+#                                   已知坑 7 决策①：TS 消费走生成器补产 JSON，
+#                                   portal 保持「提取入库、构建纯复制」零运行时解析）
 #   $INDEX/metrics-v0.0.1.json     指标（第一批清单口径，Part04 Phase1 已知坑 6）
 #   $INDEX/loc-snapshot-v0.0.1.md  LOC 快照（--refresh-loc 显式更新；默认只读）
 # 三重校验（fail-loud，无静默跳过路径）：
@@ -40,6 +45,15 @@
 #                           locale routing: one entry per locale of the same
 #                           doc id; monolingual docs carry a fallback marker —
 #                           the render side routes on this, no dir scanning)
+#                           plus moved_links (Part04 task 3.2 increment: the
+#                           structured round-trip chain of cross-part task
+#                           moves — a manually curated constant with
+#                           fail-loud validation)
+#   sprint-v0.0.1.json      the same hierarchy index as JSON (Part04 task 3.2
+#                           increment, known-pitfall-7 option ①: TS consumption
+#                           reads the generator-emitted JSON so the portal stays
+#                           "extract-and-commit, build-by-copy" with zero
+#                           runtime parsing)
 #   metrics-v0.0.1.json     metrics (first-batch list, Part04 Phase1 pitfall 6)
 #   loc-snapshot-v0.0.1.md  LOC snapshot (explicit --refresh-loc; read-only by default)
 # Triple validation (fail-loud, no silent-skip path):
@@ -103,6 +117,24 @@ BLOCKED_ITEMS = [
      "part": "part02",
      "source": "Sprints/v0.0.1/part02/artifacts/phaseP3/taskP3.6-mobile-package.md",
      "replay": "Apple 开发者账号到位后补签名与 TestFlight 上架"},
+]
+
+# 移交往返链（Part04 任务 3.2 增量，人工维护常量，与 BLOCKED_ITEMS 同口径：
+# 机械 grep 移交标记不可靠——每条显式登记两端点；渲染层据此做双向跳转，
+# from 侧任务呈现「移交至」、to 侧任务呈现「承接自」）。校验见
+# validate_moved_links：两端点必须存在、from 侧必须为 moved 状态、
+# moved 任务与链条目守恒（有 moved 任务而无链 = fail-loud）。
+# Moved-task round-trip chain (Part04 task 3.2 increment, a manually curated
+# constant kept in the same spirit as BLOCKED_ITEMS: grepping move markers is
+# unreliable, so both endpoints of every entry are registered explicitly; the
+# render side builds bidirectional jumps from it — the from task shows "moved
+# to", the to task shows "continued from"). Validation lives in
+# validate_moved_links: both endpoints must exist, the from side must carry the
+# moved status, and the moved tasks must be exactly covered by the chain
+# (a moved task without a chain entry fails loudly).
+MOVED_LINKS = [
+    {"from_task": "part01:2.1", "to_task": "part02:P0.5"},
+    {"from_task": "part03:5.5", "to_task": "part04:1.1"},
 ]
 
 # Plan 进度概要表的行形态。
@@ -441,6 +473,33 @@ def sprint_rhythm(parts_docs):
     return rhythm
 
 
+def validate_moved_links(parts_out):
+    # 校验 4（任务 3.2 增量）：移交链两端点存在、from 侧为 moved 状态、
+    # moved 任务与链完全守恒（缺链/孤儿链均 fail-loud）。
+    # Validation 4 (task 3.2 increment): both endpoints of every moved link
+    # exist, the from side carries the moved status, and the moved tasks are
+    # exactly covered by the chain (a missing link or an orphan link both fail
+    # loudly).
+    by_part = {p["id"]: {t["id"]: t for t in p["tasks"]} for p in parts_out}
+    covered = set()
+    for link in MOVED_LINKS:
+        for endpoint in ("from_task", "to_task"):
+            pid, _, tid = link[endpoint].partition(":")
+            if pid not in by_part or tid not in by_part[pid]:
+                fail("moved_links", endpoint,
+                     f"端点不存在: {link[endpoint]!r}")
+        fpid, _, ftid = link["from_task"].partition(":")
+        if by_part[fpid][ftid]["status"] != "moved":
+            fail("moved_links", "from_task",
+                 f"源任务非 moved 状态: {link['from_task']!r}")
+        covered.add(link["from_task"])
+    actual = {f"{p['id']}:{t['id']}" for p in parts_out
+              for t in p["tasks"] if t["status"] == "moved"}
+    if covered != actual:
+        fail("moved_links", "coverage",
+             f"moved 任务与移交链不守恒: 链={sorted(covered)} 任务={sorted(actual)}")
+
+
 def build_all():
     # 主构建：index + metrics（内存结构；写盘在 write_outputs）。
     # Main build: index + metrics in memory; persistence lives in
@@ -474,6 +533,8 @@ def build_all():
                           "docs": docs, "tasks": task_entries})
     index = {"schema_version": 1, "sprint": "v0.0.1", "parts": parts_out,
              "portal_content": collect_portal_content()}
+    validate_moved_links(parts_out)
+    index["moved_links"] = MOVED_LINKS
     evd = count_dirs(part_ids)
     metrics = {
         "schema_version": 1,
@@ -492,34 +553,48 @@ def build_all():
 
 
 def write_outputs(index, metrics):
-    # 写盘（幂等：内容确定、无时间戳；git diff 为零即幂等成立）。
+    # 写盘（幂等：内容确定、无时间戳；git diff 为零即幂等成立）。索引以
+    # 双形态落盘：yaml（人读、git 友好）+ json（任务 3.2 起 TS 构建消费）。
     # Persist (idempotent: deterministic content, no timestamps; a zero git
-    # diff IS the idempotency proof).
+    # diff IS the idempotency proof). The index lands in two forms: yaml
+    # (human-readable, git-friendly) plus json (TS build consumption since
+    # task 3.2).
     ypath = os.path.join(INDEX, "sprint-v0.0.1.yaml")
+    spath = os.path.join(INDEX, "sprint-v0.0.1.json")
     jpath = os.path.join(INDEX, "metrics-v0.0.1.json")
     with open(ypath, "w", encoding="utf-8") as fh:
         yaml.safe_dump(index, fh, allow_unicode=True, sort_keys=False,
                        default_flow_style=False)
+    with open(spath, "w", encoding="utf-8") as fh:
+        json.dump(index, fh, ensure_ascii=False, indent=2, sort_keys=True)
+        fh.write("\n")
     with open(jpath, "w", encoding="utf-8") as fh:
         json.dump(metrics, fh, ensure_ascii=False, indent=2, sort_keys=True)
         fh.write("\n")
-    return ypath, jpath
+    return ypath, spath, jpath
 
 
 def verify():
-    # --verify：重解析全部 front-matter 与磁盘产物逐条比对（V1.1.4 判据）。
+    # --verify：重解析全部 front-matter 与磁盘产物逐条比对（V1.1.4 判据）；
+    # 任务 3.2 起 json 索引一并比对（三产物齐核）。
     # --verify: re-parse every front-matter and compare entry-by-entry against
-    # the on-disk artifacts (the V1.1.4 gate).
+    # the on-disk artifacts (the V1.1.4 gate); since task 3.2 the json index is
+    # compared as well (all three products).
     index, metrics = build_all()
     ypath = os.path.join(INDEX, "sprint-v0.0.1.yaml")
+    spath = os.path.join(INDEX, "sprint-v0.0.1.json")
     jpath = os.path.join(INDEX, "metrics-v0.0.1.json")
-    for path in (ypath, jpath):
+    for path in (ypath, spath, jpath):
         if not os.path.exists(path):
             fail(os.path.relpath(path, ASDM), "file", "产物缺失——先运行生成模式")
     disk_index = yaml.safe_load(open(ypath, encoding="utf-8"))
+    disk_sindex = json.load(open(spath, encoding="utf-8"))
     disk_metrics = json.load(open(jpath, encoding="utf-8"))
     if disk_index != index:
         print("ERROR: sprint-v0.0.1.yaml 与 front-matter 重解析结果存在漂移", file=sys.stderr)
+        sys.exit(1)
+    if disk_sindex != index:
+        print("ERROR: sprint-v0.0.1.json 与 yaml 索引存在漂移", file=sys.stderr)
         sys.exit(1)
     if disk_metrics != metrics:
         print("ERROR: metrics-v0.0.1.json 与源报告重提取结果存在漂移", file=sys.stderr)
@@ -574,16 +649,16 @@ def main():
         print(__doc__, file=sys.stderr)
         sys.exit(1)
     index, metrics = build_all()
-    ypath, jpath = write_outputs(index, metrics)
+    ypath, spath, jpath = write_outputs(index, metrics)
     n_docs = sum(len(p["docs"]) for p in index["parts"])
     n_tasks = sum(len(p["tasks"]) for p in index["parts"])
     n_portal = len(index["portal_content"])
     n_en = sum(1 for e in index["portal_content"] if e["locale"] == "en-US")
     moved = metrics["moved_count"]
     print(f"index OK: parts={len(index['parts'])} docs={n_docs} tasks={n_tasks} moved={moved} "
-          f"portal_docs={n_portal} portal_en={n_en}")
+          f"portal_docs={n_portal} portal_en={n_en} moved_links={len(index['moved_links'])}")
     print(f"metrics OK: loc_total={metrics['loc']['total']['lines']} adr={metrics['adr_count']}")
-    print(f"产出: {os.path.relpath(ypath, ASDM)} / {os.path.relpath(jpath, ASDM)}")
+    print(f"产出: {os.path.relpath(ypath, ASDM)} / {os.path.relpath(spath, ASDM)} / {os.path.relpath(jpath, ASDM)}")
 
 
 if __name__ == "__main__":
