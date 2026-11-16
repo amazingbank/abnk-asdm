@@ -360,7 +360,7 @@ parts:
   date: '2026-11-16'
   docs:
   - doc: v0.0.1-Part04-Phase1-Data-Pipeline.md
-    status: pending
+    status: in_progress
     date: '2026-11-16'
     locale: zh-CN
     evidence: ./artifacts/

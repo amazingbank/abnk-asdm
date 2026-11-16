@@ -39,6 +39,7 @@ locale: zh-CN
 ## 三、幂等复跑记录（V1.1.5）
 
 - 两遍完整生成 → 产出物 MD5 完全一致：`sprint-v0.0.1.yaml` = 4375d3d87ab7c5c87832a88744725db1、`metrics-v0.0.1.json` = e31e3555211b43d9dde33ea6c83d3298（BYTE-IDENTICAL）。
+- 注记（2026-11-16 审核补）：上列哈希是 V1.1.5 时点记录——其后执行期源文档回写（执行结果填写、Plan 表 1.1 行状态）触发的 V1.1.8 重跑合法更新了字节，最终入库产物（暂存态实测 `sprint-v0.0.1.yaml` = b1fd3dda624a30c03c714d87ad81dcb1、`metrics-v0.0.1.json` = b6b7b5de94ca5736cbe64d771677cffe）与上列哈希不同属预期演进，非幂等失效；幂等判据以「同源两次重跑零字节差」为准。
 - 已跟踪态（staged）复验：重跑后 porcelain 三条均 `A `（无 `M` 后缀）——重跑零工作区变更。
 
 ## 四、fail-loud 演示（V1.1.7）
