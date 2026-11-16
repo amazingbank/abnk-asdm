@@ -7,7 +7,7 @@
   "guid": "f7a8b9c0-1d2e-4f3a-9b4c-5d6e7f8a9b0c",
   "name": "abnk-check-bilingual",
   "displayName": "ABNK Check Bilingual",
-  "description": "Three-in-one regression gate for the Amazing Bank (ABNK) repos: ① bilingual comment check on channel sources（触碰/增量源码，中文在上、英文语义重写在下——同行 `中文 | English` 或相邻行两形态均合法，行内 noqa-bilingual 豁免）；② front-matter structural check on workspace markdown（创作 md，排除 artifacts/ 与 modelB/——首行 `---`、YAML 可解析、三 profile 必填字段，与 Phase 5 注入脚本共用校验口径）；③ credential scan on public evidence（ADR-010 衍生约束 2/5——口令/token/密钥字面量、GitHub PAT/JWT 字面量、私钥块、密钥形态文件、公网 IP 字面量抽检口径；`.github-private` 路径引用合法、内容泄漏违规）。Violations > 0 → exit 1.",
+  "description": "Three-in-one regression gate for the Amazing Bank (ABNK) repos: ① bilingual comment check on channel sources（触碰/增量源码，中文在上、英文语义重写在下——同行 `中文 | English` 或相邻行两形态均合法，行内 noqa-bilingual 豁免）；② front-matter structural check on workspace markdown（创作 md，排除 artifacts/ 与 modelB/ 与 index/——首行 `---`、YAML 可解析、三 profile 必填字段，与 Phase 5 注入脚本共用校验口径）；③ credential scan on public evidence（ADR-010 衍生约束 2/5——口令/token/密钥字面量、GitHub PAT/JWT 字面量、私钥块、密钥形态文件、公网 IP 字面量抽检口径；`.github-private` 路径引用合法、内容泄漏违规）。Violations > 0 → exit 1.",
   "toolset": {
     "guid": "b7a2c9d1-4e3f-4a58-9c6b-1d2e3f4a5b6c",
     "id": "abnk-harness-toolset",
@@ -48,7 +48,7 @@
 
 ### 模式二：front-matter（Judgment: front-matter structure）
 
-- **创作树口径**：排除 `artifacts/`（证据语言无关、不注入 front-matter）与 `modelB/`（外部资料）——与 Phase 5 注入脚本 `add-frontmatter.py` 一致。
+- **创作树口径**：排除 `artifacts/`（证据语言无关、不注入 front-matter）、`modelB/`（外部资料）与 `index/`（生成器机器产物——Part04 引入，非创作 md）——与 Phase 5 注入脚本 `add-frontmatter.py` 口径一致 + Part04 数据管线产物目录演进。
 - **三 profile 路由与必填字段**（共用校验口径）：
   - `sprint-doc`（`docs/Sprints/v*/part*/*`）：`sprint` / `part` / `status` / `date` / `locale`
   - `planning-doc`（`docs/README.md` 与 `docs/planning/abnk-design/*`）：`section` / `status` / `locale`
