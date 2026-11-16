@@ -1,0 +1,81 @@
+- generic [ref=e55]:
+  - banner [ref=e56]:
+    - generic [ref=e57]:
+      - generic [ref=e58]: Amazing Bank
+      - generic [ref=e59]: Backoffice Operations Console
+    - generic [ref=e60]:
+      - button "切换到中文" [ref=e61] [cursor=pointer]:
+        - img "translation" [ref=e63]
+      - button "user ABNK Operations Admin" [ref=e67] [cursor=pointer]:
+        - img "user" [ref=e69]
+        - generic [ref=e72]: ABNK Operations Admin
+  - generic [ref=e73]:
+    - complementary [ref=e74]:
+      - menu [ref=e76]:
+        - menuitem "team Clients" [ref=e77] [cursor=pointer]:
+          - img "team" [ref=e78]
+          - generic [ref=e81]: Clients
+        - menuitem "account-book Loan Operations" [ref=e82] [cursor=pointer]:
+          - img "account-book" [ref=e83]
+          - generic [ref=e86]: Loan Operations
+    - main [ref=e87]:
+      - generic [ref=e88]:
+        - generic [ref=e90]:
+          - heading "Clients" [level=4] [ref=e91]
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - img "search" [ref=e96]
+              - searchbox "Search by name, external ID, or mobile number" [active] [ref=e99]: zzz-no-match
+              - button [ref=e187] [cursor=pointer]:
+                - img "close-circle" [ref=e188]
+            - button [ref=e102] [cursor=pointer]:
+              - img "search" [ref=e104]
+        - generic [ref=e110]:
+          - table [ref=e114]:
+            - rowgroup [ref=e123]:
+              - row [ref=e124]:
+                - columnheader "Client ID" [ref=e125]
+                - columnheader "Name" [ref=e126]
+                - columnheader "External ID" [ref=e127]
+                - columnheader "Mobile Number" [ref=e128]
+                - columnheader "Identifier Status" [ref=e129]
+                - columnheader "Identifier Expiry Date" [ref=e130]
+                - columnheader "Actions" [ref=e131]
+            - rowgroup [ref=e132]:
+              - row [ref=e133] [cursor=pointer]:
+                - cell "28" [ref=e134]
+                - cell "Alex POC-A1107104347" [ref=e135]
+                - cell "ABNK-POC-A-1107104347" [ref=e136]
+                - cell "13504347001" [ref=e137]
+                - cell "Expired" [ref=e138]
+                - cell "2020-01-01" [ref=e140]
+                - cell [ref=e141]:
+                  - button "Details" [ref=e142]
+              - row [ref=e144] [cursor=pointer]:
+                - cell "29" [ref=e145]
+                - cell "Ben POC-B1107104347" [ref=e146]
+                - cell "ABNK-POC-B-1107104347" [ref=e147]
+                - cell "13504347002" [ref=e148]
+                - cell "Valid" [ref=e149]
+                - cell "2099-12-31" [ref=e151]
+                - cell [ref=e152]:
+                  - button "Details" [ref=e153]
+              - row [ref=e155] [cursor=pointer]:
+                - cell "30" [ref=e156]
+                - cell "Chloe POC-C1107104347" [ref=e157]
+                - cell "ABNK-POC-C-1107104347" [ref=e158]
+                - cell "13504347003" [ref=e159]
+                - cell "Valid" [ref=e160]
+                - cell "2099-12-31" [ref=e162]
+                - cell [ref=e163]:
+                  - button "Details" [ref=e164]
+          - list [ref=e166]:
+            - listitem [ref=e167]: Total 3 clients
+            - listitem "Previous Page" [ref=e168]:
+              - button [disabled] [ref=e169]:
+                - img "left" [ref=e170]
+            - listitem "1" [ref=e173] [cursor=pointer]
+            - listitem "Next Page" [ref=e175]:
+              - button [disabled] [ref=e176]:
+                - img "right" [ref=e177]
+        - generic [ref=e180]: "Data source: P0.3 seed snapshot (Wang/Li/Zhao POC-A/B/C, business date 2027-03-29); identifier status is derived from the expiry date against the business date (read-only baseline) — money format sample: ¥10,000.00"

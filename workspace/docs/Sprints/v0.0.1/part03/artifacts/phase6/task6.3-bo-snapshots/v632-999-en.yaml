@@ -1,0 +1,33 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e4]:
+    - banner [ref=f1e5]:
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: Amazing Bank
+        - generic [ref=f1e8]: Backoffice Operations Console
+      - generic [ref=f1e9]:
+        - button "切换到中文" [ref=f1e10] [cursor=pointer]:
+          - img "translation" [ref=f1e12]
+        - button "user ABNK Operations Admin" [ref=f1e16] [cursor=pointer]:
+          - img "user" [ref=f1e18]
+          - generic [ref=f1e21]: ABNK Operations Admin
+    - generic [ref=f1e22]:
+      - complementary [ref=f1e23]:
+        - menu [ref=f1e25]:
+          - menuitem "team Clients" [ref=f1e26] [cursor=pointer]:
+            - img "team" [ref=f1e27]
+            - generic [ref=f1e30]: Clients
+          - menuitem "account-book Loan Operations" [ref=f1e31] [cursor=pointer]:
+            - img "account-book" [ref=f1e32]
+            - generic [ref=f1e35]: Loan Operations
+      - main [ref=f1e36]:
+        - generic [ref=f1e45]:
+          - img "No data" [ref=f1e47]
+          - generic [ref=f1e59]: "Client not found: clientId=999"
+          - button "Back to client list" [ref=f1e61] [cursor=pointer]
+  - generic:
+    - generic [ref=f1e64]:
+      - img "close-circle" [ref=f1e65]
+      - generic [ref=f1e68]: "Client not found (ID: 999)"
+    - generic [ref=f1e70]:
+      - img "close-circle" [ref=f1e71]
+      - generic [ref=f1e74]: "Client not found (ID: 999)"

@@ -1,0 +1,150 @@
+- generic [ref=f2e4]:
+  - banner [ref=f2e5]:
+    - generic [ref=f2e6]:
+      - generic [ref=f2e7]: Amazing Bank
+      - generic [ref=f2e8]: Backoffice 运营后台
+    - generic [ref=f2e9]:
+      - button "Switch to English" [ref=f2e236] [cursor=pointer]:
+        - img "translation" [ref=f2e12]
+      - button "user ABNK Operations Admin" [ref=f2e16] [cursor=pointer]:
+        - img "user" [ref=f2e18]
+        - generic [ref=f2e21]: ABNK Operations Admin
+  - generic [ref=f2e22]:
+    - complementary [ref=f2e23]:
+      - menu [ref=f2e25]:
+        - menuitem "team 客户列表" [ref=f2e237] [cursor=pointer]:
+          - img "team" [ref=f2e27]
+          - generic [ref=f2e30]: 客户列表
+        - menuitem "account-book 贷款运营" [ref=f2e238] [cursor=pointer]:
+          - img "account-book" [ref=f2e32]
+          - generic [ref=f2e35]: 贷款运营
+    - main [ref=f2e36]:
+      - generic [ref=f2e395]:
+        - generic [ref=f2e397]:
+          - button "arrow-left 返回" [ref=f2e398] [cursor=pointer]:
+            - img "arrow-left" [ref=f2e400]
+            - generic [ref=f2e403]: 返回
+          - heading "客户详情 · 王POC-A1107104347" [level=4] [ref=f2e404]
+        - generic [ref=f2e406]:
+          - generic [ref=f2e407]: 客户信息
+          - table [ref=f2e413]:
+            - rowgroup [ref=f2e414]:
+              - row [ref=f2e415]:
+                - 'cell "客户号 : 28" [ref=f2e416]':
+                  - generic [ref=f2e417]:
+                    - generic [ref=f2e418]: "客户号 :"
+                    - generic [ref=f2e419]: "28"
+                - 'cell "外部编号 : ABNK-POC-A-1107104347" [ref=f2e420]':
+                  - generic [ref=f2e421]:
+                    - generic [ref=f2e422]: "外部编号 :"
+                    - generic [ref=f2e423]: ABNK-POC-A-1107104347
+              - row [ref=f2e424]:
+                - 'cell "姓名 : POC-A1107104347 王" [ref=f2e425]':
+                  - generic [ref=f2e426]:
+                    - generic [ref=f2e427]: "姓名 :"
+                    - generic [ref=f2e428]: POC-A1107104347 王
+                - 'cell "手机号 : 13504347001" [ref=f2e429]':
+                  - generic [ref=f2e430]:
+                    - generic [ref=f2e431]: "手机号 :"
+                    - generic [ref=f2e432]: "13504347001"
+              - row [ref=f2e433]:
+                - 'cell "邮箱 : wang.a@abnk.example.com" [ref=f2e434]':
+                  - generic [ref=f2e435]:
+                    - generic [ref=f2e436]: "邮箱 :"
+                    - generic [ref=f2e437]: wang.a@abnk.example.com
+                - 'cell "所属机构 : Head Office" [ref=f2e438]':
+                  - generic [ref=f2e439]:
+                    - generic [ref=f2e440]: "所属机构 :"
+                    - generic [ref=f2e441]: Head Office
+              - row [ref=f2e442]:
+                - 'cell "状态 : ACTIVE" [ref=f2e443]':
+                  - generic [ref=f2e444]:
+                    - generic [ref=f2e445]: "状态 :"
+                    - generic [ref=f2e446]: ACTIVE
+        - generic [ref=f2e449]:
+          - generic [ref=f2e450]: 证照信息（可编辑）
+          - generic [ref=f2e453]:
+            - table [ref=f2e456]:
+              - rowgroup [ref=f2e457]:
+                - row [ref=f2e458]:
+                  - 'cell "证照类型 : 身份证" [ref=f2e459]':
+                    - generic [ref=f2e460]:
+                      - generic [ref=f2e461]: "证照类型 :"
+                      - generic [ref=f2e462]: 身份证
+                  - 'cell "证件号 : ID-A-1107104347" [ref=f2e463]':
+                    - generic [ref=f2e464]:
+                      - generic [ref=f2e465]: "证件号 :"
+                      - generic [ref=f2e466]: ID-A-1107104347
+                - row [ref=f2e467]:
+                  - 'cell "签发日 : 2015-01-01" [ref=f2e468]':
+                    - generic [ref=f2e469]:
+                      - generic [ref=f2e470]: "签发日 :"
+                      - generic [ref=f2e471]: 2015-01-01
+                  - 'cell "到期日 : 2020-01-01" [ref=f2e472]':
+                    - generic [ref=f2e473]:
+                      - generic [ref=f2e474]: "到期日 :"
+                      - generic [ref=f2e475]: 2020-01-01
+                - row [ref=f2e476]:
+                  - 'cell "记录状态 : ACTIVE" [ref=f2e477]':
+                    - generic [ref=f2e478]:
+                      - generic [ref=f2e479]: "记录状态 :"
+                      - generic [ref=f2e480]: ACTIVE
+                  - 'cell "到期状态（推导） : 已过期" [ref=f2e482]':
+                    - generic [ref=f2e483]:
+                      - generic [ref=f2e484]: "到期状态（推导） :"
+                      - generic [ref=f2e485]: 已过期
+            - separator [ref=f2e487]
+            - generic [ref=f2e488]: 证照编辑（mock 提交回显）——到期状态由到期日对业务日期（2027-03-29）推导
+            - generic [ref=f2e490]:
+              - generic [ref=f2e493]:
+                - generic "到期日" [ref=f2e495]: "* 到期日"
+                - generic [ref=f2e500]:
+                  - textbox "* 到期日" [ref=f2e501]:
+                    - /placeholder: 请选择日期
+                    - text: 2020-01-01
+                  - generic:
+                    - img "calendar"
+                  - button [ref=f2e502] [cursor=pointer]:
+                    - img "close-circle" [ref=f2e503]
+              - generic [ref=f2e508]:
+                - generic "证件号（可选）" [ref=f2e510]
+                - textbox "证件号（可选）" [ref=f2e514]:
+                  - /placeholder: 变更时填写
+                  - text: ID-A-1107104347
+              - generic [ref=f2e517]:
+                - generic "说明（可选）" [ref=f2e519]
+                - textbox "说明（可选）" [ref=f2e523]:
+                  - /placeholder: 说明
+                  - text: 身份证(已过期)
+              - button "保存证照变更" [ref=f2e530] [cursor=pointer]
+        - generic [ref=f2e533]:
+          - generic [ref=f2e534]: 账户信息
+          - generic [ref=f2e538]:
+            - strong [ref=f2e541]: 活期
+            - table [ref=f2e549]:
+              - rowgroup [ref=f2e555]:
+                - row [ref=f2e556]:
+                  - columnheader "账号" [ref=f2e557]
+                  - columnheader "产品" [ref=f2e558]
+                  - columnheader "余额" [ref=f2e559]
+                  - columnheader "状态" [ref=f2e560]
+              - rowgroup [ref=f2e561]:
+                - row [ref=f2e562]:
+                  - cell "0000**0011" [ref=f2e563]
+                  - cell "ABNK 活期储蓄" [ref=f2e564]
+                  - cell "¥10,000.00" [ref=f2e565]
+                  - cell "ACTIVE" [ref=f2e566]
+                - row [ref=f2e568]:
+                  - cell "0000**0012" [ref=f2e569]
+                  - cell "ABNK 活期储蓄" [ref=f2e570]
+                  - cell "¥0.00" [ref=f2e571]
+                  - cell "ACTIVE" [ref=f2e572]
+            - strong [ref=f2e576]: 定期
+            - generic [ref=f2e578]:
+              - img "暂无数据" [ref=f2e580]
+              - generic [ref=f2e586]: 无定期账户
+        - generic [ref=f2e588]:
+          - generic [ref=f2e589]: 贷款信息
+          - generic [ref=f2e593]:
+            - img "暂无数据" [ref=f2e595]
+            - generic [ref=f2e601]: 无贷款记录

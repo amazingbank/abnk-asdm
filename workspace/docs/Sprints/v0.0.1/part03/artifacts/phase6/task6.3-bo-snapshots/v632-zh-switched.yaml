@@ -1,0 +1,27 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e4]:
+    - banner [ref=f1e5]:
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]: Amazing Bank
+        - generic [ref=f1e8]: Backoffice 运营后台
+      - generic [ref=f1e9]:
+        - button "Switch to English" [active] [ref=f1e75] [cursor=pointer]:
+          - img "translation" [ref=f1e12]
+        - button "user ABNK Operations Admin" [ref=f1e16] [cursor=pointer]:
+          - img "user" [ref=f1e18]
+          - generic [ref=f1e21]: ABNK Operations Admin
+    - generic [ref=f1e22]:
+      - complementary [ref=f1e23]:
+        - menu [ref=f1e25]:
+          - menuitem "team 客户列表" [ref=f1e76] [cursor=pointer]:
+            - img "team" [ref=f1e27]
+            - generic [ref=f1e30]: 客户列表
+          - menuitem "account-book 贷款运营" [ref=f1e77] [cursor=pointer]:
+            - img "account-book" [ref=f1e32]
+            - generic [ref=f1e35]: 贷款运营
+      - main [ref=f1e36]:
+        - generic [ref=f1e78]:
+          - img "暂无数据" [ref=f1e80]
+          - generic [ref=f1e92]: 客户不存在：clientId=999
+          - button "返回客户列表" [ref=f1e94] [cursor=pointer]
+  - tooltip "Switch to English" [ref=f1e98]
