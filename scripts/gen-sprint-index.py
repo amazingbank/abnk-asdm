@@ -16,6 +16,10 @@
 #                                   层按此路由，无需扫描目录）+ moved_links 移交
 #                                   返链（Part04 任务 3.2 增量：跨 Part 任务移交的
 #                                   结构化往返链，人工维护常量 + fail-loud 校验）
+#                                   + part 级 decisions 决策条目与顶层 adrs ADR 索引
+#                                   （Part04 任务 3.3 增量：Part Plan「决策记录」D 表
+#                                   与 planning 树 ADR 的结构化提取——决策时间线页
+#                                   的数据契约）
 #   $INDEX/sprint-v0.0.1.json      同一层级索引的 JSON 形态（Part04 任务 3.2 增量，
 #                                   已知坑 7 决策①：TS 消费走生成器补产 JSON，
 #                                   portal 保持「提取入库、构建纯复制」零运行时解析）
@@ -56,6 +60,9 @@
 #                           runtime parsing)
 #   metrics-v0.0.1.json     metrics (first-batch list, Part04 Phase1 pitfall 6)
 #   loc-snapshot-v0.0.1.md  LOC snapshot (explicit --refresh-loc; read-only by default)
+#   The index also carries part-level decisions (D-table rows from each Part
+#   Plan's "决策记录" section) and a top-level adrs index (planning-tree ADR
+#   metadata) since task 3.3 — the data contract of the decision-timeline page.
 # Triple validation (fail-loud, no silent-skip path):
 #   1. index vs front-matter: zero drift (validated on generate; --verify re-checks)
 #   2. metrics vs source report: zero drift (four numbers extracted from the
@@ -153,6 +160,32 @@ RE_VP = re.compile(r"(\d+)/(\d+)\s*全过")
 RE_UNIT = re.compile(r"(\d+)/(\d+)\s*全绿")
 RE_ASSERT = re.compile(r"(\d+)/(\d+)\s*断言")
 RE_DRIFT = re.compile(r"DRIFT:\s*(\d+)")
+
+# 决策表提取形态（任务 3.3 增量）：Part Plan「决策记录」节 = 日期标题 + D 表行；
+# D 行 id 可带内联日期（全角括号，如 D8（2026-11-10））；〔…修订，Phase N〕标注
+# 机械提取为 revised_in_phase（修订上下文跳转的契约数据）。
+# Decision-table extraction shapes (task 3.3 increment): a Part Plan's
+# "决策记录" section = a dated heading plus D-table rows; a row id may carry an
+# inline date in full-width parentheses (e.g. D8（2026-11-10）); a
+# "〔…修订，Phase N〕" annotation is mechanically captured as revised_in_phase
+# (the contract data behind the revision-context jump).
+RE_DECISION_HEADING = re.compile(r"^##\s*决策记录（(\d{4}-\d{2}-\d{2})")
+RE_DECISION_ROW = re.compile(
+    r"^\|\s*(D\d+)(?:（(\d{4}-\d{2}-\d{2})[^）]*）)?\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*$")
+RE_REVISION_PHASE = re.compile(r"〔[^〕]*修订，\s*Phase\s*([\wP]+)")
+RE_REVISION_BRACKET = re.compile(r"〔[^〕]*修订[^〕]*〕")
+
+# ADR 提取形态（任务 3.3 增量）：planning 树 ADR = front-matter（section/status/
+# locale）+ 正文一级标题行与日期行。
+# ADR extraction shapes (task 3.3 increment): a planning-tree ADR = front-matter
+# (section/status/locale) plus the body title heading and the date line.
+RE_ADR_TITLE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
+RE_ADR_DATE = re.compile(r"[-–]\s*日期：\s*(\d{4}-\d{2}-\d{2})")
+
+# ADR 状态词表（planning profile；ADR 惯例词，与 Sprints 状态词表分立）。
+# ADR status vocabulary (planning profile; conventional ADR words, kept
+# separate from the Sprints status vocabulary).
+ADR_STATUS = {"accepted", "proposed", "rejected", "superseded"}
 
 
 def fail(path, field, message):
@@ -473,6 +506,87 @@ def sprint_rhythm(parts_docs):
     return rhythm
 
 
+def parse_decisions(part_id, rel, text):
+    # 决策表提取（任务 3.3 增量）：「决策记录」节 → 结构化决策条目。Part01 无该节
+    # （审核实测 2026-11-16，如实省略 optional 字段）；有节但零 D 行 = 结构漂移
+    # fail-loud；〔修订〕标注必须捕获 Phase 上下文，否则 fail-loud。
+    # Decision-table extraction (task 3.3 increment): the "决策记录" section →
+    # structured decision entries. Part01 has no such section (audit-verified
+    # 2026-11-16; the optional field is simply omitted); a section with zero
+    # parsed D rows is a structural drift and fails loudly; a revision
+    # annotation must yield its Phase context or fails loudly.
+    lines = text.split("\n")
+    table_date, rows, in_section = None, [], False
+    for line in lines:
+        m = RE_DECISION_HEADING.match(line)
+        if m:
+            in_section, table_date = True, m.group(1)
+            continue
+        if in_section and line.startswith("## "):
+            break
+        if in_section:
+            row = RE_DECISION_ROW.match(line)
+            if row:
+                rows.append({"id": row.group(1), "inline_date": row.group(2),
+                            "title": row.group(3), "content": row.group(4)})
+    if in_section and not rows:
+        fail(rel, "决策记录", "节头存在但未解析到任何 D 行（表结构漂移？）")
+    entries = []
+    for row in rows:
+        entry = {"id": row["id"], "title": row["title"], "content": row["content"],
+                 "date": row["inline_date"] or table_date}
+        bracket = RE_REVISION_BRACKET.search(row["content"])
+        phase = RE_REVISION_PHASE.search(row["content"])
+        if bracket and not phase:
+            fail(rel, row["id"], "〔修订〕标注未捕获 Phase 上下文（形态漂移？）")
+        if phase:
+            entry["revised_in_phase"] = phase.group(1)
+        entries.append(entry)
+    return entries
+
+
+def collect_adrs():
+    # ADR 索引（任务 3.3 增量）：planning 树 ADR front-matter（section/status/
+    # locale 必填，status ∈ ADR 词表）+ 正文标题与日期行提取；id 取文件名前三位。
+    # ADR index (task 3.3 increment): planning-tree ADR front-matter
+    # (section/status/locale required, status within the ADR vocabulary) plus
+    # body title and date lines; the id is the three-digit filename prefix.
+    adr_dir = os.path.join(PLANNING, "adr/zh-CN")
+    out = []
+    for fname in sorted(os.listdir(adr_dir)):
+        if not re.match(r"^\d{3}-", fname) or not fname.endswith(".md"):
+            continue
+        path = os.path.join(adr_dir, fname)
+        text = open(path, encoding="utf-8").read()
+        lines = text.split("\n")
+        if not lines or lines[0].strip() != "---":
+            fail(fname, "front-matter", "首行非 ---")
+        end = next((i for i in range(1, min(len(lines), 100))
+                    if lines[i].strip() == "---"), None)
+        if end is None:
+            fail(fname, "front-matter", "100 行内未找到闭合 ---")
+        try:
+            fm = yaml.safe_load("\n".join(lines[1:end])) or {}
+        except yaml.YAMLError as exc:
+            fail(fname, "front-matter", f"YAML 解析失败: {exc}")
+        for key in ("section", "status", "locale"):
+            if not fm.get(key):
+                fail(fname, key, "必填字段缺失或为空（planning-doc profile）")
+        if fm["status"] not in ADR_STATUS:
+            fail(fname, "status",
+                 f"非法 ADR 状态: {fm['status']!r}（词表: {sorted(ADR_STATUS)}）")
+        title_m = RE_ADR_TITLE.search(text)
+        date_m = RE_ADR_DATE.search(text)
+        if not title_m or not date_m:
+            fail(fname, "title/date", "正文 `# 标题` 或 `- 日期：` 行提取失败")
+        out.append({"id": fname[:3], "doc": fname, "title": title_m.group(1),
+                    "date": date_m.group(1), "status": fm["status"]})
+    if not out:
+        fail("planning/abnk-design/adr/zh-CN", "adrs", "未收集到任何 ADR")
+    out.sort(key=lambda a: a["id"])
+    return out
+
+
 def validate_moved_links(parts_out):
     # 校验 4（任务 3.2 增量）：移交链两端点存在、from 侧为 moved 状态、
     # moved 任务与链完全守恒（缺链/孤儿链均 fail-loud）。
@@ -528,13 +642,27 @@ def build_all():
             task_entries.append(entry)
             if t["status"] == "moved":
                 moved_count += 1
+        # 决策条目（任务 3.3 增量）：Part Plan「决策记录」D 表提取（Part01 无该节
+        # → optional 字段省略）；ADR 索引在 build_all 末尾注入顶层。
+        # Decision entries (task 3.3 increment): extracted from the Part Plan's
+        # "决策记录" D-table (Part01 has none → the optional field is omitted);
+        # the ADR index lands top-level at the end of build_all.
+        plan_rel = f"{pid}/zh-CN/{plan_doc['doc']}"
+        decisions = parse_decisions(
+            pid, plan_rel,
+            open(os.path.join(SPRINTS, pid, "zh-CN", plan_doc["doc"]),
+                 encoding="utf-8").read())
+        part_entry = {"id": pid, "status": plan_status, "date": plan_doc["date"],
+                      "docs": docs, "tasks": task_entries}
+        if decisions:
+            part_entry["decisions"] = decisions
         parts_docs[pid] = {"docs": docs}
-        parts_out.append({"id": pid, "status": plan_status, "date": plan_doc["date"],
-                          "docs": docs, "tasks": task_entries})
+        parts_out.append(part_entry)
     index = {"schema_version": 1, "sprint": "v0.0.1", "parts": parts_out,
              "portal_content": collect_portal_content()}
     validate_moved_links(parts_out)
     index["moved_links"] = MOVED_LINKS
+    index["adrs"] = collect_adrs()
     evd = count_dirs(part_ids)
     metrics = {
         "schema_version": 1,

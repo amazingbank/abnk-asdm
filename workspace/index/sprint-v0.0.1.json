@@ -1,4 +1,76 @@
 {
+  "adrs": [
+    {
+      "date": "2026-10-25",
+      "doc": "001-no-rewrite.md",
+      "id": "001",
+      "status": "accepted",
+      "title": "ADR-001：不重写 Fineract，核心账务直接复用"
+    },
+    {
+      "date": "2026-10-25",
+      "doc": "002-custom-modules.md",
+      "id": "002",
+      "status": "accepted",
+      "title": "ADR-002：全部定制走 `custom/abnk/` 模块"
+    },
+    {
+      "date": "2026-10-25",
+      "doc": "003-postgresql-baseline.md",
+      "id": "003",
+      "status": "accepted",
+      "title": "ADR-003：PostgreSQL 单一数据库宿主，root/postgres 三方对齐"
+    },
+    {
+      "date": "2026-10-25",
+      "doc": "004-multi-tenancy.md",
+      "id": "004",
+      "status": "accepted",
+      "title": "ADR-004：采用 Fineract 多租户架构（分阶段落地）"
+    },
+    {
+      "date": "2026-10-25",
+      "doc": "005-frontend-strategy.md",
+      "id": "005",
+      "status": "accepted",
+      "title": "ADR-005：前端自建三套"
+    },
+    {
+      "date": "2026-10-25",
+      "doc": "006-product-lines.md",
+      "id": "006",
+      "status": "accepted",
+      "title": "ADR-006：产品线——储蓄+消费贷先行，经营贷后续"
+    },
+    {
+      "date": "2026-10-26",
+      "doc": "007-xinchuang-compatibility.md",
+      "id": "007",
+      "status": "accepted",
+      "title": "ADR-007：信创兼容策略（主线开源 + 兼容层）"
+    },
+    {
+      "date": "2026-10-26",
+      "doc": "008-channel-tech-stack.md",
+      "id": "008",
+      "status": "accepted",
+      "title": "ADR-008：渠道层技术架构（网关 SCG + 前端 React + 移动混合）"
+    },
+    {
+      "date": "2026-11-03",
+      "doc": "009-flutter-mobile.md",
+      "id": "009",
+      "status": "accepted",
+      "title": "ADR-009：手机银行移动端采用 Flutter（取代 ADR-008 的\"原生薄壳 + H5\"移动方案）"
+    },
+    {
+      "date": "2026-11-15",
+      "doc": "010-repository-openness.md",
+      "id": "010",
+      "status": "accepted",
+      "title": "ADR-010：仓库开放与保密边界（能开尽开 + 两条例外）"
+    }
+  ],
   "moved_links": [
     {
       "from_task": "part01:2.1",
@@ -101,6 +173,62 @@
     },
     {
       "date": "2026-11-16",
+      "decisions": [
+        {
+          "content": "按最接近真实银行的方式：**custom Business Step（服务端权威）+ 网关预检 + 客户端 UX** 三层；基线只预埋落点（任务 P0.5），拦截逻辑是 POC 演示增量",
+          "date": "2026-11-06",
+          "id": "D1",
+          "title": "拦截落点"
+        },
+        {
+          "content": "简化登录（网关自签 JWT + Bearer），**暂不引入 Keycloak**；用户凭据 PBKDF2 哈希",
+          "date": "2026-11-06",
+          "id": "D2",
+          "title": "登录方式"
+        },
+        {
+          "content": "契约先行（最接近真实银行）：OpenAPI spec 为唯一事实源，Dart/TS client 全部生成，双前端零手写 API 类型",
+          "date": "2026-11-06",
+          "id": "D3",
+          "title": "契约方式"
+        },
+        {
+          "content": "**web + iOS + Android 三目标**（模拟器与真机均支持）；macOS 桌面仅为内部调试可选项，不属渠道",
+          "date": "2026-11-06",
+          "id": "D4",
+          "title": "Flutter 载体"
+        },
+        {
+          "content": "容器化（prod 形态）；本地开发可先宿主进程",
+          "date": "2026-11-06",
+          "id": "D5",
+          "title": "运行形态"
+        },
+        {
+          "content": "现有文档随时修正，不阻塞本计划",
+          "date": "2026-11-06",
+          "id": "D6",
+          "title": "文档修正"
+        },
+        {
+          "content": "平台 8080 **直接公网暴露**（原「内网回环 + SSH 隧道」口径废弃）：NSG 放行 8080 为部署前置（Azure Portal 操作）；POC 口径接受 Basic Auth 直暴露，公网 TLS 终止与网关收口仍在 P3",
+          "date": "2026-11-07",
+          "id": "D7",
+          "title": "P0.4 平台暴露形态"
+        },
+        {
+          "content": "**GitHub Packages 公共包**（`ghcr.io/amazingbank/abnk-*`）：ABNK 定位开源可演示银行系统（展示 ASDM 全 SDLC AI 能力），公开性是设计目标——五服务镜像全部公共（存储/流量免费无配额、匿名 pull 免登录、回滚可拉历史 tag）。推送 PAT 只存 `.github-private` + 服务器 docker config；本地 Mac 构建的镜像不推送不发布（仅调试）；禁止覆盖已推送 tag；审计门新增第 5 节 PAT 扫描（5 节 → 6 节）。铁律 2 演进：服务端构建后**追加 push**，compose 引用 ghcr FQN",
+          "date": "2026-11-10",
+          "id": "D8",
+          "title": "制品库"
+        },
+        {
+          "content": "`channels/website` 迁出为**独立私有仓 `amazingbank/abnk-website`**（subtree split 保留全部历史，发版链 0.1.1/0.1.2 可追溯）：站点定位为 amazingbank.ai 入口（对外展示/资源提供/方法论链接 asdm.ai），未来承载社区管理能力，与 ABNK 开源银行系统定位差异大，**不适合完全开源**。ghcr 包 `abnk-website` 同步转 private（**D8 修订：五公共 → 四公共 + 一私有**）；服务器部署链切至新仓（专用只读 deploy key，仓库级 `core.sshCommand`），compose 编排不动（镜像 FQN 引用不变）；design-tokens 同步链跨仓化（`ABNK_WEBSITE_TAILWIND` env 可覆盖，验证 PASS DIFF: 0）",
+          "date": "2026-11-10",
+          "id": "D9",
+          "title": "官网独立仓"
+        }
+      ],
       "docs": [
         {
           "date": "2026-11-16",
@@ -295,6 +423,64 @@
     },
     {
       "date": "2026-11-16",
+      "decisions": [
+        {
+          "content": "**跟随系统**：任一系统语言 tag 以 zh 开头 → zh-cn，否则 en-us（与 abnk-website `resolveBrowserLocale` 同口径）；用户手动切换后以持久化偏好优先",
+          "date": "2026-11-11",
+          "id": "D1",
+          "title": "初始语言"
+        },
+        {
+          "content": "**中文为源（template），英文为语义重写**——按英语母语者与金融行业惯用语组织句子，不逐字直译（如「等额本息」→ amortizing loan with equal monthly installments）；适用于 en-us JSON 词条与 `app_en.arb`",
+          "date": "2026-11-11",
+          "id": "D2",
+          "title": "词条语言方向"
+        },
+        {
+          "content": "**双语两套数据集 + 部署期切换**：mock/fixtures 提供 zh-cn/en-us 两套完整文件，由统一环境变量 `ABNK_DATA_LOCALE`（来源部署 env 样例 `abnk-system/deploy/prod/env/abnk-fullstack.env.example`，经 Dockerfile `ARG` 注入——链路 Phase 2 任务 2.2 落地）选择——backoffice 经 Vite 构建注入、mobile 经 `--dart-define` 注入；运行时 UI 语言切换**不**切换数据集；真实后端多语言数据不在本轮范围（另立 Phase）。**〔2026-11-12 修订，Phase 7〕**：数据集改为**运行时随 UI 语言切换**（用户手动切换 UI → 数据集跟随 zh→zh-cn / en→en-us，mock 内存态重置）；`ABNK_DATA_LOCALE` 语义收敛为「初始数据语言注入」（缺省 en-us「应用数据默认英文」口径）；判据体系变更见 Phase 7 文档",
+          "date": "2026-11-11",
+          "id": "D3",
+          "revised_in_phase": "7",
+          "title": "数据文案"
+        },
+        {
+          "content": "**仅 `workspace/`**：现有内容整体迁入 `workspace/zh-CN/`，建 `workspace/en-US/` 骨架（内容按需后补，不要求一次性翻译）；toolsets 内容**不动**，但其引用的 `.asdm/workspace/...` 路径随迁移同步。**〔2026-11-15 修订，Phase 5 扩名触发〕**：locale 标识改为置于**文档叶子层**（`partXX/zh-CN/{文档}`），结构树与证据资产语言无关——原「整体迁入 workspace/zh-CN」口径废弃（顶层分层使结构树耦合语言，en-US 镜像约定守不住）；en-US 从「骨架树」改为「生长规则」（路径即 doc id、en 为语义重写、缺失 fallback、index 层注册）；toolsets 引用仍指向 zh-CN 物理路径（内容不动条款延续）。修订详情见 Phase 5 文档「方案要点」。",
+          "date": "2026-11-11",
+          "id": "D4",
+          "revised_in_phase": "5",
+          "title": "`.asdm` 双语范围"
+        },
+        {
+          "content": "**零依赖自建 i18n，与 abnk-website 同构**（`resources/locale-context/locale-provider/use-locale/interpolate` 同名同构，JSON 词条 + `Widen` 类型推导 + `satisfies` 编译期结构校验）；不引入 i18next 等第三方库",
+          "date": "2026-11-11",
+          "id": "D5",
+          "title": "backoffice 选型"
+        },
+        {
+          "content": "**localStorage（方案 A）**：URL 无语言前缀、路由层零侵入；与 abnk-website 的「URL 前缀唯一事实源」差异是有意的（工具型应用无 SEO/分享诉求，website 方案自述其前缀选择是单页锚点站场景驱动），差异在 i18n 模块注释中声明",
+          "date": "2026-11-11",
+          "id": "D6",
+          "title": "backoffice 语言事实来源"
+        },
+        {
+          "content": "Flutter 官方 `gen-l10n`（ARB），template 为 `app_zh.arb`；语言切换走既有 `AppState`（ChangeNotifier）+ `ListenableBuilder` 整树重建链路，不新增状态管理依赖；持久化引入 `shared_preferences`",
+          "date": "2026-11-11",
+          "id": "D7",
+          "title": "mobile 选型"
+        },
+        {
+          "content": "代码层统一小写 `zh-cn` / `en-us`（与 abnk-website 一致，BCP 47 大写仅用于 `<html lang>`）；`.asdm` 目录按 D4 用大写 `zh-CN` / `en-US`",
+          "date": "2026-11-11",
+          "id": "D8",
+          "title": "locale 命名"
+        },
+        {
+          "content": "① 过程证据归仓：`abnk-system/artifacts`（329 文件）与工作区根 `p3-*.yaml`（7 文件）迁入 `.asdm` 并按 Part 分桶（`partXX/artifacts/`，语言无关）——**Part = 文档 + 证据的自包含交付单元**；跨仓迁移**不保历史**（复制 + 来源 commit hash 记录，有意取舍）；② front-matter 与迁移**同车注入、提交分离**（commit A 纯 rename / commit B 注入）；③ dev portal 立项：独立仓 `git@github.com:amazingbank/abnk-devportal.git`（public 空仓已建，域名 dev.amazingbank.ai 已配 DNS），按 [ADR-010](../../../../planning/abnk-design/adr/zh-CN/010-repository-openness.md) 开放边界执行——详规划见 `../part04/v0.0.1-Part04-Plan.md`；④ 生成器归属：index/metrics 生成器是 abnk-asdm 仓自审工具（脚本 + 产出物双入库），portal 只做只读复制消费——「提取入库、构建纯复制」。",
+          "date": "2026-11-15",
+          "id": "D9",
+          "title": "资产仓归一与 dev portal 立项"
+        }
+      ],
       "docs": [
         {
           "date": "2026-11-12",
@@ -527,6 +713,50 @@
     },
     {
       "date": "2026-11-16",
+      "decisions": [
+        {
+          "content": "**独立仓 `abnk-devportal`**（public 空仓已建）——属性域区分：abnk-system 是业务系统交付域，dev portal 是软件工程管理域的产物（过程资产渲染器）；与官网 D9 独立仓同模式（定位差异大不混仓）；技术栈统一不受同仓与否约束（design tokens 跨仓共享复用 D9 的 env 覆盖机制 `ABNK_WEBSITE_TAILWIND` 先例）",
+          "date": "2026-11-15",
+          "id": "D1",
+          "title": "仓形态"
+        },
+        {
+          "content": "**dev.amazingbank.ai**（DNS 已配置指向 abnk-vm001；复用 `*.amazingbank.ai` 通配符证书零新增成本；部署走 `abnk-prod-deploy` 工具集两阶段铁门）",
+          "date": "2026-11-15",
+          "id": "D2",
+          "title": "域名"
+        },
+        {
+          "content": "UI 双语（**第三次同构复刻** abnk-website i18n：零依赖自建 + `Widen`/`satisfies` 编译期校验，Part03 Phase 1 已为 backoffice 复刻过一次，模式成熟）；内容 zh 全量 + en 增量 fallback（index 层 locale 路由，不靠目录树）",
+          "date": "2026-11-15",
+          "id": "D3",
+          "title": "语言策略"
+        },
+        {
+          "content": "**build-time 静态**（延续 ADR-008 官网零 API 精神）：portal 构建对 abnk-asdm 只读复制（index 产出物原样（sprint yaml + metrics/loc json）+ md 全文 + 证据素材），vite build 时渲染；**提取入库、构建纯复制**——生成器是 abnk-asdm 仓的自审工具（脚本 + 产出物双入库，index 的 git history 即数据可信度审计记录），portal 构建零提取逻辑（checkout 两仓 → 拷贝 → build，任何机器可复现）；MCP 动态聚合列为 roadmap 板块如实展示",
+          "date": "2026-11-15",
+          "id": "D4",
+          "title": "数据形态"
+        },
+        {
+          "content": "ghcr 公共镜像（D8 延续）+ 仓 public（ADR-010 直接推论）；数据源仓 abnk-asdm 已 public",
+          "date": "2026-11-15",
+          "id": "D5",
+          "title": "开源口径"
+        },
+        {
+          "content": "仪表盘如实展示未完成项（挂账、移交、CI 未实跑按「规划中」标注）——**透明包括透明地展示未完成**；此口径写入 Phase 3 验收判据",
+          "date": "2026-11-15",
+          "id": "D6",
+          "title": "指标诚实性"
+        },
+        {
+          "content": "只做内容渲染，不长运营功能——用户互动/注册/统计属社区运营域（ADR-010 边界 2，归 abnk-website）；技术形态（build-time 静态）与策略边界互锁，两重理由都写死",
+          "date": "2026-11-15",
+          "id": "D7",
+          "title": "portal 纯渲染器约束"
+        }
+      ],
       "docs": [
         {
           "date": "2026-11-16",
@@ -630,14 +860,14 @@
         },
         {
           "id": "3.2",
-          "note": "⏳",
-          "status": "pending",
+          "note": "✅（2026-11-16，V3.2.1–V3.2.3 全过；已知坑 7 决策①落定（生成器补产 JSON + 契约双侧同步）、moved_links 移交往返链结构化（生成器守恒校验）、V3.2.2 三路径全通（证据指针 200/往返双向/插入性质标记）+ 五形态徽标齐、V3.2.3 机械比对零遗漏（phase 23/task 74、287 探针 0 失配）、截图 10 张归档）",
+          "status": "completed",
           "title": "迭代时间线四层下钻页（灵魂页面）"
         },
         {
           "id": "3.3",
-          "note": "⏳",
-          "status": "pending",
+          "note": "✅（2026-11-16，V3.3.1–V3.3.2 全过；D 表与 ADR 走生成器提取入契约（25 D + 10 ADR，修订上下文 revised_in_phase 机械提取）；渲染器选型提前落定 react-markdown + remark-gfm（五仓定位表 GFM 硬需求）；35 卡合并时间线全过（10/10 + 25/25）、ADR-010 原文渲染五仓表 6 行完整、D4→Phase5/D3→Phase7 修订上下文跳转成立、D9 内链站内路由转换实测、console 0 红错、截图 5 张归档）",
+          "status": "completed",
           "title": "决策时间线页（ADR + Part 决策表合并渲染）"
         },
         {
