@@ -1,0 +1,144 @@
+{
+  "adr_count": 10,
+  "blocked_items": [
+    {
+      "id": "part03-v6.3.4-android-carrier",
+      "part": "part03",
+      "replay": "Android 模拟器可用时以同一 drive 口径重跑（ABNK_SHOT_PREFIX=android）",
+      "source": "Sprints/v0.0.1/part03/artifacts/phase6/task6.3-final-walkthrough.md",
+      "title": "mobile Android 载体走查（V6.3.4 段挂账）"
+    },
+    {
+      "id": "part02-p3.6-apple-signing",
+      "part": "part02",
+      "replay": "Apple 开发者账号到位后补签名与 TestFlight 上架",
+      "source": "Sprints/v0.0.1/part02/artifacts/phaseP3/taskP3.6-mobile-package.md",
+      "title": "Apple 签名段（VP3.6.3 挂起——Apple 账号条件门未到位）"
+    }
+  ],
+  "ci": {
+    "note": "CI workflow 尚未建设（规划级）——如实标注未实跑（D6 诚实性）",
+    "status": "not_run"
+  },
+  "evidence_density": {
+    "part01": 3,
+    "part02": 208,
+    "part03": 169,
+    "part04": 1
+  },
+  "loc": {
+    "categories": [
+      {
+        "files": 5494,
+        "label": "Java 生产代码 (src/main/java, 不含生成 SDK)",
+        "lines": 562048
+      },
+      {
+        "files": 1562,
+        "label": "Java 测试代码 (src/test/java, 不含生成 SDK)",
+        "lines": 361916
+      },
+      {
+        "files": 45,
+        "label": "Java 自动生成 SDK (fineract-client + fineract-client-feign)",
+        "lines": 7180
+      },
+      {
+        "files": 469,
+        "label": "Liquibase changelog (db/changelog 下的 XML)",
+        "lines": 112912
+      },
+      {
+        "files": 23,
+        "label": "SQL (迁移脚本 / 演示备份)",
+        "lines": 28136
+      },
+      {
+        "files": 99,
+        "label": "Avro schema (.avsc)",
+        "lines": 13116
+      },
+      {
+        "files": 200,
+        "label": "Cucumber E2E (.feature)",
+        "lines": 234199
+      },
+      {
+        "files": 93,
+        "label": "Gradle 构建脚本 (.gradle)",
+        "lines": 8865
+      },
+      {
+        "files": 11,
+        "label": "buildSrc Groovy",
+        "lines": 2125
+      },
+      {
+        "files": 218,
+        "label": "AsciiDoc 文档 (.adoc)",
+        "lines": 37835
+      },
+      {
+        "files": 14,
+        "label": "PlantUML 图 (.puml)",
+        "lines": 568
+      },
+      {
+        "files": 119,
+        "label": "配置文件 (.properties / .yml / .yaml / .env)",
+        "lines": 9942
+      }
+    ],
+    "snapshot": "loc-snapshot-v0.0.1.md",
+    "total": {
+      "files": 8516,
+      "label": "全部文本文件总计",
+      "lines": 1450314
+    }
+  },
+  "moved_count": 2,
+  "schema_version": 1,
+  "sprint": "v0.0.1",
+  "sprint_rhythm": [
+    {
+      "days": 23,
+      "end": "2026-11-16",
+      "part": "part01",
+      "start": "2026-10-24"
+    },
+    {
+      "days": 9,
+      "end": "2026-11-16",
+      "part": "part02",
+      "start": "2026-11-07"
+    },
+    {
+      "days": 4,
+      "end": "2026-11-16",
+      "part": "part03",
+      "start": "2026-11-12"
+    },
+    {
+      "days": 0,
+      "end": "2026-11-16",
+      "part": "part04",
+      "start": "2026-11-16"
+    }
+  ],
+  "test_report": {
+    "contract_drift": 0,
+    "e2e_assertions": {
+      "passed": 55,
+      "total": 55
+    },
+    "source": "Sprints/v0.0.1/part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md",
+    "unit_tests": {
+      "passed": 57,
+      "total": 57
+    },
+    "vp": {
+      "passed": 34,
+      "total": 34
+    }
+  }
+}

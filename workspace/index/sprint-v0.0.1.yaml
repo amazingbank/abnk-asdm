@@ -1,0 +1,466 @@
+schema_version: 1
+sprint: v0.0.1
+parts:
+- id: part01
+  status: in_progress
+  date: '2026-11-16'
+  docs:
+  - doc: v0.0.1-Part01-Phase0-Results.md
+    status: completed
+    date: '2026-10-24'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '0'
+  - doc: v0.0.1-Part01-Phase1-Results.md
+    status: completed
+    date: '2026-10-25'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '1'
+  - doc: v0.0.1-Part01-Phase2-Custom-L1.md
+    status: in_progress
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '2'
+  - doc: v0.0.1-Part01-Plan.md
+    status: in_progress
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: plan
+  tasks:
+  - id: '2.1'
+    title: custom/abnk 骨架与 devRun 接入
+    status: moved
+    note: 🔁 已移交 Part02
+  - id: '2.2'
+    title: COA 导入通道验证（关键路径先行）
+    status: pending
+    note: ⏳
+  - id: '2.3'
+    title: identity 身份证校验模块
+    status: pending
+    note: ⏳
+  - id: '2.4'
+    title: 自建 CI 门禁
+    status: pending
+    note: ⏳
+  - id: '2.5'
+    title: L1 配置固化（时区/币种复核 + Holiday 节假日表）
+    status: pending
+    note: ⏳
+  - id: '2.6'
+    title: 计息差距专项验证
+    status: pending
+    note: ⏳
+  - id: '2.7'
+    title: 业务活动映射 + 分录断言升级（Phase 2 出口判据，含挂起门）
+    status: pending
+    note: ⏳
+  - id: '2.8'
+    title: 季度 rebase 流程首跑
+    status: pending
+    note: ⏳
+- id: part02
+  status: completed
+  date: '2026-11-16'
+  docs:
+  - doc: v0.0.1-Part02-KBank-POC-Journey.md
+    status: draft
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+  - doc: v0.0.1-Part02-PhaseP0-Platform-Prod-Form.md
+    status: completed
+    date: '2026-11-07'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: P0
+  - doc: v0.0.1-Part02-PhaseP1-UX-Prototype.md
+    status: completed
+    date: '2026-11-07'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: P1
+  - doc: v0.0.1-Part02-PhaseP2-Gateway-Backend.md
+    status: completed
+    date: '2026-11-08'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: P2
+  - doc: v0.0.1-Part02-PhaseP3-Integration-Deploy.md
+    status: completed
+    date: '2026-11-11'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: P3
+  - doc: v0.0.1-Part02-Plan.md
+    status: completed
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: plan
+  tasks:
+  - id: P0.1
+    title: Fineract WAR 本地生产形态容器栈
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P0.2
+    title: POC 主线能力探查（含 identifiers PUT）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P0.3
+    title: 种子与配置数据施加（生产形态）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P0.4
+    title: 生产服务器平台形态部署（公网直接暴露）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P0.5
+    title: custom/abnk 骨架预埋（承接 Part01 任务 2.1）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P1.1
+    title: 移动工具链就位（Flutter/Android SDK）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P1.2
+    title: 设计系统 tokens 单一事实源落地
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P1.3
+    title: Flutter 手机银行原型（mock）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P1.4
+    title: Backoffice React 原型（mock）
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P1.5
+    title: 契约冻结与原型评审（Phase 出口铁门）
+    status: completed
+    note: ✅（2026-11-07，用户裁决「确认冻结」）
+  - id: P2.1
+    title: SCG 工程骨架与 Fineract 转发
+    status: completed
+    note: ✅（2026-11-07）
+  - id: P2.2
+    title: 简化登录与 JWT（Bearer 形态）
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P2.3
+    title: 对客通道收敛面 + 黑名单
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P2.4
+    title: 转账聚合（幂等 + 补偿）
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P2.5
+    title: 内部通道与通道隔离
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P2.6
+    title: 契约一致性校验 + 客户端生成
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P2.7
+    title: 网关集成测试
+    status: completed
+    note: ✅（2026-11-08）
+  - id: P3.1
+    title: 手机银行接线（mock→生成 client）
+    status: completed
+    note: ✅（2026-11-09）
+  - id: P3.2
+    title: Backoffice 接线
+    status: completed
+    note: ✅（2026-11-09）
+  - id: P3.3
+    title: 缺口验证资产（Part02 旅程 1.3 自动化）
+    status: completed
+    note: ✅（2026-11-09）
+  - id: P3.4
+    title: 网关容器化 + prod compose 扩容
+    status: completed
+    note: ✅（2026-11-10）
+  - id: P3.5
+    title: DNS 与生产部署（两阶段铁门）
+    status: completed
+    note: ✅（2026-11-10）
+  - id: P3.6
+    title: iOS/Android 安装包（条件门：Apple 账号）
+    status: completed
+    note: ✅（2026-11-11，apk 段；ipa 段 ⏸ 挂账——Apple 账号条件门）
+- id: part03
+  status: completed
+  date: '2026-11-16'
+  docs:
+  - doc: v0.0.1-Part03-Phase1-Backoffice-I18n.md
+    status: completed
+    date: '2026-11-12'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '1'
+  - doc: v0.0.1-Part03-Phase2-Backoffice-Errors-Data.md
+    status: completed
+    date: '2026-11-12'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '2'
+  - doc: v0.0.1-Part03-Phase3-Mobile-L10n.md
+    status: completed
+    date: '2026-11-12'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '3'
+  - doc: v0.0.1-Part03-Phase4-Mobile-Fixtures.md
+    status: completed
+    date: '2026-11-12'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '4'
+  - doc: v0.0.1-Part03-Phase5-Asdm-Workspace.md
+    status: completed
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '5'
+    doc-note: 范围扩展（资产归仓 + front-matter 同车）
+    moved_to: part04:1.1
+  - doc: v0.0.1-Part03-Phase6-Comments-Convention.md
+    status: completed
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '6'
+  - doc: v0.0.1-Part03-Phase7-Runtime-Data-Locale.md
+    status: completed
+    date: '2026-11-12'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '7'
+    doc-note: 插入性质（D3 修订触发）
+  - doc: v0.0.1-Part03-Plan.md
+    status: completed
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: plan
+  tasks:
+  - id: '1.1'
+    title: 复刻 website i18n 骨架（Widen 类型推导 + `satisfies` 校验 + `interpolate`，词条 JSON
+      按命名空间拆分：common/login/clients/loanOps/errors）
+    status: completed
+    note: ✅
+  - id: '1.2'
+    title: LocaleProvider + localStorage 事实源 + `<html lang>`/title 同步
+    status: completed
+    note: ✅
+  - id: '1.3'
+    title: 系统语言跟随（`resolveBrowserLocale` 同构迁移）
+    status: completed
+    note: ✅
+  - id: '1.4'
+    title: BoLayout 头部语言切换器 + 布局文案词条化
+    status: completed
+    note: ✅
+  - id: '1.5'
+    title: antd `ConfigProvider` locale 与 dayjs locale 随语言联动
+    status: completed
+    note: ✅
+  - id: '1.6'
+    title: pages/components 全量词条替换（含 `{param}` 插值模板）
+    status: completed
+    note: ✅
+  - id: '1.7'
+    title: '`utils/format.ts` 金额/数字格式 locale 参数化'
+    status: completed
+    note: ✅
+  - id: '2.1'
+    title: api 层中文异常消息错误码化 + errors 词条
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '2.2'
+    title: mock 数据双语两套与部署期切换（Vite 注入 `ABNK_DATA_LOCALE`）
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '3.1'
+    title: 配置 flutter_localizations/intl/l10n.yaml 并编写 ARB 双语词条（zh 模板 + en 语义重写）
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '3.2'
+    title: AppState 增加 locale + shared_preferences 持久化，MaterialApp 接线 localizationsDelegates
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '3.3'
+    title: profile 页「语言/Language」切换区块
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '3.4'
+    title: 全量文案替换（7 feature 页 + 底部导航 + 3 个 model 枚举映射 + 异常/错误码层）
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '4.1'
+    title: fixtures 拆分 zh-cn/en-us 两套资产
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '4.2'
+    title: 数据载入层按 `--dart-define ABNK_DATA_LOCALE` 选择数据集
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '5.1'
+    title: 过程证据归仓——artifacts 跨仓复制与 Part 分桶归位（含凭据扫描门）
+    status: completed
+    note: ✅（2026-11-16）
+  - id: '5.2'
+    title: workspace 双语叶子层迁移——locale 置于文档叶子，结构树语言无关
+    status: completed
+    note: ✅（2026-11-16）
+  - id: '5.3'
+    title: 引用大清扫——三个面合并一次切换（含删源与两段式输出改写）
+    status: completed
+    note: ✅（2026-11-16）
+  - id: '5.4'
+    title: front-matter 注入——全 workspace markdown 结构化元数据头（提交分离）
+    status: completed
+    note: ✅（2026-11-16）
+  - id: '5.5'
+    title: index/metrics 生成器
+    status: moved
+    note: 🔁 已移交 Part04
+  - id: '6.1'
+    title: 本次触碰文件注释双语化（中文在上，英文语义重写在下）
+    status: completed
+    note: ✅（2026-11-16）
+  - id: '6.2'
+    title: 新增三合一防回潮门（check-bilingual + front-matter + 凭据扫描）接入工具集/CI
+    status: completed
+    note: ✅（2026-11-16，V6.2.1–6.2.8 全过；两处实现缺陷与脚本自身 31 处注释合规问题经自测拦到即修，判据未放宽）
+  - id: '6.3'
+    title: 两端中英切换全流程验收走查
+    status: completed
+    note: ✅（2026-11-16，V6.3.1–6.3.5 全过；V6.3.1 印刷口径 7 行逐条裁决为合法类——原判据范围 0；Android 载体挂账）
+  - id: '7.1'
+    title: backoffice 数据集运行时化（reseedDataSet + dataEpoch remount）
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '7.2'
+    title: mobile 数据集运行时化（FixtureBundle.activate + Resettable + dataEpoch）
+    status: completed
+    note: ✅（2026-11-12）
+  - id: '7.3'
+    title: Release Note 更新 + 确认门
+    status: completed
+    note: ✅（2026-11-12，Release Note 已补 D3 修订段）
+- id: part04
+  status: in_progress
+  date: '2026-11-16'
+  docs:
+  - doc: v0.0.1-Part04-Phase1-Data-Pipeline.md
+    status: pending
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '1'
+  - doc: v0.0.1-Part04-Phase2-Portal-Content.md
+    status: pending
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '2'
+  - doc: v0.0.1-Part04-Phase3-Portal-Site.md
+    status: pending
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '3'
+  - doc: v0.0.1-Part04-Phase4-Portal-Release.md
+    status: pending
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '4'
+  - doc: v0.0.1-Part04-Phase5-Generalization-Roadmap.md
+    status: planned-backlog
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: '5'
+  - doc: v0.0.1-Part04-Plan.md
+    status: in_progress
+    date: '2026-11-16'
+    locale: zh-CN
+    evidence: ./artifacts/
+    phase: plan
+  tasks:
+  - id: '1.1'
+    title: index/metrics 生成器交付（承接 Part03 任务 5.5 移交）
+    status: completed
+    note: ✅（2026-11-16，V1.1.1–V1.1.8 全过；index parts=4/docs=24/tasks=74，三重校验零漂移，幂等字节级成立）
+  - id: '1.2'
+    title: portal 工程骨架与数据消费契约
+    status: pending
+    note: ⏳
+  - id: '1.3'
+    title: 脱敏终审（ADR-010 衍生约束门）
+    status: pending
+    note: ⏳
+  - id: '2.1'
+    title: portal IA 设计文档（板块 → 数据源映射表）
+    status: pending
+    note: ⏳
+  - id: '2.2'
+    title: 方法论板块内容改写（zh，源自 asdm-training 公开素材）
+    status: pending
+    note: ⏳
+  - id: '2.3'
+    title: en-US 第一批语义重写与生成器 locale 路由增量
+    status: pending
+    note: ⏳
+  - id: '2.4'
+    title: 治理与开放板块内容（ADR-001–010 导读与开放策略展示）
+    status: pending
+    note: ⏳
+  - id: '3.1'
+    title: 路由与布局骨架 + 正式双语 UI 词条
+    status: pending
+    note: ⏳
+  - id: '3.2'
+    title: 迭代时间线四层下钻页（灵魂页面）
+    status: pending
+    note: ⏳
+  - id: '3.3'
+    title: 决策时间线页（ADR + Part 决策表合并渲染）
+    status: pending
+    note: ⏳
+  - id: '3.4'
+    title: 指标仪表盘页（诚实性原则）
+    status: pending
+    note: ⏳
+  - id: '3.5'
+    title: E2E 旅程故事线页
+    status: pending
+    note: ⏳
+  - id: '3.6'
+    title: 证据浏览页（markdown 渲染 + 内链路由 + 三态视觉层次）
+    status: pending
+    note: ⏳
+  - id: '4.1'
+    title: 容器化（多阶段构建 + nginx 静态直供）
+    status: pending
+    note: ⏳
+  - id: '4.2'
+    title: ghcr 公共镜像发布与生产部署（两阶段铁门）
+    status: pending
+    note: ⏳
+  - id: '4.3'
+    title: 官网 CTA 入口（跨仓最小改动）
+    status: pending
+    note: ⏳
+  - id: '4.4'
+    title: 发布手册与数据更新链固化
+    status: pending
+    note: ⏳
