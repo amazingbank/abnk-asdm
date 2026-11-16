@@ -3,12 +3,13 @@
   "registry_id": "abnk-harness-toolset",
   "name": "ABNK Harness Toolset",
   "description": "Automated toolset for Amazing Bank (ABNK) IT system. Phase 1 stack: PostgreSQL 18.3 docker（:5432，fineract_tenants + fineract_default）+ Fineract ServerApplication（Spring Boot + 内嵌 Tomcat，:8443 SSL，JDWP :5005）。Provides the debugger and doc-review actions; designed to grow into the full Amazing Bank IT stack orchestrator.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "configType": "toolset",
   "entryPoint": "README.md",
   "commands": {
     "abnk-debugger": "Start automated debugging session for the Amazing Bank IT stack with process management, log analysis and self-directed fix scheduling",
     "abnk-doc-review": "Five-dimension review of Sprint/Phase design docs (.asdm/workspace/docs/Sprints/) with code-evidence verification against the Fineract codebase",
-    "abnk-prod-deploy": "Deploy the Amazing Bank website (abnk-system/channels/website) to the production server via docker compose with HTTPS (amazingbank.ai). Enforces sensitive-info audit gate (Step 0) — production secrets live only in .github-private. Two-phase flow: Release Note review checkpoint, then server-side build + compose switch"
+    "abnk-prod-deploy": "Deploy the Amazing Bank website (abnk-system/channels/website) to the production server via docker compose with HTTPS (amazingbank.ai). Enforces sensitive-info audit gate (Step 0) — production secrets live only in .github-private. Two-phase flow: Release Note review checkpoint, then server-side build + compose switch",
+    "abnk-check-bilingual": "Three-in-one regression gate for the Amazing Bank repos: bilingual comment check (Chinese first, English semantic rewrite below) on channel sources, front-matter structural check on workspace markdown, and credential scan on public evidence (ADR-010). Usage: scripts/check-bilingual.sh <dir|file>... [--frontmatter <workspace>] [--credentials <evidence>]; violations > 0 → exit 1"
   }
 }
