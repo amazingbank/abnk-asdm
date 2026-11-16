@@ -10,7 +10,10 @@
 #   python3 gen-sprint-index.py --refresh-loc    重跑 count-loc.sh 更新 LOC 快照
 #   python3 gen-sprint-index.py --help           用法说明
 # 产出物：
-#   $INDEX/sprint-v0.0.1.yaml      Sprint→Part→Phase→Task 层级索引
+#   $INDEX/sprint-v0.0.1.yaml      Sprint→Part→Phase→Task 层级索引 + portal-content
+#                                   分区条目（Part04 任务 2.3 locale 路由：同 doc id
+#                                   逐 locale 注册，单语条目带 fallback 标记——渲染
+#                                   层按此路由，无需扫描目录）
 #   $INDEX/metrics-v0.0.1.json     指标（第一批清单口径，Part04 Phase1 已知坑 6）
 #   $INDEX/loc-snapshot-v0.0.1.md  LOC 快照（--refresh-loc 显式更新；默认只读）
 # 三重校验（fail-loud，无静默跳过路径）：
@@ -32,7 +35,11 @@
 #   gen-sprint-index.py --refresh-loc   rerun count-loc.sh to refresh the LOC snapshot
 #   gen-sprint-index.py --help     show this header
 # Outputs:
-#   sprint-v0.0.1.yaml      Sprint → Part → Phase → Task hierarchy index
+#   sprint-v0.0.1.yaml      Sprint → Part → Phase → Task hierarchy index, plus
+#                           portal-content section entries (Part04 task 2.3
+#                           locale routing: one entry per locale of the same
+#                           doc id; monolingual docs carry a fallback marker —
+#                           the render side routes on this, no dir scanning)
 #   metrics-v0.0.1.json     metrics (first-batch list, Part04 Phase1 pitfall 6)
 #   loc-snapshot-v0.0.1.md  LOC snapshot (explicit --refresh-loc; read-only by default)
 # Triple validation (fail-loud, no silent-skip path):
@@ -55,8 +62,22 @@ ASDM = os.path.dirname(SCRIPT_DIR)  # .asdm/scripts/ → .asdm/
 SPRINTS = os.path.join(ASDM, "workspace/docs/Sprints/v0.0.1")
 INDEX = os.path.join(ASDM, "workspace/index")
 PLANNING = os.path.join(ASDM, "workspace/docs/planning/abnk-design")
+PORTAL_CONTENT = os.path.join(ASDM, "workspace/docs/portal-content")
 COUNT_LOC = os.path.join(PLANNING, "00-baseline/count-loc.sh")
 TEST_REPORT_REL = "part02/Phase2Results/zh-CN/v0.0.1-Part02-PhaseP2-Test-Report.md"
+
+# portal-content 分区词表（Part04 任务 2.3 locale 路由增量）：
+#   PORTAL_STATUS —— 内容侧状态词表（planning-doc profile 的 status 值域）；
+#   PORTAL_LOCALES —— locale 叶子层词表，列表顺序即注册顺序（zh 全量主、
+#   en-US 增量语义重写——D3/D4 口径）。
+# Vocabulary for the portal-content partition (Part04 task 2.3 locale routing):
+#   PORTAL_STATUS — the content-side status vocabulary (value domain of the
+#   planning-doc profile's status field);
+#   PORTAL_LOCALES — the locale-leaf vocabulary; list order is registration
+#   order (zh full coverage first, en-US incremental semantic rewrites — per
+#   decisions D3/D4).
+PORTAL_STATUS = {"published", "in_progress", "draft"}
+PORTAL_LOCALES = ["zh-CN", "en-US"]
 
 # 状态词表（与 Part03 Phase5 注入脚本 add-frontmatter.py 共用口径——同族
 # 脚本，口径漂移 = 互证失败）。
@@ -146,6 +167,97 @@ def parse_frontmatter(path, text):
     if fm["status"] not in VALID_STATUS:
         fail(path, "status", f"非法状态值: {fm['status']!r}（词表: {sorted(VALID_STATUS)}）")
     return fm
+
+
+def parse_portal_frontmatter(path, text):
+    # portal-content 文档 front-matter（planning-doc profile：section/status/
+    # locale 三必填——与 Sprints 的 sprint-doc profile 分开校验，必填集不同）。
+    # Front-matter of a portal-content doc (planning-doc profile: section/
+    # status/locale required — validated separately from the Sprints
+    # sprint-doc profile, whose required-field set differs).
+    lines = text.split("\n")
+    if not lines or lines[0].strip() != "---":
+        fail(path, "front-matter", "首行非 ---（缺结构化元数据头）")
+    end = None
+    for i in range(1, min(len(lines), 100)):
+        if lines[i].strip() == "---":
+            end = i
+            break
+    if end is None:
+        fail(path, "front-matter", "100 行内未找到闭合 ---")
+    try:
+        fm = yaml.safe_load("\n".join(lines[1:end])) or {}
+    except yaml.YAMLError as exc:
+        fail(path, "front-matter", f"YAML 解析失败: {exc}")
+    if not isinstance(fm, dict):
+        fail(path, "front-matter", "front-matter 非键值结构")
+    for key in ("section", "status", "locale"):
+        if not fm.get(key):
+            fail(path, key, "必填字段缺失或为空（planning-doc profile）")
+    if fm["status"] not in PORTAL_STATUS:
+        fail(path, "status",
+             f"非法状态值: {fm['status']!r}（词表: {sorted(PORTAL_STATUS)}）")
+    if fm["locale"] not in PORTAL_LOCALES:
+        fail(path, "locale",
+             f"非法 locale: {fm['locale']!r}（词表: {PORTAL_LOCALES}）")
+    return fm
+
+
+def collect_portal_content():
+    # portal-content 分区遍历（Part04 任务 2.3 locale 路由）：分区 → locale
+    # 叶子层 → md；同一 doc id 双 locale 时逐 locale 注册条目（双语 = 双
+    # locale 注册），单语 doc 的条目带 fallback 标记（值 = 仅有 locale，
+    # 渲染层据此回退，无需扫描目录）。front-matter section 必须与分区目录
+    # 一致（双源校验，fail-loud）。
+    # Traverse the portal-content partition (Part04 task 2.3 locale routing):
+    # section → locale leaf → md; one entry per locale of the same doc id
+    # (bilingual = both locales registered), and monolingual docs carry a
+    # fallback marker (its value = the only available locale, so the render
+    # side can fall back without scanning directories). The front-matter
+    # section must match its partition directory (dual-source check, fail-loud).
+    if not os.path.isdir(PORTAL_CONTENT):
+        fail("workspace/docs/portal-content", "dir",
+             "分区缺失（任务 2.2 起 portal-content 为数据契约组成部分）")
+    docs = {}  # (section, doc) -> {locale: fm}
+    for section in sorted(os.listdir(PORTAL_CONTENT)):
+        sdir = os.path.join(PORTAL_CONTENT, section)
+        if not os.path.isdir(sdir):
+            continue
+        for locale in sorted(os.listdir(sdir)):
+            ldir = os.path.join(sdir, locale)
+            if not os.path.isdir(ldir):
+                continue
+            if locale not in PORTAL_LOCALES:
+                fail(f"portal-content/{section}", "locale-dir",
+                     f"非法 locale 叶子层: {locale!r}（词表: {PORTAL_LOCALES}）")
+            for fname in sorted(os.listdir(ldir)):
+                if not fname.endswith(".md"):
+                    continue
+                path = os.path.join(ldir, fname)
+                fm = parse_portal_frontmatter(
+                    path, open(path, encoding="utf-8").read())
+                if fm["section"] != section:
+                    fail(f"portal-content/{section}/{locale}/{fname}", "section",
+                         f"front-matter section={fm['section']!r} "
+                         f"与分区目录 {section!r} 漂移")
+                docs.setdefault((section, fname), {})[locale] = fm
+    if not docs:
+        fail("workspace/docs/portal-content", "docs", "未收集到任何 md（分区为空？）")
+    entries = []
+    for section, fname in sorted(docs):
+        locales = docs[(section, fname)]
+        for locale in PORTAL_LOCALES:  # 注册顺序：zh-CN 主、en-US 增量
+            if locale not in locales:
+                continue
+            fm = locales[locale]
+            entry = {"section": section, "doc": fname, "locale": locale,
+                     "status": fm["status"]}
+            if fm.get("date"):
+                entry["date"] = str(fm["date"])
+            if len(locales) == 1:
+                entry["fallback"] = locale
+            entries.append(entry)
+    return entries
 
 
 def collect_part(part_id):
@@ -360,7 +472,8 @@ def build_all():
         parts_docs[pid] = {"docs": docs}
         parts_out.append({"id": pid, "status": plan_status, "date": plan_doc["date"],
                           "docs": docs, "tasks": task_entries})
-    index = {"schema_version": 1, "sprint": "v0.0.1", "parts": parts_out}
+    index = {"schema_version": 1, "sprint": "v0.0.1", "parts": parts_out,
+             "portal_content": collect_portal_content()}
     evd = count_dirs(part_ids)
     metrics = {
         "schema_version": 1,
@@ -413,7 +526,10 @@ def verify():
         sys.exit(1)
     n_docs = sum(len(p["docs"]) for p in index["parts"])
     n_tasks = sum(len(p["tasks"]) for p in index["parts"])
-    print(f"verify OK: parts={len(index['parts'])} docs={n_docs} tasks={n_tasks} — index/front-matter 双向一致，metrics/源报告一致")
+    n_portal = len(index["portal_content"])
+    n_en = sum(1 for e in index["portal_content"] if e["locale"] == "en-US")
+    print(f"verify OK: parts={len(index['parts'])} docs={n_docs} tasks={n_tasks} "
+          f"portal_docs={n_portal} portal_en={n_en} — index/front-matter 双向一致，metrics/源报告一致")
 
 
 def refresh_loc():
@@ -461,8 +577,11 @@ def main():
     ypath, jpath = write_outputs(index, metrics)
     n_docs = sum(len(p["docs"]) for p in index["parts"])
     n_tasks = sum(len(p["tasks"]) for p in index["parts"])
+    n_portal = len(index["portal_content"])
+    n_en = sum(1 for e in index["portal_content"] if e["locale"] == "en-US")
     moved = metrics["moved_count"]
-    print(f"index OK: parts={len(index['parts'])} docs={n_docs} tasks={n_tasks} moved={moved}")
+    print(f"index OK: parts={len(index['parts'])} docs={n_docs} tasks={n_tasks} moved={moved} "
+          f"portal_docs={n_portal} portal_en={n_en}")
     print(f"metrics OK: loc_total={metrics['loc']['total']['lines']} adr={metrics['adr_count']}")
     print(f"产出: {os.path.relpath(ypath, ASDM)} / {os.path.relpath(jpath, ASDM)}")
 

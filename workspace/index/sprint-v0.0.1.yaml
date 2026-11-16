@@ -360,13 +360,13 @@ parts:
   date: '2026-11-16'
   docs:
   - doc: v0.0.1-Part04-Phase1-Data-Pipeline.md
-    status: in_progress
+    status: completed
     date: '2026-11-16'
     locale: zh-CN
     evidence: ./artifacts/
     phase: '1'
   - doc: v0.0.1-Part04-Phase2-Portal-Content.md
-    status: pending
+    status: completed
     date: '2026-11-16'
     locale: zh-CN
     evidence: ./artifacts/
@@ -408,24 +408,33 @@ parts:
       前后 0/0）、gitignore 双侧纪律就位）
   - id: '1.3'
     title: 脱敏终审（ADR-010 衍生约束门）
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V1.3.1–V1.3.4 全过；机械通道 `--credentials` 全量 exit 0 违规 0、公网 IP
+      实际命中 0（3 条均为版本号误报豁免）、人工抽样 6/6 通过、`mifos:password`/`<redacted>` 豁免口径声明在案——「本数据集可作为
+      Phase 2/3 消费对象」前置门声明已登记；三合一门走查全绿）
   - id: '2.1'
     title: portal IA 设计文档（板块 → 数据源映射表）
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V2.1.1–V2.1.2 全过；八板块四列零空格、既有数据源 23 条路径 test -e 全过、渲染模式四类枚举零越界、责任
+      Phase 与进度概要九任务零冲突——复现指南表内声明 Phase 4/任务 4.4）
   - id: '2.2'
     title: 方法论板块内容改写（zh，源自 asdm-training 公开素材）
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V2.2.1–V2.2.3 全过；四篇就位（总览/上下文工程/驾驭工程/自我迭代）、front-matter 三必填字段缺失
+      0、素材来源标注 5 条路径全在公开白名单（ISS 公开课课件 ×3 + 总纲 + 用户轨道 README）、客户专属场次引用 0、20 条相对链接失联
+      0）
   - id: '2.3'
     title: en-US 第一批语义重写与生成器 locale 路由增量
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V2.3.1–V2.3.4 全过；en 三篇语义重写 + zh 对称两篇就位、index 含 en-US 条目 3（portal_docs=9）、verify/sync（守恒
+      9=9）/typecheck 三绿、fallback 机制成立（单语 3 条目带标记、双语 3 doc id 双注册）、黑名单命中 0、幂等逐字节成立；首跑
+      fail-loud 拦截 Phase 2 状态行 emoji 混用漂移并修源双改）
   - id: '2.4'
     title: 治理与开放板块内容（ADR-001–010 导读与开放策略展示）
-    status: pending
-    note: ⏳
+    status: completed
+    note: ✅（2026-11-16，V2.4.1–V2.4.3 全过；双语导读齐备（ADR 引用命中 15 ≥ 8）、ADR 链接 20/20 解析（locale
+      叶子层无失联）、check-bilingual 路由扩面（portal-content → planning-doc）后 Phase 全量内容过门违规
+      0）
   - id: '3.1'
     title: 路由与布局骨架 + 正式双语 UI 词条
     status: pending
@@ -466,3 +475,62 @@ parts:
     title: 发布手册与数据更新链固化
     status: pending
     note: ⏳
+portal_content:
+- section: governance
+  doc: index.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+- section: governance
+  doc: index.md
+  locale: en-US
+  status: published
+  date: '2026-11-16'
+- section: methodology
+  doc: context-engineering.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+  fallback: zh-CN
+- section: methodology
+  doc: harness-engineering.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+  fallback: zh-CN
+- section: methodology
+  doc: index.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+- section: methodology
+  doc: index.md
+  locale: en-US
+  status: published
+  date: '2026-11-16'
+- section: methodology
+  doc: self-iteration.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+  fallback: zh-CN
+- section: overview
+  doc: index.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+- section: overview
+  doc: index.md
+  locale: en-US
+  status: published
+  date: '2026-11-16'
+- section: overview
+  doc: timeline.md
+  locale: zh-CN
+  status: published
+  date: '2026-11-16'
+- section: overview
+  doc: timeline.md
+  locale: en-US
+  status: published
+  date: '2026-11-16'
