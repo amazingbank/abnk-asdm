@@ -1,0 +1,927 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 5.03kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/nginx:1.27-alpine
+#2 DONE 0.0s
+
+#3 [context asdm] load .dockerignore
+#3 transferring asdm: 2B done
+#3 DONE 0.0s
+
+#4 [context tokens] load .dockerignore
+#4 transferring tokens: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/node:22-alpine
+#5 DONE 0.5s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 784B done
+#6 DONE 0.0s
+
+#7 [stage-1 1/3] FROM docker.io/library/nginx:1.27-alpine
+#7 DONE 0.0s
+
+#8 [build  1/12] FROM docker.io/library/node:22-alpine@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a
+#8 DONE 0.0s
+
+#9 [context asdm] load from client
+#9 transferring asdm: 73.71kB done
+#9 DONE 0.0s
+
+#10 [context asdm] load from client
+#10 transferring asdm: 1.55kB 0.0s done
+#10 DONE 0.0s
+
+#11 [context tokens] load from client
+#11 transferring tokens: 2.03kB done
+#11 DONE 0.0s
+
+#12 [context asdm] load from client
+#12 transferring asdm: 175.56kB 0.0s done
+#12 DONE 0.0s
+
+#13 [internal] load build context
+#13 transferring context: 31.66kB 0.1s done
+#13 DONE 0.1s
+
+#14 [build  2/12] WORKDIR /workspace/abnk-devportal
+#14 CACHED
+
+#15 [build  4/12] COPY package.json package-lock.json ./
+#15 CACHED
+
+#16 [build  3/12] RUN apk add --no-cache bash rsync
+#16 CACHED
+
+#17 [build  5/12] RUN npm ci --no-audit --no-fund
+#17 CACHED
+
+#18 [build  6/12] COPY . .
+#18 DONE 0.1s
+
+#19 [build  7/12] COPY --from=asdm /workspace/index                        /workspace/.asdm/workspace/index
+#19 DONE 0.1s
+
+#20 [context asdm] load from client
+#20 transferring asdm: 36.23MB 0.4s done
+#20 DONE 0.4s
+
+#21 [build  8/12] COPY --from=asdm /workspace/docs/Sprints                /workspace/.asdm/workspace/docs/Sprints
+#21 DONE 0.1s
+
+#22 [build  9/12] COPY --from=asdm /workspace/docs/planning/abnk-design   /workspace/.asdm/workspace/docs/planning/abnk-design
+#22 DONE 0.0s
+
+#23 [build 10/12] COPY --from=asdm /workspace/docs/portal-content         /workspace/.asdm/workspace/docs/portal-content
+#23 DONE 0.0s
+
+#24 [build 11/12] COPY --from=tokens /design-tokens.json /workspace/abnk-system/channels/shared/design-tokens.json
+#24 DONE 0.0s
+
+#25 [build 12/12] RUN npm run sync && npm run build
+#25 0.145 
+#25 0.145 > @abnk/devportal@0.1.0 sync
+#25 0.145 > bash scripts/sync-data.sh
+#25 0.145 
+#25 0.527 evidence OK: 四桶直供 public/evidence/（合计 433 文件，含全量截图），资产清单 manifest.json 已生成
+#25 0.527 sync OK: 4 个映射已复制到 src/data/（index/sprints/planning/abnk-design/portal-content）+ 四桶证据素材直供 public/evidence/（任务 3.5 建基 / 3.6 泛化），源仓只读性成立（porcelain 前后一致）
+#25 0.598 
+#25 0.598 > @abnk/devportal@0.1.0 build
+#25 0.598 > vite build
+#25 0.598 
+#25 0.744 vite v7.3.8 building client environment for production...
+#25 0.921 transforming...
+#25 2.340 ✓ 1032 modules transformed.
+#25 2.561 rendering chunks...
+#25 2.694 [plugin vite:reporter] 
+#25 2.694 (!) /workspace/abnk-devportal/src/data/sprints/v0.0.1/part02/artifacts/phaseP3/p3-login.yaml?raw is dynamically imported by /workspace/abnk-devportal/src/pages/evidence/evidence-data.ts but also statically imported by /workspace/abnk-devportal/src/pages/journey/journey-steps.ts, dynamic import will not move module into another chunk.
+#25 2.694 
+#25 2.771 computing gzip size...
+#25 2.888 dist/index.html                                                                 0.94 kB │ gzip:   0.66 kB
+#25 2.888 dist/assets/v632-spa-en-wEWxF-7b.yaml                                           4.11 kB
+#25 2.888 dist/assets/task3.5-journey-report-YBW1evO4.md                                  4.12 kB
+#25 2.888 dist/assets/v163-zh-logout-CejVd06d.yaml                                        4.15 kB
+#25 2.888 dist/assets/v163-zh-welcome-BW9Sm3LG.yaml                                       4.16 kB
+#25 2.888 dist/assets/user-dropdown-Z8F3uCDx.yaml                                         4.18 kB
+#25 2.888 dist/assets/v164-en-menu-DVEyWTUh.yaml                                          4.18 kB
+#25 2.888 dist/assets/v164-en-welcome-C_vF7ujU.yaml                                       4.20 kB
+#25 2.888 dist/assets/task1.4-walkthrough-DJ62_mMp.md                                     4.24 kB
+#25 2.888 dist/assets/v0.0.1-Part04-Phase5-Generalization-Roadmap-CvfqdsGT.md             4.24 kB
+#25 2.888 dist/assets/seed-poc-evidence-C6TFcaoI.json                                     4.41 kB │ gzip:   1.55 kB
+#25 2.888 dist/assets/task3.4-metrics-report-OJYw0jPi.md                                  4.44 kB
+#25 2.888 dist/assets/task3.4-walkthrough-zh-BiPZFiCq.md                                  4.65 kB
+#25 2.889 dist/assets/task4.2-walkthrough-decouple-D7mNyqBK.md                            4.67 kB
+#25 2.889 dist/assets/task2.4-final-check-B0tLONur.md                                     4.67 kB
+#25 2.889 dist/assets/task3.4-walkthrough-en-BlD-ZlWj.md                                  4.68 kB
+#25 2.889 dist/assets/taskP0.4-server-deploy-BzZHbtKs.md                                  4.82 kB
+#25 2.889 dist/assets/taskP2.7-evidence-DaHTvfQG.txt                                      4.85 kB │ gzip:   2.62 kB
+#25 2.889 dist/assets/task6.1-filelist-BX_yVXsv.txt                                       4.98 kB │ gzip:   0.79 kB
+#25 2.889 dist/assets/taskP1.3-addendum-asdm-logo-DxoqXF3o.md                             5.03 kB
+#25 2.889 dist/assets/task1.2-skeleton-report-BCPNCKz_.md                                 5.13 kB
+#25 2.889 dist/assets/taskP1.3-evidence-GbP4rjM_.txt                                      5.18 kB │ gzip:   3.32 kB
+#25 2.889 dist/assets/seed-poc-server-evidence-DxV9nFL9.json                              5.38 kB │ gzip:   1.86 kB
+#25 2.889 dist/assets/taskP1.2-tokens-evidence-BiIWa9OD.txt                               5.46 kB │ gzip:   2.78 kB
+#25 2.889 dist/assets/task5.3-sweep-evidence-Dj2XXOYs.md                                  5.68 kB
+#25 2.889 dist/assets/poc-journey-report-Y2RFoOP3.md                                      5.74 kB
+#25 2.889 dist/assets/task1.1-generator-report-CdDu67YB.md                                6.26 kB
+#25 2.889 dist/assets/task3.6-evidence-report-BDwwvt-t.md                                 6.26 kB
+#25 2.889 dist/assets/taskP1.5-review-gate-B0Moegqx.md                                    6.40 kB
+#25 2.889 dist/assets/v0.0.1-Part02-KBank-POC-Journey-BPtt51zH.md                         6.51 kB
+#25 2.889 dist/assets/task1.3-desensitize-report-Cb3pPVm-.md                              6.58 kB
+#25 2.889 dist/assets/task3.3-decisions-report-BRWrwTBW.md                                6.63 kB
+#25 2.889 dist/assets/taskP3.2-bo-e2e-C1WWIbHe.md                                         6.65 kB
+#25 2.889 dist/assets/taskP2.5-bo-evidence-CGQ2XqM8.txt                                   6.71 kB │ gzip:   3.70 kB
+#25 2.889 dist/assets/taskP3.6-mobile-package-CcK0RTTt.md                                 6.90 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Phase7-Runtime-Data-Locale-Cq-6Wgwn.md                7.03 kB
+#25 2.889 dist/assets/task3.1-skeleton-report-K7XoMc2h.md                                 7.08 kB
+#25 2.889 dist/assets/taskP2.2-auth-evidence-D7a_zeV6.txt                                 7.12 kB │ gzip:   3.80 kB
+#25 2.889 dist/assets/task3.2-timeline-report-FojZRDWo.md                                 7.14 kB
+#25 2.889 dist/assets/v632-detail-en-P0M976Yt.yaml                                        7.22 kB
+#25 2.889 dist/assets/v632-detail-zh-iZ_7eBeH.yaml                                        7.41 kB
+#25 2.889 dist/assets/v163-zh-detail-Co2GmiWF.yaml                                        7.43 kB
+#25 2.889 dist/assets/v164-en-detail-BTDr6WG4.yaml                                        7.44 kB
+#25 2.889 dist/assets/taskP3.5-prod-evidence-DA-sWby9.txt                                 7.47 kB │ gzip:   4.18 kB
+#25 2.889 dist/assets/task2.3-en-batch-BUJPjzpj.md                                        7.64 kB
+#25 2.889 dist/assets/taskP3.1-mobile-e2e-CWVVaM9B.md                                     7.71 kB
+#25 2.889 dist/assets/taskP3.4-fullstack-evidence-CCEaBz5Z.txt                            8.12 kB │ gzip:   4.29 kB
+#25 2.889 dist/assets/taskP2.4-transfer-evidence-BnXox3Vc.txt                             8.14 kB │ gzip:   4.25 kB
+#25 2.889 dist/assets/taskP2.3-customer-evidence-D9BMaqu9.txt                             9.07 kB │ gzip:   4.67 kB
+#25 2.889 dist/assets/task2.1-ia-mapping-C9ZyO10H.md                                      9.41 kB
+#25 2.889 dist/assets/taskP2.6-contract-evidence-37-Bweke.txt                            10.09 kB │ gzip:   4.82 kB
+#25 2.889 dist/assets/capability-probe-BGpt5y_Z.json                                     12.48 kB │ gzip:   3.11 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Plan-Du1YWMtL.md                                     13.15 kB
+#25 2.889 dist/assets/task6.3-final-walkthrough-BmqjFNXq.md                              13.62 kB
+#25 2.889 dist/assets/v0.0.1-Part02-Plan-FBqk_Qfg.md                                     13.79 kB
+#25 2.889 dist/assets/task6.1-bilingual-audit-Bxo7kKjx.md                                14.05 kB
+#25 2.889 dist/assets/report-1107093814-KxVM3W-B.json                                    15.69 kB │ gzip:   2.50 kB
+#25 2.889 dist/assets/report-1025094135-CRH8RKfn.json                                    15.74 kB │ gzip:   2.52 kB
+#25 2.889 dist/assets/v0.0.1-Part04-Phase4-Portal-Release-B8n6gzmC.md                    15.94 kB
+#25 2.889 dist/assets/v0.0.1-Part04-Plan-Dcvhc0Z8.md                                     16.34 kB
+#25 2.889 dist/assets/task5.3-ref-check-DtWlbElo.txt                                     17.17 kB │ gzip:   2.12 kB
+#25 2.889 dist/assets/task2.1-client-notfound-en-CYvB8F8v.png                            21.01 kB
+#25 2.889 dist/assets/v0.0.1-Part02-PhaseP2-Test-Report-BnpaFNPi.md                      21.01 kB
+#25 2.889 dist/assets/v0.0.1-Part04-Phase2-Portal-Content-BU50j3Id.md                    21.45 kB
+#25 2.889 dist/assets/task3.4-en-transactions-Chaob3KK.png                               22.01 kB
+#25 2.889 dist/assets/task2.1-client-notfound-zh-Crv0ZsuF.png                            22.59 kB
+#25 2.889 dist/assets/task7.2-switched-en-reset-BK2wyXbR.png                             23.40 kB
+#25 2.889 dist/assets/gateway-report-20261110-073757-BRp9CVhR.json                       25.42 kB │ gzip:   3.80 kB
+#25 2.889 dist/assets/task3.4-zh-transactions-BxAyBOds.png                               25.58 kB
+#25 2.889 dist/assets/web-03-transfer-C3NRT4wU.png                                       25.66 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Phase2-Backoffice-Errors-Data-JCreUFh_.md            26.10 kB
+#25 2.889 dist/assets/login-zh-We_pAsaJ.png                                              26.66 kB
+#25 2.889 dist/assets/web-01-login-BSWBMwQS.png                                          26.81 kB
+#25 2.889 dist/assets/task3.4-en-transfer-BDSAOF4p.png                                   26.94 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Phase4-Mobile-Fixtures-CzmnzkS3.md                   27.02 kB
+#25 2.889 dist/assets/web-03-transfer-BVJaMuGo.png                                       27.30 kB
+#25 2.889 dist/assets/web-05-loans-CZskFu20.png                                          27.99 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Phase1-Backoffice-I18n-D5GbNIqu.md                   28.38 kB
+#25 2.889 dist/assets/task2.1-login-error-zh-DNg9Lleo.png                                28.53 kB
+#25 2.889 dist/assets/task3.4-en-login-CP6zB0uM.png                                      28.63 kB
+#25 2.889 dist/assets/task3.4-en-loans-C4UCm-DR.png                                      28.77 kB
+#25 2.889 dist/assets/web-04-fixed-deposit-B-wm59W3.png                                  28.85 kB
+#25 2.889 dist/assets/web-zh-login-c4arGReT.png                                          29.43 kB
+#25 2.889 dist/assets/login-en-DtyootZD.png                                              29.60 kB
+#25 2.889 dist/assets/task3.4-zh-loans-C8xSVCut.png                                      29.74 kB
+#25 2.889 dist/assets/v0.0.1-Part03-Phase3-Mobile-L10n-DXyjz7KJ.md                       29.84 kB
+#25 2.889 dist/assets/task3.4-zh-transfer-CLsduXun.png                                   30.08 kB
+#25 2.889 dist/assets/task3.4-en-fixed-deposit-CejZQhrE.png                              30.14 kB
+#25 2.889 dist/assets/task2.1-login-error-en-Dcm74aUr.png                                30.51 kB
+#25 2.890 dist/assets/step8-mobile-transactions-new-entry-C8Jibj3n.png                   30.63 kB
+#25 2.890 dist/assets/login-zh-validation-Cau9l560.png                                   30.67 kB
+#25 2.890 dist/assets/task5.1-credential-scan-CGsRZ7fA.txt                               30.93 kB │ gzip:   7.55 kB
+#25 2.890 dist/assets/task3.4-en-profile-B24lVGt8.png                                    30.93 kB
+#25 2.890 dist/assets/task3.4-en-login-error-BwWaIzgr.png                                30.93 kB
+#25 2.890 dist/assets/task3.4-zh-fixed-deposit-D8KOGNL2.png                              31.37 kB
+#25 2.890 dist/assets/web-en-profile-yVLe2k2m.png                                        31.64 kB
+#25 2.890 dist/assets/task3.4-zh-transfer-validation-DxbxLiPC.png                        31.84 kB
+#25 2.890 dist/assets/v0.0.1-Part04-Phase1-Data-Pipeline-B5Eqc52V.md                     32.09 kB
+#25 2.890 dist/assets/web-05c-loan-submitted-C3sux0YO.png                                32.49 kB
+#25 2.890 dist/assets/task3.4-zh-login-error-CulQESYR.png                                32.63 kB
+#25 2.890 dist/assets/web-03b-transfer-success-DJYV2SsU.png                              32.68 kB
+#25 2.890 dist/assets/web-04-transfer-success-D8Zb_zGE.png                               32.89 kB
+#25 2.890 dist/assets/v0.0.1-Part04-Phase3-Portal-Site-BHN52tQi.md                       33.01 kB
+#25 2.890 dist/assets/task3.4-zh-fd-validation-B08lbiUf.png                              33.45 kB
+#25 2.890 dist/assets/login-en-validation-Dwf1JWOd.png                                   34.11 kB
+#25 2.890 dist/assets/task4.2-en-transactions-GnVGns20.png                               34.13 kB
+#25 2.890 dist/assets/web-06-transactions-Czf-f0yj.png                                   34.19 kB
+#25 2.890 dist/assets/v0.0.1-Part03-Phase6-Comments-Convention-B9kT2zXf.md               34.98 kB
+#25 2.890 dist/assets/step4-mobile-transfer-success-gap-L4zfqzpV.png                     35.34 kB
+#25 2.890 dist/assets/task3.4-zh-profile-CO9E369m.png                                    35.42 kB
+#25 2.890 dist/assets/task3.3-zh-before-24MrEx2_.png                                     35.47 kB
+#25 2.890 dist/assets/step8-mobile-transfer-again-success-BKp5kyXK.png                   35.48 kB
+#25 2.890 dist/assets/step5b-mobile-loan-applied-gap-B7x8r89n.png                        35.57 kB
+#25 2.890 dist/assets/bo-online-english-clients-D_RxMNbz.png                             35.61 kB
+#25 2.890 dist/assets/task4.2-zh-transactions-C3aj81oa.png                               36.25 kB
+#25 2.890 dist/assets/step6-mobile-transactions-C2sjD6gx.png                             36.27 kB
+#25 2.890 dist/assets/v0.0.1-Part01-Phase2-Custom-L1-5DLXA7Oe.md                         36.36 kB
+#25 2.890 dist/assets/gateway-report-20261108-170841-CsQWxYaf.json                       36.50 kB │ gzip:   4.23 kB
+#25 2.890 dist/assets/web-04b-fd-success-CQ72hPnE.png                                    36.67 kB
+#25 2.890 dist/assets/web-05b-loan-apply-Cwj8Gu1C.png                                    36.71 kB
+#25 2.890 dist/assets/gateway-report-20261108-170857-CSKjKXvO.json                       36.77 kB │ gzip:   4.29 kB
+#25 2.890 dist/assets/web-07-profile-BT_wAgp_.png                                        38.69 kB
+#25 2.890 dist/assets/v0.0.1-Part03-Phase5-Asdm-Workspace-sF5UPXoU.md                    39.02 kB
+#25 2.890 dist/assets/v0.0.1-Part02-PhaseP1-UX-Prototype-EI8IgO_I.md                     39.36 kB
+#25 2.890 dist/assets/empty-state-en-BmpQb9Fe.png                                        39.74 kB
+#25 2.890 dist/assets/step5-mobile-fd-opened-gap-D5Iin9mc.png                            40.30 kB
+#25 2.890 dist/assets/task3.4-en-home-BGhwl2Ud.png                                       40.54 kB
+#25 2.890 dist/assets/web-en-home-C4ZHigPO.png                                           40.75 kB
+#25 2.890 dist/assets/task4.2-en-home-DHQlues7.png                                       41.28 kB
+#25 2.890 dist/assets/gap-report-20261110-093911-c5o2PPTO.json                           41.50 kB │ gzip:   4.06 kB
+#25 2.890 dist/assets/gap-report-20261110-073749-DFyVgVWb.json                           41.52 kB │ gzip:   4.03 kB
+#25 2.890 dist/assets/task3.4-zh-loan-apply-CPOQROwc.png                                 41.92 kB
+#25 2.890 dist/assets/v0.0.1-Part02-PhaseP3-Integration-Deploy-CEHi3UOR.md               42.56 kB
+#25 2.890 dist/assets/web-02-home-REg4ynIy.png                                           42.91 kB
+#25 2.890 dist/assets/web-02-home-BZSxaZBL.png                                           43.44 kB
+#25 2.890 dist/assets/bonus-mobile-switch-en-data-follows-vf0gkDH9.png                   43.93 kB
+#25 2.890 dist/assets/task4.2-zh-home-B72zIK4z.png                                       43.96 kB
+#25 2.890 dist/assets/evidence-inline-materials-zh-cn-C4VWWKgP.png                       45.02 kB
+#25 2.890 dist/assets/web-zh-home-CoHQM3fS.png                                           45.19 kB
+#25 2.890 dist/assets/empty-state-zh-eBxMYSJy.png                                        45.22 kB
+#25 2.890 dist/assets/task3.4-zh-home-qK_4o0kX.png                                       48.06 kB
+#25 2.890 dist/assets/v0.0.1-Part02-PhaseP0-Platform-Prod-Form-0g4LMPC2.md               48.33 kB
+#25 2.890 dist/assets/v0.0.1-Part02-PhaseP2-Gateway-Backend-D03D7lgi.md                  48.59 kB
+#25 2.890 dist/assets/loanops-en-CDwDBgtY.png                                            51.67 kB
+#25 2.890 dist/assets/timeline-part02-task-P2.4-en-us-BTU-BhOR.png                       56.98 kB
+#25 2.890 dist/assets/clients-list-en-CscGy1Hg.png                                       58.89 kB
+#25 2.890 dist/assets/loanops-zh-B3wC57eO.png                                            59.49 kB
+#25 2.890 dist/assets/bo-05-loan-ops-DhnGX0yV.png                                        59.57 kB
+#25 2.890 dist/assets/timeline-part03-task-5.5-zh-cn-C14Nfwgd.png                        62.35 kB
+#25 2.890 dist/assets/timeline-part02-zh-cn-C_7mDt7V.png                                 63.49 kB
+#25 2.890 dist/assets/layout-en-dropdown-open-C3EXr2MQ.png                               64.75 kB
+#25 2.890 dist/assets/welcome-toast-en-DGRn7ySH.png                                      64.79 kB
+#25 2.890 dist/assets/timeline-part02-task-P2.4-zh-cn-B5uNfKzn.png                       65.19 kB
+#25 2.890 dist/assets/clients-list-zh-C8uIAjNJ.png                                       65.95 kB
+#25 2.890 dist/assets/task2.2-walkthrough-regression-BEbvKJyg.png                        66.29 kB
+#25 2.890 dist/assets/evidence-index-zh-cn-DsBARvZ6.png                                  67.77 kB
+#25 2.890 dist/assets/step1-bo-login-clients-DglF65cn.png                                69.26 kB
+#25 2.890 dist/assets/reproduce-en-us-BipV930e.png                                       70.57 kB
+#25 2.890 dist/assets/planning-zh-cn-Da_BIbpJ.png                                        71.35 kB
+#25 2.890 dist/assets/timeline-sprint-zh-cn-DlRYulsY.png                                 71.83 kB
+#25 2.890 dist/assets/bo-04-identifier-restored-Doj6CYQD.png                             71.86 kB
+#25 2.890 dist/assets/bo-02-client-detail-CwCAXpwA.png                                   71.94 kB
+#25 2.890 dist/assets/welcome-toast-zh-CjQqXOgy.png                                      71.96 kB
+#25 2.890 dist/assets/bo-03-identifier-updated-d0OTB9KZ.png                              71.96 kB
+#25 2.890 dist/assets/layout-zh-dropdown-open-DX48SExr.png                               72.22 kB
+#25 2.890 dist/assets/evidence-zh-cn-DKixYKGG.png                                        72.38 kB
+#25 2.890 dist/assets/governance-zh-cn-DSrf-2g5.png                                      72.43 kB
+#25 2.890 dist/assets/reproduce-zh-cn-CENiRX-V.png                                       72.45 kB
+#25 2.890 dist/assets/step1-bo-client-detail-expired--nCiMXL4.png                        72.82 kB
+#25 2.890 dist/assets/task2.2-walkthrough-decouple-DdOM802Y.png                          72.87 kB
+#25 2.890 dist/assets/methodology-zh-cn-B8KdSfMK.png                                     73.14 kB
+#25 2.890 dist/assets/bo-02-client-list-XN9KdKIW.png                                     73.25 kB
+#25 2.890 dist/assets/decisions-en-us-RBN1nWDv.png                                       73.31 kB
+#25 2.890 dist/assets/evidence-en-us-C2FcM2wr.png                                        73.43 kB
+#25 2.890 dist/assets/task7.1-switched-zh-Ck606VvD.png                                   73.48 kB
+#25 2.890 dist/assets/timeline-en-us-CKAGCJt9.png                                        73.82 kB
+#25 2.890 dist/assets/planning-en-us-DEHH3NiT.png                                        74.10 kB
+#25 2.890 dist/assets/governance-en-us-84Nt3thx.png                                      74.21 kB
+#25 2.890 dist/assets/timeline-zh-cn-DtMFsTDi.png                                        74.35 kB
+#25 2.890 dist/assets/methodology-en-us-SOZqQQ6P.png                                     75.75 kB
+#25 2.890 dist/assets/decisions-zh-cn-lp2bVwHF.png                                       76.39 kB
+#25 2.890 dist/assets/timeline-part04-task-1.1-zh-cn-CuEwZoDq.png                        78.72 kB
+#25 2.890 dist/assets/metrics-en-us-DQqlqEZB.png                                         79.21 kB
+#25 2.890 dist/assets/web-05-transactions-BOYt10g2.png                                   79.60 kB
+#25 2.890 dist/assets/metrics-zh-cn-CAPSFW4-.png                                         80.54 kB
+#25 2.890 dist/assets/bo-01-login-DCzRdTH4.png                                           80.61 kB
+#25 2.890 dist/assets/bo-05-loan-ops-D0wWv4rU.png                                        85.63 kB
+#25 2.891 dist/assets/android-03-transfer-fyPtH57U.png                                   89.67 kB
+#25 2.891 dist/assets/android-03-transfer-CsO-ga59.png                                   90.06 kB
+#25 2.891 dist/assets/step7-bo-identifier-fixed-valid-C25SHjv2.png                       90.91 kB
+#25 2.891 dist/assets/bo-03-client-detail-CDnC5UJV.png                                   92.25 kB
+#25 2.891 dist/assets/bo-04a-identifier-updated-PPAU8U4k.png                             92.86 kB
+#25 2.891 dist/assets/android-04-transactions-BVqcfEhf.png                               94.21 kB
+#25 2.891 dist/assets/android-01-login-BaeYE2nb.png                                      94.57 kB
+#25 2.891 dist/assets/bo-04b-identifier-edit-success-DGupVCJR.png                        95.10 kB
+#25 2.891 dist/assets/client-detail-en-Cenc_jCl.png                                      95.34 kB
+#25 2.891 dist/assets/timeline-part03-phase7-zh-cn-CwggZT-k.png                          97.72 kB
+#25 2.891 dist/assets/tap-submit-0-CpHLChyw.png                                         100.49 kB
+#25 2.891 dist/assets/client-detail-zh-CazF3lGD.png                                     101.94 kB
+#25 2.891 dist/assets/journey-en-us-DWlVtjM3.png                                        102.06 kB
+#25 2.891 dist/assets/final-release-first-frame-CqOAgeEJ.png                            103.14 kB
+#25 2.891 dist/assets/chkA-DvS7BHTC.png                                                 103.36 kB
+#25 2.891 dist/assets/ime-0-Cn9fvKMV.png                                                103.50 kB
+#25 2.891 dist/assets/walk-02-home-2-BtmesWHd.png                                       103.50 kB
+#25 2.891 dist/assets/walk-02-home-1-CMN_DvmM.png                                       103.60 kB
+#25 2.891 dist/assets/tap-submit-4-Dq8FSrBx.png                                         103.63 kB
+#25 2.891 dist/assets/tap-submit-7-CO8JwSaq.png                                         103.68 kB
+#25 2.891 dist/assets/burst-1-BA_7jj21.png                                              104.27 kB
+#25 2.891 dist/assets/final-02-0-BuH27_vY.png                                           104.49 kB
+#25 2.891 dist/assets/02-home-D0qVwoqQ.png                                              104.60 kB
+#25 2.891 dist/assets/pre-submit-DlGuy3c7.png                                           104.83 kB
+#25 2.891 dist/assets/inet-0-BUBztYkm.png                                               105.18 kB
+#25 2.891 dist/assets/inet-4-DiDO0aFh.png                                               105.19 kB
+#25 2.891 dist/assets/inet-5-BHKXTSw_.png                                               105.28 kB
+#25 2.891 dist/assets/dnsfix2-4-60fCz0M-.png                                            105.29 kB
+#25 2.891 dist/assets/dnsfix2-0-DnrjY-vw.png                                            105.39 kB
+#25 2.891 dist/assets/dnsfix-03-result-1-D1cZGd0B.png                                   105.52 kB
+#25 2.891 dist/assets/to-03-4-BrqIc8Tf.png                                              105.67 kB
+#25 2.891 dist/assets/to-03-9-Cf6xbRWk.png                                              105.69 kB
+#25 2.891 dist/assets/inet-02-3-B9ybbB0v.png                                            106.10 kB
+#25 2.891 dist/assets/retry2-1-Bvb7aqXh.png                                             106.12 kB
+#25 2.891 dist/assets/01-login-BrmwO9uP.png                                             106.13 kB
+#25 2.891 dist/assets/reveal-CH-zBEVS.png                                               106.15 kB
+#25 2.891 dist/assets/dnsfix-03-result-2-DiUt4UUZ.png                                   106.22 kB
+#25 2.891 dist/assets/dnsfix-03-result-6-B5lNcDd3.png                                   106.29 kB
+#25 2.891 dist/assets/to-03-0-C3ednYtN.png                                              106.59 kB
+#25 2.891 dist/assets/txt-02-0-BGEaxjCI.png                                             106.65 kB
+#25 2.891 dist/assets/inet-02-0-DLYSTs5f.png                                            106.66 kB
+#25 2.891 dist/assets/retry-0-CZLQdlkU.png                                              106.72 kB
+#25 2.891 dist/assets/01-filled-B-zJ3Lfu.png                                            107.32 kB
+#25 2.891 dist/assets/journey-zh-cn-DKYyVAs0.png                                        108.02 kB
+#25 2.891 dist/assets/evidence-adr010-zh-cn-t8Pj3K0p.png                                108.08 kB
+#25 2.891 dist/assets/walk-02-home-0-uuB31Phi.png                                       116.75 kB
+#25 2.891 dist/assets/tap-submit-3-CkWhq5O6.png                                         116.75 kB
+#25 2.891 dist/assets/tap-submit-1-Bh7OaUhi.png                                         116.77 kB
+#25 2.891 dist/assets/burst-0-BujiU7jH.png                                              117.39 kB
+#25 2.891 dist/assets/dnsfix-03-result-0-D_puseJK.png                                   118.60 kB
+#25 2.891 dist/assets/evidence-doc-part02-phaseP2-zh-cn-DyeJa9cx.png                    118.68 kB
+#25 2.891 dist/assets/retry2-0-C1kWSLgf.png                                             119.15 kB
+#25 2.891 dist/assets/android-01-login-8AbC75Ne.png                                     127.75 kB
+#25 2.891 dist/assets/evidence-doc-part04-phase4-zh-cn-DJL1BAOo.png                     132.00 kB
+#25 2.891 dist/assets/chkF2-B3wcP_Bn.png                                                137.81 kB
+#25 2.891 dist/assets/chk-filled2-Bd0pn82P.png                                          139.89 kB
+#25 2.891 dist/assets/chk-filled-DaJkwxZw.png                                           140.73 kB
+#25 2.891 dist/assets/android-02-home-SkaydVav.png                                      141.79 kB
+#25 2.891 dist/assets/ios-04-transactions-BwUv2WgV.png                                  143.39 kB
+#25 2.891 dist/assets/ios-03-transfer-DB-YwFLp.png                                      143.54 kB
+#25 2.891 dist/assets/timeline-part03-phase5-zh-cn-D0dTw1-O.png                         146.11 kB
+#25 2.891 dist/assets/chkB-Dv9zFZjg.png                                                 146.25 kB
+#25 2.891 dist/assets/chkD2-DbDQTpgE.png                                                146.64 kB
+#25 2.891 dist/assets/paste-01-VcJcQqCy.png                                             147.38 kB
+#25 2.891 dist/assets/walk-01-login-filled-GNkrI3eb.png                                 148.39 kB
+#25 2.891 dist/assets/inet-01-filled-BGFF1jnl.png                                       148.43 kB
+#25 2.891 dist/assets/chkE-SvUDi7MF.png                                                 148.66 kB
+#25 2.891 dist/assets/chkF-DiD1rqoF.png                                                 148.75 kB
+#25 2.891 dist/assets/final-01-filled-Dh1Z1AsN.png                                      149.78 kB
+#25 2.891 dist/assets/dnsfix-02-filled-Dw8hLG5F.png                                     149.84 kB
+#25 2.891 dist/assets/txt-01-filled-BJqzkj5h.png                                        150.52 kB
+#25 2.891 dist/assets/timeline-part02-phaseP2-zh-cn-DvWPkCRR.png                        150.97 kB
+#25 2.891 dist/assets/journey-zh-cn-honesty-C61m3zIM.png                                151.43 kB
+#25 2.891 dist/assets/android-02-home-5DuFQIF7.png                                      151.43 kB
+#25 2.891 dist/assets/ios-01-login-B88b28UX.png                                         152.79 kB
+#25 2.891 dist/assets/android-04-transfer-success-CIsAfBaA.png                          154.93 kB
+#25 2.891 dist/assets/chkC-CuO59l_Y.png                                                 157.71 kB
+#25 2.891 dist/assets/chkD-CNlLNukR.png                                                 157.80 kB
+#25 2.891 dist/assets/dnsfix-01-DOTp7vki.png                                            158.10 kB
+#25 2.891 dist/assets/chk-username-BW5eqeBb.png                                         159.51 kB
+#25 2.891 dist/assets/ios-03-transfer-BdmzOf1b.png                                      160.03 kB
+#25 2.891 dist/assets/ios-03-profile-ByDE2TMQ.png                                       164.22 kB
+#25 2.891 dist/assets/decisions-D4-revision-context-part03-phase5-zh-cn-BL2qHTX0.png    173.64 kB
+#25 2.891 dist/assets/ios-01-login-DNPjmZ-n.png                                         174.29 kB
+#25 2.891 dist/assets/ios-04-profile-zh-switched-C7UZixM9.png                           174.59 kB
+#25 2.891 dist/assets/ios-04-home-zh-switched-_RifpUGi.png                              174.59 kB
+#25 2.891 dist/assets/site-01-home-C_ruky7X.png                                         179.35 kB
+#25 2.891 dist/assets/ios-04-home-en-switched-Cmgzj6YR.png                              191.29 kB
+#25 2.891 dist/assets/ios-02-home-initial-CovO-Nua.png                                  197.15 kB
+#25 2.891 dist/assets/ios-02-home-BEytYWZs.png                                          197.32 kB
+#25 2.892 dist/assets/ios-05-home-zh-switched-Dd4oDAJZ.png                              198.60 kB
+#25 2.892 dist/assets/home-en-us-BYwVChfq.png                                           199.69 kB
+#25 2.892 dist/assets/home-zh-cn-BECY033N.png                                           209.83 kB
+#25 2.892 dist/assets/ios-02-home-7qWJgdBb.png                                          229.34 kB
+#25 2.892 dist/assets/gap-report-20261109-131638-BBMVTmW_.json                          238.43 kB │ gzip:  10.20 kB
+#25 2.892 dist/assets/gap-report-20261109-131702-LI77a-7C.json                          244.50 kB │ gzip:  10.36 kB
+#25 2.892 dist/assets/p1.5-three-terminal-DvaKAZVA.png                                  268.56 kB
+#25 2.892 dist/assets/android-05-transactions-BgG-_uje.png                              277.77 kB
+#25 2.892 dist/assets/ios-04-transactions-BVoMnzX6.png                                  334.43 kB
+#25 2.892 dist/assets/decisions-adr010-zh-cn-D9H3e9kY.png                               489.87 kB
+#25 2.892 dist/assets/decisions-adr010-en-us-Bzr698r0.png                               518.98 kB
+#25 2.892 dist/assets/timeline-evidence-taskP2.4-file-zh-cn-Ba_dIH6w.png                602.70 kB
+#25 2.892 dist/assets/decisions-timeline-zh-cn-DaYmY4G4.png                           1,072.48 kB
+#25 2.892 dist/assets/decisions-timeline-en-us-DmjgvxLd.png                           1,104.98 kB
+#25 2.892 dist/assets/android-00-home-icon-BSJuuCCc.png                               1,381.69 kB
+#25 2.892 dist/assets/ios-00-home-icon-BZALcLQD.png                                   3,356.32 kB
+#25 2.892 dist/assets/index-CuQXenmA.css                                                 18.14 kB │ gzip:   4.38 kB
+#25 2.892 dist/assets/chkA-C_s2kvfc.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkB-Dy5Z8lQE.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkC-RYuUqM5N.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkD-CoB6257A.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkE-ww6bkZLU.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkF-CKUHkgr8.js                                                    0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkD2-Bs1HbRg0.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/chkF2-BIOewhC-.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-0-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-1-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-2-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-3-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-4-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/ime-5-C-lwwL0v.js                                                   0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-0-DuokOjH-.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-1-DuokOjH-.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-2-DuokOjH-.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-3-DuokOjH-.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-4-BVv8PFXm.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/inet-5-xEudlA_p.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/reveal-BInnJ9_P.js                                                  0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/02-home-BmfD41N3.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/burst-0-BXmDS4SI.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/burst-1-BTT4ZdIk.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/burst-2-BTT4ZdIk.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/burst-3-BTT4ZdIk.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/burst-4-BTT4ZdIk.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-0-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-1-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-2-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-3-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-4-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry-5-CkA856Au.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-0-_FmHzZUK.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-1-_FmHzZUK.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-2-_FmHzZUK.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-3-_FmHzZUK.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-4-DtdmeszH.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-5-DtdmeszH.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-6-DtdmeszH.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-7-DtdmeszH.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-8-DtdmeszH.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/to-03-9-h_AEKl3c.js                                                 0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/bo-01-login-D9o-m6pS.js                                             0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/01-login-BiV6eFze.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/paste-01-CO-6X5XF.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/paste-02-CO-6X5XF.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry2-0-BMbgHgZE.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry2-1-DYRXwQYg.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.892 dist/assets/retry2-2-DYRXwQYg.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/retry2-3-DYRXwQYg.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/retry2-4-DYRXwQYg.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/retry2-5-DYRXwQYg.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-0-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-1-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-2-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-3-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-4-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/txt-02-5-TBlVshsa.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-invalid-fr-fallback-p5XwHWf5.js                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-stored-en-us-SrnfuTO6.js                                      0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-stored-zh-cn-D9o-m6pS.js                                      0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-en-no-storage-system-follow-SrnfuTO6.js                       0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-en-storage-priority-SrnfuTO6.js                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-zh-system-follow-D9o-m6pS.js                                  0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-en-CQYT_jgv.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/login-zh-D9o-m6pS.js                                                0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/01-filled-BJCJVx3C.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix-01-CtS6lArX.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-0-CAsl97lM.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-1-CAsl97lM.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-2-CAsl97lM.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-3-CAsl97lM.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-4-xd4voK_M.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-5-xd4voK_M.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-6-xd4voK_M.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/dnsfix2-7-xd4voK_M.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-0-CuMIqgWk.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-1-CuMIqgWk.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-2-CuMIqgWk.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-3-DlZhRsNw.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-4-DlZhRsNw.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-5-DlZhRsNw.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-6-DlZhRsNw.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/inet-02-7-DlZhRsNw.js                                               0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/chk-filled-f5Vm8nCW.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-0-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-1-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-2-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-3-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-4-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-5-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-6-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/final-02-7-DxwkpcG9.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/pre-submit-D5erOxia.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/loanops-en-CqfUTxEO.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/loanops-zh-BCkAM2wP.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/loanops-money-en-D6yjfSpp.js                                        0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/loanops-money-zh-Cf7iJ0pi.js                                        0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/home-en-us-DFgtoWls.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/home-zh-cn-OMoJmziW.js                                              0.06 kB │ gzip:   0.08 kB
+#25 2.893 dist/assets/ios-02-home-DfKnwr5i.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.893 dist/assets/web-02-home-e3FxWgmp.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.893 dist/assets/bo-01-login-B3YhIH1f.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.893 dist/assets/ios-02-home-SBo-QDXx.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-02-home-DuCzt3nA.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/chk-filled2-D5gESGu6.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-en-home-C5KRGQOW.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-zh-home-C5gyc-Uw.js                                             0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-01-login-juapKHs-.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/site-01-home-D5rytA18.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-01-login-DmijkkVh.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-05-loans-BjhfIrgR.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-01-login-DAh3rSJ0.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-01-login-CdeMmB6L.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/chk-username-Ck9pd14X.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-0-D70c6aoT.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-1-BjQ80_Ea.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-2-BjQ80_Ea.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-3-DFzG77Sa.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-4-CzKtmY_7.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-5-CzKtmY_7.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-6-CzKtmY_7.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/tap-submit-7-DMB-gIJR.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-01-login-l3Hst4Lk.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-zh-login-B72HoZYH.js                                            0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/txt-01-filled-C25cmu9j.js                                           0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/journey-en-us-CBs3gYCU.js                                           0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/journey-zh-cn--bReI4kh.js                                           0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/metrics-en-us-CgBhckzz.js                                           0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/metrics-zh-cn-Bp30o9xf.js                                           0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/bo-05-loan-ops-BwY6SITJ.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-07-profile-DoB5WDQh.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/bo-05-loan-ops-mKJtjsYg.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/inet-01-filled-DzYis_rj.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-0-BLgpWU9Q.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-1-BncSso68.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-2-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-3-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-4-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-5-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-6-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/walk-02-home-7-Dk1O_h1B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/empty-state-en-CmrKUyPj.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/empty-state-zh-689sC0TQ.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-03-profile-CAYWiUDR.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-en-profile-apURyHuF.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/evidence-en-us-DTwNnrmA.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/evidence-zh-cn-XnjbI3Zi.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/planning-en-us-DXXawTEL.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/planning-zh-cn-D9LTP4D2.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/timeline-en-us-B9NJC05B.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/timeline-zh-cn-CbzVlqLo.js                                          0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/android-02-home-Cixpq8cx.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-03-transfer-BhWKRt5l.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-03-transfer-BFVSI4PM.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/android-02-home-BNxi2UsT.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-03-transfer-y9fn6cx4.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-03-transfer-B1MDOJB3.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/final-01-filled-OI-shI8N.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/clients-list-en-BSAbSGgx.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/clients-list-zh-DOenlMhI.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.4-en-home-DcWExSHa.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.4-zh-home-gMG0VFaF.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task4.2-en-home-BpWyiAFp.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task4.2-zh-home-BvmapKU1.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/step2-3-mobile-login-home-B5UwpIwW.js                               0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/decisions-en-us-DeY_-oSt.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/decisions-zh-cn-CNlx-zAK.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/reproduce-en-us-D0n0xDMf.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/reproduce-zh-cn-DO50z3l3.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/android-01-login-BP2IDRNS.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/ios-00-home-icon-BT4QyMQN.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/android-01-login-BRLK8fs5.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/dnsfix-02-filled-CfyAYw29.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/client-detail-en-Io9GjM25.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/client-detail-zh-DQ2gP1gW.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/welcome-toast-en-BQRNySrf.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/welcome-toast-zh-CewuBKWD.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.4-en-loans-j2ZpKN3q.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.4-en-login-DMp6Uyul.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.4-zh-loans-Bks_Dj71.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/governance-en-us-B9X2jjCG.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/governance-zh-cn-DGkvw0l9.js                                        0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/bo-02-client-list-DkfOzZDp.js                                       0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.3-en-switched-BcTHN38C.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.3-zh-before-BWBQ5Rc2.js                                       0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.3-zh-restored-BcTHN38C.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task3.3-zh-switched-BcTHN38C.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task4.2-en-profile-BcTHN38C.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/task4.2-zh-profile-BcTHN38C.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/step3-mobile-profile-identity-expired-BWBQ5Rc2.js                   0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/methodology-en-us-CZ9PB79b.js                                       0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/methodology-zh-cn-B2B1b_nb.js                                       0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-04b-fd-success-BboR1QvX.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/web-05b-loan-apply-ADu65viK.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/dnsfix-03-result-0-zla_X_eE.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/dnsfix-03-result-1-qvEGWB7f.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/dnsfix-03-result-2-BOwSBTf8.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.894 dist/assets/dnsfix-03-result-3-BOwSBTf8.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/dnsfix-03-result-4-BOwSBTf8.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/dnsfix-03-result-5-BOwSBTf8.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/dnsfix-03-result-6-CgEADzeE.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/dnsfix-03-result-7-CgEADzeE.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task3.4-en-profile-DJ2l2I8W.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task3.4-zh-profile-12vNjqSI.js                                      0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/android-03-transfer-em6LXyYy.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/bo-03-client-detail-Dz8IRgRi.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/ios-04-transactions-Q3LOPhbe.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/p1.5-three-terminal-DvHUidIR.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/web-06-transactions-5b6hWUIl.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/android-03-transfer-BA80_5w6.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/bo-02-client-detail-DMPYoqAB.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/ios-04-transactions-DPzUrf0i.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/web-05-transactions-BQ3554Rx.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/login-en-validation-BE0Y5VpD.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/login-zh-validation-CpIR48IN.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task3.4-en-transfer-CWMSxeDJ.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task3.4-zh-transfer-DQXRuJZ9.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/ios-02-home-initial-BCVqa4li.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task7.1-switched-zh-Bw3PC36c.js                                     0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/android-00-home-icon-DV8SRYiG.js                                    0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/web-04-fixed-deposit-BWvBp_gz.js                                    0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/walk-01-login-filled-DEyoJNv1.js                                    0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/evidence-index-zh-cn-Bqw_0QhR.js                                    0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/baseline-commit-CJjQfx5z.js                                         0.07 kB │ gzip:   0.09 kB
+#25 2.895 dist/assets/task3.4-zh-loan-apply-gSpuuwI2.js                                   0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/evidence-adr010-zh-cn-B9Dm2ZLQ.js                                   0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/journey-zh-cn-honesty-BcxzxSg1.js                                   0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part02-zh-cn-C-a5YxfH.js                                   0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-sprint-zh-cn-0NSeDSKC.js                                   0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/web-05c-loan-submitted-RSTeqLNO.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.1-login-error-en-B9Ftqhld.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.1-login-error-zh-Ap_T_jkX.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-en-login-error-BWn2JfDi.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-zh-login-error-D4fW3G65.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step1-bo-login-clients-CB6Ritt4.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/decisions-adr010-en-us-Dv5c1O-u.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/decisions-adr010-zh-cn-CPksYzDd.js                                  0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/android-04-transactions-BrPSOeyc.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/android-05-transactions-CtVvk8o0.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/web-04-transfer-success-w3VzJZTy.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/layout-en-dropdown-open-LleOHS09.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/layout-zh-dropdown-open-Bm0rEhs-.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-en-transactions-D-gxCPqV.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-zh-transactions-D_Xroj00.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task4.2-en-transactions-Dg7A4AN4.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task4.2-zh-transactions-B3wbLE0d.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/ios-04-home-en-switched-DDNLBAQs.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/ios-04-home-zh-switched-Co_07X0W.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/ios-05-home-zh-switched-x6KffQeq.js                                 0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/web-03b-transfer-success-D_LuDQsv.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/bo-03-identifier-updated-CRUz3kn2.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-en-fixed-deposit-v8iZ1WEy.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-zh-fd-validation-Cu8GC4xk.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-zh-fixed-deposit-BFgp7En4.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/decisions-timeline-en-us-D_4JMtj6.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/decisions-timeline-zh-cn-CMxpMXES.js                                0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/bo-04a-identifier-updated-xGDi9l28.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/bo-04-identifier-restored-Cn1rZnce.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/final-release-first-frame-D9wc-a0D.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task7.2-switched-en-reset-DQ9EI5Id.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step6-mobile-transactions-DgFFPMGD.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/bo-online-english-clients-C5E0BQxS.js                               0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.1-client-notfound-en-CMAd5dir.js                              0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.1-client-notfound-zh-CIykT6CD.js                              0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/ios-04-profile-zh-switched-CQz6YUBj.js                              0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step5-mobile-fd-opened-gap-DymkFZCO.js                              0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/android-04-transfer-success-_IaWsy_9.js                             0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.2-walkthrough-decouple-gMH02-V7.js                            0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part03-phase5-zh-cn-VV5WjHgH.js                            0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part03-phase7-zh-cn-BHQiyGec.js                            0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part02-phaseP2-zh-cn-DuDM0mPh.js                           0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/bo-04b-identifier-edit-success-CxG8dwU6.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task2.2-walkthrough-regression-CK7_wr9s.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/task3.4-zh-transfer-validation-N3Lzpqsg.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step1-bo-client-detail-expired-l5YUfN0p.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step5b-mobile-loan-applied-gap-DJfm6bLh.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part03-task-5.5-zh-cn-BtP0O58U.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part04-task-1.1-zh-cn-DJJ76dvD.js                          0.08 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step7-bo-identifier-fixed-valid-81aCDKjC.js                         0.09 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/evidence-inline-materials-zh-cn-DnaKilv2.js                         0.09 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/timeline-part02-task-P2.4-en-us-uybnTL_J.js                         0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/timeline-part02-task-P2.4-zh-cn-D3Ft0dNI.js                         0.09 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/evidence-doc-part04-phase4-zh-cn-CazoBfb8.js                        0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/step4-mobile-transfer-success-gap-C8_ZUYmp.js                       0.09 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/evidence-doc-part02-phaseP2-zh-cn-24bnNJcF.js                       0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/bonus-mobile-switch-en-data-follows-3e9nJ7Nz.js                     0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/step8-mobile-transactions-new-entry-DP3-QUqv.js                     0.09 kB │ gzip:   0.10 kB
+#25 2.895 dist/assets/step8-mobile-transfer-again-success-BfTu-Uu_.js                     0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/timeline-evidence-taskP2.4-file-zh-cn-ilSgUQq1.js                   0.09 kB │ gzip:   0.11 kB
+#25 2.895 dist/assets/decisions-D4-revision-context-part03-phase5-zh-cn-D9peNZpW.js       0.10 kB │ gzip:   0.12 kB
+#25 2.895 dist/assets/p3-04-CJ5FeMvr.js                                                   0.39 kB │ gzip:   0.23 kB
+#25 2.895 dist/assets/task4.1-structure-check-DNppNVPG.js                                 0.42 kB │ gzip:   0.16 kB
+#25 2.895 dist/assets/task3.1-arb-keys-Cb_5IZAs.js                                        0.53 kB │ gzip:   0.23 kB
+#25 2.895 dist/assets/taskP0.5-wiring-evidence-4h5m7ePc.js                                0.61 kB │ gzip:   0.33 kB
+#25 2.895 dist/assets/task2.2-structure-check-Bece_5Gz.js                                 0.73 kB │ gzip:   0.47 kB
+#25 2.895 dist/assets/p3-01-Djw7xoPU.js                                                   0.77 kB │ gzip:   0.33 kB
+#25 2.895 dist/assets/p3-03-BV4Ef9IV.js                                                   0.85 kB │ gzip:   0.38 kB
+#25 2.896 dist/assets/login-zh-CV7SOOmi.js                                                0.85 kB │ gzip:   0.42 kB
+#25 2.896 dist/assets/v632-login-init-CjmsateO.js                                         0.85 kB │ gzip:   0.38 kB
+#25 2.896 dist/assets/v632-login-zh-_kVEd7Yc.js                                           0.86 kB │ gzip:   0.43 kB
+#25 2.896 dist/assets/v163-zh-login-B-HH9cTI.js                                           0.87 kB │ gzip:   0.43 kB
+#25 2.896 dist/assets/v164-en-login-DHQRc6yF.js                                           0.91 kB │ gzip:   0.38 kB
+#25 2.896 dist/assets/task3.4-flutter-run-BcHeoZhX.js                                     0.93 kB │ gzip:   0.51 kB
+#25 2.896 dist/assets/flutter-run-DnViMDBO.js                                             1.04 kB │ gzip:   0.54 kB
+#25 2.896 dist/assets/p3-02-BbWi-Rzf.js                                                   1.06 kB │ gzip:   0.44 kB
+#25 2.896 dist/assets/p3-chk-BapnRTyM.js                                                  1.07 kB │ gzip:   0.45 kB
+#25 2.896 dist/assets/v163-zh-login-validation-C76L875L.js                                1.08 kB │ gzip:   0.48 kB
+#25 2.896 dist/assets/v632-login-err-en-CXoZXxqk.js                                       1.09 kB │ gzip:   0.45 kB
+#25 2.896 dist/assets/v632-clients-zh-DFIXgMpu.js                                         1.11 kB │ gzip:   0.42 kB
+#25 2.896 dist/assets/v632-login-err-zh-1wyTP5SY.js                                       1.11 kB │ gzip:   0.50 kB
+#25 2.896 dist/assets/v164-en-validation-7i9tttjj.js                                      1.13 kB │ gzip:   0.44 kB
+#25 2.896 dist/assets/task5.3-boundary-check-DPrZvcop.js                                  1.20 kB │ gzip:   0.74 kB
+#25 2.896 dist/assets/v632-zh-switched-D0RH2Rux.js                                        1.24 kB │ gzip:   0.49 kB
+#25 2.896 dist/assets/taskP0.1-war-stack-evidence-DFcycxIb.js                             1.25 kB │ gzip:   0.86 kB
+#25 2.896 dist/assets/task2.2-walkthrough-decouple-DDjQcjXI.js                            1.29 kB │ gzip:   0.90 kB
+#25 2.896 dist/assets/README-DLg6WxxZ.js                                                  1.33 kB │ gzip:   0.94 kB
+#25 2.896 dist/assets/v632-usermenu-Dmx9cwsI.js                                           1.36 kB │ gzip:   0.52 kB
+#25 2.896 dist/assets/task2.2-walkthrough-regression-BDEIo7nr.js                          1.38 kB │ gzip:   0.91 kB
+#25 2.896 dist/assets/e2e-first-run-CoeQYJb4.js                                           1.42 kB │ gzip:   0.84 kB
+#25 2.896 dist/assets/v632-999-en-CVDLNek0.js                                             1.45 kB │ gzip:   0.49 kB
+#25 2.896 dist/assets/v632-999-zh-BvQbsnQo.js                                             1.46 kB │ gzip:   0.52 kB
+#25 2.896 dist/assets/v0.0.1-Part01-Phase0-Results-BgajnHHm.js                            1.56 kB │ gzip:   1.13 kB
+#25 2.896 dist/assets/payments-Dmje2Ql0.js                                                1.66 kB │ gzip:   1.09 kB
+#25 2.896 dist/assets/build-v4.1.1-Dw3ObV1C.js                                            1.68 kB │ gzip:   0.66 kB
+#25 2.896 dist/assets/003-postgresql-baseline-DJWWybsk.js                                 1.76 kB │ gzip:   1.23 kB
+#25 2.896 dist/assets/task2.1-walkthrough-BoO3457u.js                                     1.77 kB │ gzip:   1.05 kB
+#25 2.896 dist/assets/observability-DUbWus72.js                                           1.82 kB │ gzip:   1.29 kB
+#25 2.896 dist/assets/regulatory-reporting-cBi_1TTI.js                                    1.85 kB │ gzip:   1.19 kB
+#25 2.896 dist/assets/001-no-rewrite-RAIc2a8n.js                                          1.87 kB │ gzip:   1.35 kB
+#25 2.896 dist/assets/task3.4-arb-keys-Cb1K7AGo.js                                        2.10 kB │ gzip:   1.01 kB
+#25 2.896 dist/assets/positioning-B8rTAsx-.js                                             2.12 kB │ gzip:   1.54 kB
+#25 2.896 dist/assets/p3-05-DFezOJjv.js                                                   2.25 kB │ gzip:   0.62 kB
+#25 2.896 dist/assets/task7.1-walkthrough-CLFk_KvH.js                                     2.26 kB │ gzip:   1.46 kB
+#25 2.896 dist/assets/security-compliance-DDB4pJSD.js                                     2.28 kB │ gzip:   1.57 kB
+#25 2.896 dist/assets/v632-empty-en2-o_LnNkEY.js                                          2.35 kB │ gzip:   0.83 kB
+#25 2.896 dist/assets/README-JEqayCNg.js                                                  2.38 kB │ gzip:   1.55 kB
+#25 2.896 dist/assets/task1.7-walkthrough-BW1P7ClA.js                                     2.39 kB │ gzip:   1.48 kB
+#25 2.896 dist/assets/task1.5-walkthrough-Fn816yJG.js                                     2.41 kB │ gzip:   1.51 kB
+#25 2.896 dist/assets/task6.3-archive-index-B921tvRL.js                                   2.41 kB │ gzip:   1.42 kB
+#25 2.896 dist/assets/v153-zh-empty-C1Bc1sW0.js                                           2.42 kB │ gzip:   0.90 kB
+#25 2.896 dist/assets/personas-BkNse7gK.js                                                2.45 kB │ gzip:   1.49 kB
+#25 2.896 dist/assets/product-lines-BEI66vuq.js                                           2.47 kB │ gzip:   1.42 kB
+#25 2.896 dist/assets/004-multi-tenancy-D3c012Er.js                                       2.47 kB │ gzip:   1.58 kB
+#25 2.896 dist/assets/task7.2-walkthrough-BijC5ZHk.js                                     2.48 kB │ gzip:   1.65 kB
+#25 2.896 dist/assets/005-frontend-strategy-Dk6iKrQO.js                                   2.52 kB │ gzip:   1.65 kB
+#25 2.896 dist/assets/006-product-lines-8py8IdMP.js                                       2.53 kB │ gzip:   1.62 kB
+#25 2.896 dist/assets/release-strategy-nkGlbmDi.js                                        2.54 kB │ gzip:   1.68 kB
+#25 2.896 dist/assets/datatables-vs-custom-tables-s7yxU_Py.js                             2.56 kB │ gzip:   1.58 kB
+#25 2.896 dist/assets/v153-en-empty-BTyzhlGG.js                                           2.56 kB │ gzip:   0.93 kB
+#25 2.896 dist/assets/taskP3.3-gap-evidence-BEz5EFAH.js                                   2.56 kB │ gzip:   1.62 kB
+#25 2.896 dist/assets/aos-integration-SpDMvAzQ.js                                         2.59 kB │ gzip:   1.63 kB
+#25 2.896 dist/assets/v632-empty-zh-BwVoa8R3.js                                           2.60 kB │ gzip:   0.91 kB
+#25 2.896 dist/assets/v163-zh-loanops-BPRyb6xD.js                                         2.64 kB │ gzip:   0.96 kB
+#25 2.896 dist/assets/v632-loanops-en-UX0DJTkK.js                                         2.66 kB │ gzip:   0.92 kB
+#25 2.896 dist/assets/v632-loanops-zh-f6YePNqM.js                                         2.68 kB │ gzip:   0.97 kB
+#25 2.896 dist/assets/v164-en-loanops-reload-DxP1iUEO.js                                  2.71 kB │ gzip:   0.94 kB
+#25 2.896 dist/assets/v173-en-loanops-BCDhsNZ5.js                                         2.77 kB │ gzip:   0.94 kB
+#25 2.896 dist/assets/event-bus-BEeb56hd.js                                               2.79 kB │ gzip:   1.72 kB
+#25 2.896 dist/assets/api-gateway-brZaf6io.js                                             2.82 kB │ gzip:   1.83 kB
+#25 2.896 dist/assets/v173-zh-loanops-Cg0cQk1C.js                                         2.89 kB │ gzip:   0.99 kB
+#25 2.896 dist/assets/task5.2-migration-evidence-Xgquh-cH.js                              2.91 kB │ gzip:   1.64 kB
+#25 2.896 dist/assets/002-custom-modules-LB7hvZwx.js                                      2.94 kB │ gzip:   1.92 kB
+#25 2.896 dist/assets/task5.1-migration-record-CMOKsGsP.js                                2.99 kB │ gzip:   1.77 kB
+#25 2.896 dist/assets/007-xinchuang-compatibility-CJrBqkP1.js                             3.03 kB │ gzip:   2.00 kB
+#25 2.896 dist/assets/report-Dzz5SRHA.js                                                  3.04 kB │ gzip:   1.92 kB
+#25 2.896 dist/assets/v0.0.1-Part01-Phase1-Results-UhCVa5M6.js                            3.08 kB │ gzip:   2.07 kB
+#25 2.896 dist/assets/taskP1.3-web-walkthrough-CHC9fB6k.js                                3.11 kB │ gzip:   2.02 kB
+#25 2.896 dist/assets/v163-zh-searched-aOIixtzl.js                                        3.12 kB │ gzip:   1.04 kB
+#25 2.896 dist/assets/localization-Z7F5noQN.js                                            3.13 kB │ gzip:   1.89 kB
+#25 2.896 dist/assets/task4.2-walkthrough-default-CO0jlClG.js                             3.16 kB │ gzip:   1.77 kB
+#25 2.896 dist/assets/task1.2-walkthrough-BuqCQhkM.js                                     3.35 kB │ gzip:   1.74 kB
+#25 2.896 dist/assets/008-channel-tech-stack-GV9DcPck.js                                  3.40 kB │ gzip:   2.20 kB
+#25 2.896 dist/assets/taskP1.1-toolchain--j3gQUAw.js                                      3.42 kB │ gzip:   1.95 kB
+#25 2.896 dist/assets/task1.3-walkthrough-BWVVBix7.js                                     3.56 kB │ gzip:   1.93 kB
+#25 2.896 dist/assets/taskP2.1-forward-evidence-CyB0qyzy.js                               3.60 kB │ gzip:   2.16 kB
+#25 2.896 dist/assets/roadmap-D-MDovlE.js                                                 3.61 kB │ gzip:   2.20 kB
+#25 2.896 dist/assets/v632-clients-en3-D6OVg4RN.js                                        3.75 kB │ gzip:   1.09 kB
+#25 2.896 dist/assets/task3.3-walkthrough-Cp94sFX5.js                                     3.77 kB │ gzip:   2.16 kB
+#25 2.896 dist/assets/v163-zh-clients-D97b5ZA3.js                                         3.82 kB │ gzip:   1.14 kB
+#25 2.896 dist/assets/v153-zh-initial-CtCzz72f.js                                         3.82 kB │ gzip:   1.14 kB
+#25 2.897 dist/assets/v632-clients-zh2-BWtpI96n.js                                        3.83 kB │ gzip:   1.15 kB
+#25 2.897 dist/assets/taskP1.4-bo-walkthrough-DBw9IRir.js                                 3.84 kB │ gzip:   2.48 kB
+#25 2.897 dist/assets/layout-zh-DXU1UEYD.js                                               3.85 kB │ gzip:   1.14 kB
+#25 2.897 dist/assets/v164-en-clients-DxXa3S-b.js                                         3.87 kB │ gzip:   1.11 kB
+#25 2.897 dist/assets/v632-empty-en-CP3F6bNH.js                                           3.87 kB │ gzip:   1.12 kB
+#25 2.897 dist/assets/v163-zh-search-DtZJWB4E.js                                          3.88 kB │ gzip:   1.14 kB
+#25 2.897 dist/assets/task1.6-walkthrough-zh-BvjAI6pl.js                                  3.88 kB │ gzip:   2.08 kB
+#25 2.897 dist/assets/savings-BJi9Z60k.js                                                 3.91 kB │ gzip:   2.28 kB
+#25 2.897 dist/assets/accounting-B8NvK_6-.js                                              3.96 kB │ gzip:   2.26 kB
+#25 2.897 dist/assets/task1.6-walkthrough-en-CkGGj83k.js                                  3.96 kB │ gzip:   2.23 kB
+#25 2.897 dist/assets/v0.0.1-Part01-Plan-zU7pKokS.js                                      3.96 kB │ gzip:   2.20 kB
+#25 2.897 dist/assets/v632-clients-en-CMI6c0b4.js                                         4.05 kB │ gzip:   1.14 kB
+#25 2.897 dist/assets/layout-en-CRR5uw2t.js                                               4.09 kB │ gzip:   1.19 kB
+#25 2.897 dist/assets/layout-zh-back-eZQLQC6O.js                                          4.09 kB │ gzip:   1.19 kB
+#25 2.897 dist/assets/v632-spa-zh-ukvT_Fxl.js                                             4.09 kB │ gzip:   1.18 kB
+#25 2.897 dist/assets/v632-zh-list-RIGnqQ-3.js                                            4.09 kB │ gzip:   1.17 kB
+#25 2.897 dist/assets/overview-DWHmeiL4.js                                                4.11 kB │ gzip:   1.92 kB
+#25 2.897 dist/assets/task5.4-frontmatter-report-moO3tVED.js                              4.13 kB │ gzip:   2.39 kB
+#25 2.897 dist/assets/v632-spa-en-DxZFToz4.js                                             4.14 kB │ gzip:   1.13 kB
+#25 2.897 dist/assets/v163-zh-logout-Dyqo9fLB.js                                          4.18 kB │ gzip:   1.21 kB
+#25 2.897 dist/assets/task3.5-journey-report-CiQsg7U-.js                                  4.18 kB │ gzip:   2.62 kB
+#25 2.897 dist/assets/v163-zh-welcome-DSc_pv-K.js                                         4.19 kB │ gzip:   1.20 kB
+#25 2.897 dist/assets/user-dropdown-B7n8H20T.js                                           4.21 kB │ gzip:   1.22 kB
+#25 2.897 dist/assets/v164-en-menu-CBo694Kd.js                                            4.21 kB │ gzip:   1.17 kB
+#25 2.897 dist/assets/v164-en-welcome-CJOrN0eG.js                                         4.23 kB │ gzip:   1.17 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Phase5-Generalization-Roadmap-CiGm_N2a.js             4.30 kB │ gzip:   2.51 kB
+#25 2.897 dist/assets/task1.4-walkthrough-BvNT-1xI.js                                     4.33 kB │ gzip:   2.25 kB
+#25 2.897 dist/assets/seed-poc-evidence-B70YmekD.js                                       4.44 kB │ gzip:   1.57 kB
+#25 2.897 dist/assets/task3.4-metrics-report-WVPcIWLh.js                                  4.52 kB │ gzip:   2.90 kB
+#25 2.897 dist/assets/009-flutter-mobile-D2sjLmEM.js                                      4.55 kB │ gzip:   2.70 kB
+#25 2.897 dist/assets/task3.4-walkthrough-zh-DGZRvEa9.js                                  4.72 kB │ gzip:   2.66 kB
+#25 2.897 dist/assets/task2.4-final-check-gMj1MZQm.js                                     4.74 kB │ gzip:   2.75 kB
+#25 2.897 dist/assets/task4.2-walkthrough-decouple-B_eHQHfO.js                            4.76 kB │ gzip:   2.71 kB
+#25 2.897 dist/assets/task3.4-walkthrough-en-Btr0awP1.js                                  4.76 kB │ gzip:   2.64 kB
+#25 2.897 dist/assets/010-repository-openness-CAlLp9EG.js                                 4.88 kB │ gzip:   2.76 kB
+#25 2.897 dist/assets/taskP2.7-evidence-lQejicvT.js                                       4.89 kB │ gzip:   2.65 kB
+#25 2.897 dist/assets/domain-concepts-CGmbh1W7.js                                         4.91 kB │ gzip:   2.95 kB
+#25 2.897 dist/assets/taskP0.4-server-deploy-BHJv-bpO.js                                  4.94 kB │ gzip:   2.86 kB
+#25 2.897 dist/assets/customization-strategy-CDDE5xmr.js                                  4.96 kB │ gzip:   2.67 kB
+#25 2.897 dist/assets/task6.1-filelist-CybbMQn9.js                                        5.01 kB │ gzip:   0.82 kB
+#25 2.897 dist/assets/taskP1.3-addendum-asdm-logo-MGuDiy_s.js                             5.14 kB │ gzip:   3.04 kB
+#25 2.897 dist/assets/task1.2-skeleton-report-Bt1N6KQW.js                                 5.22 kB │ gzip:   2.97 kB
+#25 2.897 dist/assets/taskP1.3-evidence-B9EW5cDp.js                                       5.25 kB │ gzip:   3.35 kB
+#25 2.897 dist/assets/zh-CN-CrxJt0x3.js                                                   5.33 kB │ gzip:   2.92 kB
+#25 2.897 dist/assets/seed-poc-server-evidence-CpmUqMKF.js                                5.42 kB │ gzip:   1.89 kB
+#25 2.897 dist/assets/api-surface-Bizy-NPI.js                                             5.46 kB │ gzip:   2.98 kB
+#25 2.897 dist/assets/lending-0UOr_cZs.js                                                 5.50 kB │ gzip:   3.03 kB
+#25 2.897 dist/assets/taskP1.2-tokens-evidence-DwQ3EQG6.js                                5.54 kB │ gzip:   2.82 kB
+#25 2.897 dist/assets/domain-ontology-DaE2Uvvi.js                                         5.59 kB │ gzip:   2.88 kB
+#25 2.897 dist/assets/task5.3-sweep-evidence-CDsinDdy.js                                  5.78 kB │ gzip:   3.00 kB
+#25 2.897 dist/assets/poc-journey-report-BjSs9HBJ.js                                      5.81 kB │ gzip:   3.22 kB
+#25 2.897 dist/assets/extension-points-CJ-RPaL1.js                                        5.86 kB │ gzip:   3.25 kB
+#25 2.897 dist/assets/environment-P-6o4l7Y.js                                             5.99 kB │ gzip:   3.63 kB
+#25 2.897 dist/assets/zh-CN-CA1e6-ll.js                                                   6.00 kB │ gzip:   3.48 kB
+#25 2.897 dist/assets/en-US-BUKaIn16.js                                                   6.07 kB │ gzip:   2.85 kB
+#25 2.897 dist/assets/fineract-codebase-CUDKAp79.js                                       6.25 kB │ gzip:   3.48 kB
+#25 2.897 dist/assets/task3.6-evidence-report-W6O5fRBs.js                                 6.34 kB │ gzip:   3.70 kB
+#25 2.897 dist/assets/task1.1-generator-report-DFnFunNV.js                                6.37 kB │ gzip:   3.78 kB
+#25 2.897 dist/assets/taskP1.5-review-gate-DsblJ13i.js                                    6.52 kB │ gzip:   2.98 kB
+#25 2.897 dist/assets/v0.0.1-Part02-KBank-POC-Journey-B3exobrB.js                         6.60 kB │ gzip:   3.48 kB
+#25 2.897 dist/assets/phase-1-validation-CJPL2a_b.js                                      6.63 kB │ gzip:   3.68 kB
+#25 2.897 dist/assets/task1.3-desensitize-report-CTYd2Xj-.js                              6.69 kB │ gzip:   3.62 kB
+#25 2.897 dist/assets/self-iteration-C_H6DLDm.js                                          6.70 kB │ gzip:   3.60 kB
+#25 2.897 dist/assets/task3.3-decisions-report-CmFJ-ae_.js                                6.72 kB │ gzip:   3.69 kB
+#25 2.897 dist/assets/taskP2.5-bo-evidence-COJaDNMW.js                                    6.75 kB │ gzip:   3.73 kB
+#25 2.897 dist/assets/taskP3.2-bo-e2e-paLAiolY.js                                         6.76 kB │ gzip:   3.72 kB
+#25 2.897 dist/assets/README-Cv-Olinh.js                                                  6.80 kB │ gzip:   3.40 kB
+#25 2.897 dist/assets/en-US-C5mk44vr.js                                                   6.91 kB │ gzip:   3.19 kB
+#25 2.897 dist/assets/taskP3.6-mobile-package-BmgT41nS.js                                 6.99 kB │ gzip:   4.02 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase7-Runtime-Data-Locale-BrOU6szV.js                7.13 kB │ gzip:   3.67 kB
+#25 2.897 dist/assets/task3.1-skeleton-report-BTqoy0QV.js                                 7.19 kB │ gzip:   4.14 kB
+#25 2.897 dist/assets/task3.2-timeline-report-DSWdVUwP.js                                 7.25 kB │ gzip:   4.15 kB
+#25 2.897 dist/assets/v632-detail-en-7yzB_DJP.js                                          7.26 kB │ gzip:   1.69 kB
+#25 2.897 dist/assets/harness-engineering-D-M_VYiD.js                                     7.27 kB │ gzip:   4.06 kB
+#25 2.897 dist/assets/taskP2.2-auth-evidence-CZQrbveK.js                                  7.29 kB │ gzip:   3.85 kB
+#25 2.897 dist/assets/v632-detail-zh-CmpPQjUF.js                                          7.44 kB │ gzip:   1.77 kB
+#25 2.897 dist/assets/v163-zh-detail-DRaijEow.js                                          7.46 kB │ gzip:   1.77 kB
+#25 2.897 dist/assets/v164-en-detail-C1MLQZMS.js                                          7.47 kB │ gzip:   1.75 kB
+#25 2.897 dist/assets/taskP3.5-prod-evidence-Co5y73Wa.js                                  7.62 kB │ gzip:   4.22 kB
+#25 2.897 dist/assets/task2.3-en-batch-CuTHJNr5.js                                        7.74 kB │ gzip:   4.12 kB
+#25 2.897 dist/assets/taskP3.1-mobile-e2e-CkDdgvDt.js                                     7.83 kB │ gzip:   4.08 kB
+#25 2.897 dist/assets/taskP2.4-transfer-evidence-Bl6P-rlE.js                              8.17 kB │ gzip:   4.28 kB
+#25 2.897 dist/assets/engineering-conventions-Dv6dKa9u.js                                 8.23 kB │ gzip:   4.77 kB
+#25 2.897 dist/assets/taskP3.4-fullstack-evidence-DV0uRckw.js                             8.24 kB │ gzip:   4.33 kB
+#25 2.897 dist/assets/context-engineering-6omCMit1.js                                     8.77 kB │ gzip:   4.81 kB
+#25 2.897 dist/assets/taskP2.3-customer-evidence-DWawgeEW.js                              9.10 kB │ gzip:   4.70 kB
+#25 2.897 dist/assets/website-i18n-fonts-DMnSJS2j.js                                      9.51 kB │ gzip:   5.16 kB
+#25 2.897 dist/assets/task2.1-ia-mapping-Cnrz2_Ms.js                                      9.54 kB │ gzip:   3.84 kB
+#25 2.897 dist/assets/taskP2.6-contract-evidence-BFjT7nM0.js                             10.13 kB │ gzip:   4.85 kB
+#25 2.897 dist/assets/capability-probe-C4biAa7u.js                                       12.57 kB │ gzip:   3.15 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Plan-C3Hv2H6Y.js                                     13.26 kB │ gzip:   6.31 kB
+#25 2.897 dist/assets/task6.3-final-walkthrough-D-7D165Z.js                              13.79 kB │ gzip:   6.96 kB
+#25 2.897 dist/assets/v0.0.1-Part02-Plan-0qVncChM.js                                     13.92 kB │ gzip:   6.52 kB
+#25 2.897 dist/assets/task6.1-bilingual-audit-C1xOLD8V.js                                14.10 kB │ gzip:   3.02 kB
+#25 2.897 dist/assets/mobile-banking-mvp-CR-v-vmu.js                                     15.23 kB │ gzip:   6.89 kB
+#25 2.897 dist/assets/report-1107093814-Bxv5Iwo2.js                                      15.72 kB │ gzip:   2.52 kB
+#25 2.897 dist/assets/report-1025094135-bGkJ72Ok.js                                      15.77 kB │ gzip:   2.55 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Phase4-Portal-Release-Bt5gDxM7.js                    16.11 kB │ gzip:   6.96 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Plan-TPk_bjxM.js                                     16.43 kB │ gzip:   8.27 kB
+#25 2.897 dist/assets/task5.3-ref-check-BHZQ-XrV.js                                      17.21 kB │ gzip:   2.16 kB
+#25 2.897 dist/assets/v0.0.1-Part02-PhaseP2-Test-Report-DQRcF1UD.js                      21.30 kB │ gzip:   9.59 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Phase2-Portal-Content-BI0i2Mzr.js                    21.71 kB │ gzip:   9.01 kB
+#25 2.897 dist/assets/gateway-report-20261110-073757-BYzXW44b.js                         25.45 kB │ gzip:   3.83 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase2-Backoffice-Errors-Data-JJRbUBTt.js            26.38 kB │ gzip:  10.84 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase4-Mobile-Fixtures-bH--sRGE.js                   27.30 kB │ gzip:  10.75 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase1-Backoffice-I18n-C6_-7X6N.js                   28.80 kB │ gzip:  11.09 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase3-Mobile-L10n-BzzdQJ4q.js                       30.17 kB │ gzip:  11.98 kB
+#25 2.897 dist/assets/task5.1-credential-scan-Crh13dkL.js                                31.13 kB │ gzip:   7.59 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Phase1-Data-Pipeline-LnvXSL0K.js                     32.38 kB │ gzip:  13.19 kB
+#25 2.897 dist/assets/v0.0.1-Part04-Phase3-Portal-Site-BNvVLi__.js                       33.30 kB │ gzip:  13.91 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase6-Comments-Convention-D5ojdU_A.js               35.26 kB │ gzip:  14.45 kB
+#25 2.897 dist/assets/gateway-report-20261108-170841-Dq-lB7Fv.js                         36.53 kB │ gzip:   4.26 kB
+#25 2.897 dist/assets/gateway-report-20261108-170857-wH2AyLtp.js                         36.81 kB │ gzip:   4.32 kB
+#25 2.897 dist/assets/v0.0.1-Part01-Phase2-Custom-L1-t7TTASIT.js                         36.92 kB │ gzip:  14.62 kB
+#25 2.897 dist/assets/v0.0.1-Part03-Phase5-Asdm-Workspace-DTxrlzOv.js                    39.38 kB │ gzip:  15.05 kB
+#25 2.897 dist/assets/v0.0.1-Part02-PhaseP1-UX-Prototype-DPaX8lFC.js                     39.74 kB │ gzip:  17.12 kB
+#25 2.897 dist/assets/gap-report-20261110-093911-B0LLRdnN.js                             41.54 kB │ gzip:   4.09 kB
+#25 2.897 dist/assets/gap-report-20261110-073749-BDbPDisf.js                             41.56 kB │ gzip:   4.06 kB
+#25 2.897 dist/assets/v0.0.1-Part02-PhaseP3-Integration-Deploy-CHQ0uaUy.js               42.96 kB │ gzip:  17.73 kB
+#25 2.897 dist/assets/v0.0.1-Part02-PhaseP0-Platform-Prod-Form-D5Hxspmn.js               48.79 kB │ gzip:  19.52 kB
+#25 2.897 dist/assets/v0.0.1-Part02-PhaseP2-Gateway-Backend-Dd4QLCJX.js                  49.01 kB │ gzip:  19.74 kB
+#25 2.897 dist/assets/gap-report-20261109-131638-CXg4VU9G.js                            238.47 kB │ gzip:  10.23 kB
+#25 2.897 dist/assets/gap-report-20261109-131702-D_99Lws4.js                            244.54 kB │ gzip:  10.39 kB
+#25 2.897 dist/assets/index-j9ai2GP6.js                                                 814.20 kB │ gzip: 237.49 kB
+#25 2.898 
+#25 2.898 (!) Some chunks are larger than 500 kB after minification. Consider:
+#25 2.898 - Using dynamic import() to code-split the application
+#25 2.898 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+#25 2.898 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#25 2.898 ✓ built in 2.14s
+#25 DONE 3.1s
+
+#7 [stage-1 1/3] FROM docker.io/library/nginx:1.27-alpine
+#7 CACHED
+
+#26 [stage-1 2/3] COPY --from=build /workspace/abnk-devportal/dist /usr/share/nginx/html
+#26 DONE 0.1s
+
+#27 [stage-1 3/3] COPY nginx.conf /etc/nginx/conf.d/default.conf
+#27 DONE 0.0s
+
+#28 exporting to image
+#28 exporting layers 0.1s done
+#28 writing image sha256:04d4faa41ae8cfecb45bb842cfde17f40006ba77dbaeaa1c63bd83db82fa96ae done
+#28 naming to docker.io/library/abnk-devportal:local done
+#28 DONE 0.2s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/m9r3waaespr31o02rol1lj9tv
