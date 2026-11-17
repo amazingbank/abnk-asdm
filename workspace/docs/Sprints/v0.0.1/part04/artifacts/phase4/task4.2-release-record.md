@@ -31,7 +31,7 @@ locale: zh-CN
 | 敏感信息审计（prod-deploy Step 0 强制门） | ✅ exit 0 | 6 节全过（凭据模式/密钥形态/PAT 扫描/private repo 完整性） |
 | 服务器就绪 | ✅ | SSH OK；Docker 29.9.2 + compose 5.6.1；磁盘 96G 空闲；80/443 由 abnk-nginx 绑定 |
 | TLS 证书 | ✅ | `notAfter=May 12 2027`；SAN `*.amazingbank.ai + amazingbank.ai`——dev 子域零新增覆盖 |
-| DNS | ✅ | `dig +short dev.amazingbank.ai` → 20.6.8.119（= abnk-vm001，已生效） |
+| DNS | ✅ | `dig +short dev.amazingbank.ai` → <PROD_HOST>（= abnk-vm001，已生效） |
 | ghcr 公共口径先例 | ✅ | `abnk-mweb:1.0.1` 匿名 manifest 200（D5 口径既有包成立）；服务器已 `docker login ghcr.io`（auths 含 ghcr.io，push 凭证在位） |
 | 仓推送基线 | ✅（3/3 对齐） | `.asdm`/`abnk-devportal`/`abnk-system` 本地 HEAD 均已推送 origin/main；服务器 abnk-system 落后本地（Phase B `git pull` 对齐） |
 | 本地编排验证 | ✅ | compose config（含 drill env + override）exit 0；入口 nginx-gateway.conf `nginx -t` syntax OK |
@@ -67,7 +67,7 @@ locale: zh-CN
 #    .asdm: Part04 Phase4 文档勾选 + artifacts/phase4 归档（数据截至此 commit）
 
 # 1) 服务器三仓获取与基线核对
-ssh azureuser@20.6.8.119 "git clone https://github.com/amazingbank/abnk-devportal.git ~/source/abnk-devportal \
+ssh azureuser@<PROD_HOST> "git clone https://github.com/amazingbank/abnk-devportal.git ~/source/abnk-devportal \
   && git clone https://github.com/amazingbank/abnk-asdm.git ~/source/abnk-asdm \
   && cd ~/source/abnk-system && git pull \
   && cd ~/source/abnk-devportal && git log --oneline -1 \
@@ -75,29 +75,29 @@ ssh azureuser@20.6.8.119 "git clone https://github.com/amazingbank/abnk-devporta
 # 核对：两个新 clone HEAD = 本地推送 commit
 
 # 2) 服务器侧构建（V4.2.1）
-ssh azureuser@20.6.8.119 "cd ~/source/abnk-devportal && docker build \
+ssh azureuser@<PROD_HOST> "cd ~/source/abnk-devportal && docker build \
   -t ghcr.io/amazingbank/abnk-devportal:0.1.0 \
   --build-context asdm=~/source/abnk-asdm \
   --build-context tokens=~/source/abnk-system/channels/shared ."
 
 # 3) 【确认门①】push ghcr 公共包（问用户后执行）
-ssh azureuser@20.6.8.119 "docker push ghcr.io/amazingbank/abnk-devportal:0.1.0"
+ssh azureuser@<PROD_HOST> "docker push ghcr.io/amazingbank/abnk-devportal:0.1.0"
 # + 用户在 GitHub UI 把包可见性设为 Public；随后匿名 pull 复验（本机执行）：
 docker pull ghcr.io/amazingbank/abnk-devportal:0.1.0   # 期望：匿名可拉
 
 # 4) 部署根 .env 追加镜像变量（首版 = append，非 sed 替换）
-ssh azureuser@20.6.8.119 "grep -q ABNK_DEVPORTAL_IMAGE ~/deploy/.env || \
+ssh azureuser@<PROD_HOST> "grep -q ABNK_DEVPORTAL_IMAGE ~/deploy/.env || \
   echo 'ABNK_DEVPORTAL_IMAGE=ghcr.io/amazingbank/abnk-devportal:0.1.0' >> ~/deploy/.env"
 
 # 5) 容器层起服务（V4.2.2 阶段一——单服务滚动，其余七容器零感知）
-ssh azureuser@20.6.8.119 "cd ~/source/abnk-system && \
+ssh azureuser@<PROD_HOST> "cd ~/source/abnk-system && \
   docker compose --env-file ~/deploy/.env -f deploy/prod/compose-abnk-prod.yaml up -d abnk-devportal"
 # 容器层验证（反代链路预检——经 abnk-nginx 容器解析 portal 容器名）：
-ssh azureuser@20.6.8.119 "docker exec abnk-nginx wget -q -O- http://abnk-devportal:80/ | head -c 200; \
+ssh azureuser@<PROD_HOST> "docker exec abnk-nginx wget -q -O- http://abnk-devportal:80/ | head -c 200; \
   docker compose --env-file ~/deploy/.env -f ~/source/abnk-system/deploy/prod/compose-abnk-prod.yaml ps abnk-devportal"
 
 # 6) 【确认门②】接入公网反代（问用户后执行）——restart 入口 nginx 加载新 server 块
-ssh azureuser@20.6.8.119 "docker restart abnk-nginx"
+ssh azureuser@<PROD_HOST> "docker restart abnk-nginx"
 # （滚动 up 后 restart abnk-nginx 同时满足 2026-11-12 nginx upstream 缓存纪律）
 
 # 7) 公网终验（V4.2.3，本机执行）
@@ -120,6 +120,8 @@ docker pull ghcr.io/amazingbank/abnk-devportal:0.1.0                     # 历�
 - **确认门②（公网反代接入）**：✅ 2026-11-17 用户回复「已转 Public，执行接入」——`docker restart abnk-nginx` 生效 dev server 块；包可见性同步翻转 Public
 
 ## 风险与备注
+
+- **生产 IP 清除声明（2026-11-17，website 0.1.5 发版 Step 0 审计拦截）**：本记录原以字面量记录服务器 IP（8 处），触发 audit-sensitive-info 第 2 节失败——已全部替换为 `<PROD_HOST>`（`.github-private/abnk-prod/config.json` 解析，ADR-010 轻规则口径：IP 字面量不落 public 仓）。⚠️ 已推送的 git 历史（f047242…e739710 区间）仍含字面量——IP 同时经公网 DNS（amazingbank.ai A 记录）对外可见，实际暴露面未扩大；是否重写 git 历史由用户裁决（生产部署工具集不主动 force-push public 仓）。
 
 - ghcr 包可见性翻转需 GitHub UI 操作（用户/组织管理员）——匿名复验前完成
 - dev 子域接入不改任何既有 server 块（纯增量 server 块 + 新服务）——对 api/app/bo/官网的回归面收敛为 `docker restart abnk-nginx`（秒级，全栈其余容器不 recreate）
