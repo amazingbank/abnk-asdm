@@ -14,9 +14,15 @@ locale: zh-CN
 
 ## 镜像 tag
 
-- **`ghcr.io/amazingbank/abnk-devportal:0.1.0`**（tag 源 = abnk-devportal 仓 `package.json` version——对齐 website Iron Rule 4 口径）
-- 首推：ghcr 上 `amazingbank/abnk-devportal` 包不存在（匿名 manifest 探测 403 = 未创建）——无覆盖风险（已知坑 2 天然满足）
-- ⚠️ ghcr 包首次推送默认 private——push 后需在 GitHub（`amazingbank` org → Packages → abnk-devportal → Package settings）将可见性改为 **Public**，匿名 pull 复验（V4.2.1）才可能通过；此步需用户/组织管理员在 UI 执行
+- **`ghcr.io/amazingbank/abnk-devportal:0.1.1`**（线上运行版本；tag 源 = abnk-devportal 仓 `package.json` version——对齐 website Iron Rule 4 口径）
+- 发布轨迹：`0.1.0`（首推，digest `sha256:e7e589dd…`）→ **V4.2.3 公网走查发现路由层缺陷** → 修复发版 `0.1.1`（digest `sha256:de1861fe…`，commit `294557a`）；两 tag 均已推送、均不可覆盖（已知坑 2 天然满足）
+- 包可见性：用户已在 GitHub UI 翻转 Public——匿名 manifest 复验 0.1.0 / 0.1.1 双 200（D5 公共口径落地；本机 ghcr 已登录，匿名性经 token manifest 探测成立）
+
+### 0.1.1 修复（V4.2.3 走查抓出的路由层缺陷）
+
+- 现象：裸 `/evidence` → 301（目录重定向，Location 协议降级 http）→ `/evidence/` → 资产 location `=404`——SPA 路由被 `dist/evidence` 物理目录遮蔽（V4.1.3 本地验证只测了深链与资产文件，未测目录同名路由——测试缺口记入教训）
+- 修复（portal 仓 `nginx.conf`）：SPA fallback 去除 `$uri/` 目录形态（目录不再触发 301）+ `location = /evidence/` 尾斜杠规范重定向 + `absolute_redirect off`（相对 Location 不降级协议）
+- 验证：本地六项冒烟（裸 200 / 尾斜杠 301 / 语言路由 200 / 资产 200 / 深链 200 / 缺失资产 404）全过后再上服务器；公网复验全过（见下）
 
 ## Phase A：发版前核验（已完成，全部本地/只读）
 
@@ -51,6 +57,8 @@ locale: zh-CN
 > 三仓全 public → HTTPS 匿名 clone 即可，零新增凭证面（与 website 私有仓 deploy key 模式差异：公开仓无需 key）。
 
 ## Phase B：部署命令链（待用户确认后执行）
+
+> **执行状态（2026-11-17）**：B0–B5 已执行并全过（真实输出见文末「Phase B 执行记录」）；⏸ 停在确认门②（ghcr 包可见性翻转 + 公网反代接入）。
 
 ```bash
 # 0) 本地提交并推送三仓（确认门①的前置——服务器构建以远端 commit 为基线）
@@ -108,11 +116,37 @@ docker pull ghcr.io/amazingbank/abnk-devportal:0.1.0                     # 历�
 
 ## 用户确认门状态
 
-- **确认门①（镜像 push + 三仓提交推送授权）**：⏸ 待用户回复
-- **确认门②（公网反代接入）**：⏸ 待容器层验证后单独询问
+- **确认门①（镜像 push + 三仓提交推送授权）**：✅ 2026-11-17 用户回复「确认发版」——三仓推送（portal `f7a923a` / system `ad5f828` / asdm `f047242`）→ 服务器 clone + 构建成功 → push 成功（0.1.0 digest `sha256:e7e589dd…`；修复版 0.1.1 digest `sha256:de1861fe…`）
+- **确认门②（公网反代接入）**：✅ 2026-11-17 用户回复「已转 Public，执行接入」——`docker restart abnk-nginx` 生效 dev server 块；包可见性同步翻转 Public
 
 ## 风险与备注
 
 - ghcr 包可见性翻转需 GitHub UI 操作（用户/组织管理员）——匿名复验前完成
 - dev 子域接入不改任何既有 server 块（纯增量 server 块 + 新服务）——对 api/app/bo/官网的回归面收敛为 `docker restart abnk-nginx`（秒级，全栈其余容器不 recreate）
 - 首次发布后 portal 数据截至 = `.asdm` 本次推送 commit（页脚标注任务 4.4 接线）
+
+## Phase B 执行记录（2026-11-17，真实输出）
+
+| 步骤 | 命令/动作 | 结果 |
+|---|---|---|
+| B0 三仓提交推送 | portal `f7a923a`（容器化三文件）/ system `ad5f828`（dev 接入四文件）/ asdm `f047242`（Phase4 归档） | ✅ 全部推送 origin/main |
+| B1 服务器三仓获取 | clone HTTPS 匿名 devportal + asdm；system `git pull` | ✅ 三 HEAD 与本地推送逐字一致；system porcelain 干净 |
+| B2 服务器构建 | `docker build --build-context asdm=$HOME/source/abnk-asdm --build-context tokens=$HOME/source/abnk-system/channels/shared .` | ✅ exit 0；`✓ built in 10.26s`；镜像 200MB；evidence 435 文件（含当日归档）；服务器侧 sync 只读性证明真实成立（clone 为真 git 仓，porcelain 前后一致） |
+| B3 push ghcr | `docker push ghcr.io/amazingbank/abnk-devportal:0.1.0` | ✅ digest `sha256:e7e589ddd40f9c75fbf24573dd3e52df5c233354cb3380ca1a198ad3edebc49b`；基础层 Mounted from abnk-website |
+| B3′ 匿名可见性探测 | ghcr 匿名 token manifest GET | ⚠️ 403 = 包已创建但默认 private——**待用户 UI 翻转 Public**（V4.2.1 匿名复验前置） |
+| B4 部署根 env | append `ABNK_DEVPORTAL_IMAGE=ghcr.io/amazingbank/abnk-devportal:0.1.0` | ✅ |
+| B5 容器层起服务 | `compose up -d abnk-devportal`（单服务滚动） | ✅ `Up (healthy)`；镜像 = 0.1.0 FQN；经 abnk-nginx 容器反代链路 200（HTML 直出）+ 深链 `/timeline/part02` 200；**其余八容器零感知（Up ~1h 未 recreate）** |
+| B6 公网接入 | `docker restart abnk-nginx` | ✅ 用户确认门②后执行；九容器全 healthy |
+| **B7 0.1.1 修复发版** | 公网走查发现缺陷 → 修复 → 重建 | ✅ portal `294557a`；服务器构建 exit 0 → push 0.1.1 → `.env` sed 更新 → 单服务 recreate + 按纪律 `docker restart abnk-nginx`（portal 容器换 IP，2026-11-12 nginx upstream 缓存纪律） |
+
+## V4.2.1–V4.2.4 验收结果（终态）
+
+| 步骤 | 结果 |
+|---|---|
+| V4.2.1 镜像发布 | ✅ 服务器侧构建 + push（0.1.0 / 0.1.1 双 tag）；匿名 manifest 复验双 200（用户翻转 Public 后）；tag 入本记录 |
+| V4.2.2 子域接入与两阶段发布 | ✅ 容器层 200（经 abnk-nginx 反代链路 + 深链 200，其余八容器零感知）→ 用户确认 → 公网反代接入（restart 入口） |
+| V4.2.3 公网上线终验 | ✅ `https://dev.amazingbank.ai/` HTTP/2 200；双语切换真实成立（UI 点击「切换语言」→ `/en-us/` + 英文标题）；四层下钻真实路由（`/zh-cn/timeline/part04/task/4.1`，Part04 任务 4.1/4.2 卡片在列——**叙事闭环成立**）；指标页/证据浏览 200；证据资产公网直供 200 + manifest 200；console 0 error；回归面（website/api/app/bo 四子域）全 200；截图 7 张归档 `screenshots/`（**Part04 核心交付达成——dev portal 上线**） |
+| V4.2.4 回滚演练 | ✅ 服务器 `docker pull ghcr.io/amazingbank/abnk-devportal:0.1.0` 成功（首版 tag 可达，双 tag 201MB 在位缓存；不实际切换） |
+
+> 走查过程发现并当日修复：0.1.0 的 `/evidence` 路由遮蔽缺陷（见「0.1.1 修复」节）——「先于生产暴露路由层缺陷」在公网终验环节兑现（0.1.0 在线窗口约 1 小时）。
+> 数据新鲜度如实口径：portal 内容截至 abnk-asdm `f047242`（含 4.1 收口 + 4.2 Phase A 记录）；index 产出物上次生成于 Phase 3 收口——任务级状态以 index 时点为准（4.4 手册固化「index 再生成 → commit → 重发布」更新链）。
